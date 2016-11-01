@@ -11,6 +11,6 @@ package rabbitsvsfoxes;
  */
 public enum MessageType {
     INFORM, ASKMYPOSITION, ASKOBJECTSNEARBY, REPLYMYPOSITION, 
-    REPLYOBJECTSAROUND, test1;
+    REPLYOBJECTSAROUND;
     
 }
