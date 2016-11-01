@@ -1,0 +1,32 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package rabbitsvsfoxes;
+
+import java.util.List;
+
+/**
+ *
+ * @author Georgi
+ */
+public class Agent extends EnvironmentObject {
+
+    public Agent(int x, int y) {
+        super(x, y);
+    }
+    
+    public void sendMessage(Agent target,Message msg){
+        
+    }
+    
+    public void broadcastToAgents(List<Agent> agents){
+        
+    }
+    
+    public void receiveMessage(Message msg){
+        
+    }
+
+}
