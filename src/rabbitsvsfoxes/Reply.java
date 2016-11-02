@@ -12,7 +12,7 @@ import java.util.List;
  * @author Georgi
  */
 public class Reply extends Message {
-
+    
     public Reply(MessageType type) {
         super(type);
     }

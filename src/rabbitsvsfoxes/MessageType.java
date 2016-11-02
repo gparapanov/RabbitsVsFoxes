@@ -10,7 +10,7 @@ package rabbitsvsfoxes;
  * @author Georgi
  */
 public enum MessageType {
-    INFORM, ASKMYPOSITION, ASKOBJECTSNEARBY, REPLYMYPOSITION, 
-    REPLYOBJECTSAROUND;
+    Inform, AskObjectsNearby, ReplyObjectsNearby,AskAgentNearby,
+    ReplyAgentsNearby, InformRabbitSpotted, InformFoxSpotted;
     
 }

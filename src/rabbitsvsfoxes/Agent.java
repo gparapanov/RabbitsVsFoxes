@@ -21,7 +21,7 @@ public class Agent extends EnvironmentObject {
         
     }
     
-    public void broadcastToAgents(List<Agent> agents){
+    public void broadcastToAgents(List<Agent> agents, Message msg){
         
     }
     

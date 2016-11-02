@@ -9,7 +9,7 @@ package rabbitsvsfoxes;
  *
  * @author Georgi
  */
-public abstract class Message {
+public class Message {
     protected MessageType msgType;
 
     public Message(MessageType type) {
