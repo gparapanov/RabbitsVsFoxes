@@ -6,6 +6,7 @@
 package rabbitsvsfoxes;
 
 import java.util.List;
+import javax.swing.ImageIcon;
 
 /**
  *
@@ -27,6 +28,10 @@ public class Agent extends EnvironmentObject {
     
     public void receiveMessage(Message msg){
         
+    }
+    
+    public ImageIcon getIcon(){
+        return null;
     }
 
 }

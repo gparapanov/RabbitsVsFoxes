@@ -6,14 +6,19 @@
 package rabbitsvsfoxes;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 
 /**
@@ -22,35 +27,140 @@ import javax.swing.border.BevelBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
+    private final ImageIcon grassIcon
+            = new ImageIcon("images/grass.png", "Grass icon");
+    ;
     private JPanel panel1;
-    private int size=30;
+    private int size = 30;
     private List<JLabel> labels;
+    private Set<Agent> agents;
+    private Set<EnvironmentObject> envObjects;
+    private FoxAgent fox1;
+    private RabbitAgent rabbit1;
+    private RVFGui env = this;
+    private JLabel foxLabel;
+    private Color backgroundC = Color.decode("#169B08");
 
     public RVFGui() {
-        initComponents();
-        labels=new ArrayList<>();
+        initComponents();//generated method
+        initialiseVariables();
+        drawField();
+
+        //fox1 = new FoxAgent(0, 0);
+        //rabbit1 = new RabbitAgent(0,0);
+
+        //foxLabel = this.getLabel(fox1.getPositionX(), fox1.getPositionY());
+        //foxLabel.setIcon(fox1.getIcon());
+
+        // JLabel rabbitLabel=this.getLabel(0, 0);
+        // rabbitLabel.setIcon(rabbit1.getIcon());
+        ActionListener listener = (ActionEvent event) -> {
+            startMoving();
+        };
+        Timer displayTimer = new Timer(500, listener);
+        //displayTimer.start();
+
+        this.setContentPane(panel1);
+    }
+
+    private void initialiseVariables() {
+        this.agents = new LinkedHashSet();
+        this.envObjects = new LinkedHashSet();
+        labels = new ArrayList<>();
         panel1 = new JPanel(new GridLayout(size, size));
 
+        for (int i = 0; i < 6; i++) {
+            this.agents.add(new RabbitAgent(randomRange(0, size - 1), randomRange(0, size - 1)));
+            this.agents.add(new FoxAgent(randomRange(0, size - 1), randomRange(0, size - 1)));
+        }
+    }
+
+    private void drawField() {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                JLabel l = new JLabel("" + i, JLabel.CENTER);
-               
-                //JLabel l = new JLabel(new ImageIcon("image_file.png"), JLabel.CENTER);
+                JLabel l = new JLabel("", JLabel.CENTER);
                 l.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
                 l.setFont(l.getFont().deriveFont(12f));
+                l.setBackground(backgroundC);
+                l.setIcon(grassIcon);
+                l.setOpaque(true);
                 panel1.add(l);
                 labels.add(l);
             }
         }
-        this.getLabel(4, 4).setText("hi");
-        this.getLabel(6, 8).setText("hi");
-        this.getLabel(7, 9).setText("hi");
-        this.setContentPane(panel1);
+        for (Agent a : agents) {
+            JLabel curLabel;
+            curLabel = this.getLabel(a.getPositionX(), a.getPositionY());
+            curLabel.setIcon(a.getIcon());
+        }
     }
-    private JLabel getLabel(int r, int c) {
-        int index = r * size + c;
+
+    public int randomRange(int min, int max) {
+        int range = Math.abs(max - min) + 1;
+        return (int) (Math.random() * range) + (min <= max ? min : max);
+    }
+
+    public void addAgent(Agent a) {
+        addEnvironmentObject(a);
+    }
+
+    public void removeAgent(Agent a) {
+        removeEnvironmentObject(a);
+    }
+
+    public void addEnvironmentObject(EnvironmentObject eo) {
+
+    }
+
+    public void removeEnvironmentObject(EnvironmentObject eo) {
+
+    }
+
+    public void step() {
+
+    }
+
+    public JLabel getLabel(int x, int y) {
+        int index = y * size + x;
         return labels.get(index);
     }
+
+    private void setLabel(int r, int c, JLabel newLabel) {
+        int index = r * size + c;
+        labels.set(index, newLabel);
+    }
+
+    private void startMoving() {
+        int x1 = fox1.getPositionX();
+        int y1 = fox1.getPositionY();
+        double direction = Math.random();
+        if (direction < 0.25) {
+            x1++;
+        } else if (direction < 0.5) {
+            y1--;
+        } else if (direction < 0.75) {
+            x1--;
+        } else {
+            y1++;
+        }
+        if (x1 >= size) {
+            x1--;
+
+        } else if (x1 < 0) {
+            x1++;
+        }
+        if (y1 >= size) {
+            y1--;
+
+        } else if (y1 < 0) {
+            y1++;
+        }
+        fox1.setPosition(x1, y1);
+        foxLabel.setIcon(grassIcon);
+        foxLabel = env.getLabel(x1, y1);
+        foxLabel.setIcon(fox1.getIcon());
+    }
+
     public void visualise() {
 
     }
