@@ -13,16 +13,10 @@ import javax.swing.ImageIcon;
  */
 public class FoxAgent extends Agent{
 
-    private final ImageIcon foxIcon 
-            = new ImageIcon("images/fox2.png", "Fox icon");
-
     public FoxAgent(int x, int y) {
         super(x, y);
+        this.setIcon(new ImageIcon("images/fox (1).png", "Fox icon"));
     }
 
     
-
-    public ImageIcon getIcon() {
-        return foxIcon;
-    }
 }

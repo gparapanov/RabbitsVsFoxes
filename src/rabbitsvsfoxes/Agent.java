@@ -13,7 +13,7 @@ import javax.swing.ImageIcon;
  * @author Georgi
  */
 public class Agent extends EnvironmentObject {
-
+    
     public Agent(int x, int y) {
         super(x, y);
     }
@@ -29,9 +29,11 @@ public class Agent extends EnvironmentObject {
     public void receiveMessage(Message msg){
         
     }
+
     
-    public ImageIcon getIcon(){
-        return null;
-    }
+    
+    
+    
+   
 
 }

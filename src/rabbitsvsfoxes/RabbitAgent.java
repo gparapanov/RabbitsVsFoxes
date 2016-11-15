@@ -12,15 +12,11 @@ import javax.swing.ImageIcon;
  * @author Georgi
  */
 public class RabbitAgent extends Agent {
-private final ImageIcon rabbitIcon
-        =new ImageIcon("images/rabbit1.png","Rabbit icon");
 
     public RabbitAgent(int x, int y) {
         super(x, y);
+        this.setIcon(new ImageIcon("images/rabbit1.png","Rabbit icon"));
     }
     
     
-    public ImageIcon getIcon() {
-        return rabbitIcon;
-    }
 }
