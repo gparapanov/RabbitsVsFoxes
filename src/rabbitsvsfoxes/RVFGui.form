@@ -132,7 +132,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JRadioButtonMenuItem" name="hybridOption">
               <Properties>
-                <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" value="Hybrid"/>
                 <Property name="toolTipText" type="java.lang.String" value=""/>
               </Properties>

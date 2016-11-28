@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package rabbitsvsfoxes;
 
 import java.awt.BorderLayout;
@@ -13,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,21 +30,21 @@ public class RVFGui extends javax.swing.JFrame {
     private final ImageIcon grassIcon
             = new ImageIcon("images/grass.png", "Grass icon");
     ;
-    private final int RABBITS=8;
-    private final int FOXES=8;
-    private final int CARROTS=15;
-    private final int BOMBS=10;
-    
+    private final int RABBITS = 6;
+    private final int FOXES = 5;
+    private final int CARROTS = 20;
+    private final int BOMBS = 10;
+
     private JPanel panel1;
     private final int size = 35;
     private List<JLabel> labels;
     private Set<Agent> agents;
     private Set<EnvironmentObject> envObjects;
+    private ArrayList<Carrot> carrots;
     private final RVFGui env = this;
     private final Color backgroundC = Color.decode("#169B08");
     private Timer displayTimer;
     private ButtonGroup agentBehaviourGroup;
-    
 
     public RVFGui() {
         initComponents();//generated method
@@ -68,13 +64,14 @@ public class RVFGui extends javax.swing.JFrame {
     private void initialiseVariables() {
         this.agents = new LinkedHashSet();
         this.envObjects = new LinkedHashSet();
+        this.carrots = new ArrayList<>();
         labels = new ArrayList<>();
         panel1 = new JPanel(new GridLayout(size, size));
-        agentBehaviourGroup=new ButtonGroup();
+        agentBehaviourGroup = new ButtonGroup();
         agentBehaviourGroup.add(this.goalDrivenOption);
         agentBehaviourGroup.add(this.hybridOption);
-        hybridOption.setSelected(true);
-        
+        //hybridOption.setSelected(true);
+
         startMenu.addMouseListener(new MouseListener() {
 
             @Override
@@ -84,22 +81,22 @@ public class RVFGui extends javax.swing.JFrame {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                
+
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                
+
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                
+
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                
+
             }
         });
         stopMenu.addMouseListener(new MouseListener() {
@@ -111,25 +108,25 @@ public class RVFGui extends javax.swing.JFrame {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                
+
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                
+
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                
+
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                
+
             }
         });
-        
+
     }
 
     /**
@@ -141,22 +138,6 @@ public class RVFGui extends javax.swing.JFrame {
      */
     private void createEnvironmentObjects(int r, int f, int c, int b) {
         int newX, newY;
-        for (int i = 0; i < r; i++) {//create rabbits
-            do {
-                newX = randomRange(0, size - 1);
-                newY = randomRange(0, size - 1);
-            } while (spaceOccupied(newX, newY) != null);
-            RabbitAgent rabbit = new RabbitAgent(newX, newY);
-            this.addEnvironmentObject(rabbit);
-        }
-        for (int i = 0; i < f; i++) {//create foxes
-            do {
-                newX = randomRange(0, size - 1);
-                newY = randomRange(0, size - 1);
-            } while (spaceOccupied(newX, newY) != null);
-            FoxAgent fox = new FoxAgent(newX, newY);
-            this.addEnvironmentObject(fox);
-        }
         for (int i = 0; i < c; i++) {//create carrots
             do {
                 newX = randomRange(0, size - 1);
@@ -171,6 +152,22 @@ public class RVFGui extends javax.swing.JFrame {
             } while (spaceOccupied(newX, newY) != null);
             this.addEnvironmentObject(new Bomb(newX, newY));
         }
+        for (int i = 0; i < r; i++) {//create rabbits
+            do {
+                newX = randomRange(0, size - 1);
+                newY = randomRange(0, size - 1);
+            } while (spaceOccupied(newX, newY) != null);
+            RabbitAgent rabbit = new RabbitAgent(newX, newY);
+            this.addEnvironmentObject(rabbit);
+        }for (int i = 0; i < f; i++) {//create foxes
+            do {
+                newX = randomRange(0, size - 1);
+                newY = randomRange(0, size - 1);
+            } while (spaceOccupied(newX, newY) != null);
+            FoxAgent fox = new FoxAgent(newX, newY);
+            this.addEnvironmentObject(fox);
+        }
+
     }
 
     private void drawField() {
@@ -242,6 +239,11 @@ public class RVFGui extends javax.swing.JFrame {
             if (!agents.contains(a)) {
                 agents.add(a);
             }
+        } else if (eo instanceof Carrot) {
+            Carrot c = (Carrot) eo;
+            if (!carrots.contains(c)) {
+                carrots.add(c);
+            }
         }
     }
 
@@ -260,114 +262,166 @@ public class RVFGui extends javax.swing.JFrame {
         labels.set(index, newLabel);
     }
 
-    public int heuristicManhattan(Agent ag, EnvironmentObject eo) {
-        //calculates manhattan distance between agent and objects nearby
-
-        int xDiff = ag.getX() - eo.getX();
-        int yDiff = ag.getY() - eo.getY();
-
-        return Math.abs(xDiff + yDiff);
-    }
-
-    private void step() {
-        for (Agent a : agents) {
-            if (a instanceof RabbitAgent && a.isAlive()) {
-                int minDistance = 100;
-                Carrot currentGoal = null;
-                for (EnvironmentObject eo : envObjects) {
-                    if (eo instanceof Carrot && eo.isAlive()) {
-                        int distance = heuristicManhattan(a, eo);
-                        if (minDistance > distance) {
-                            minDistance = distance;
-                            currentGoal = (Carrot) eo;
-                        }
-                    }
-                }
-                if (currentGoal.getX() == a.getX() && currentGoal.getY() == a.getY()) {//if on goal
-                    currentGoal.setAlive(false);
-                } else if (currentGoal.getX() > a.getX()) {
-                    a.move(Direction.RIGHT);
-                } else if (currentGoal.getX() < a.getX()) {
-                    a.move(Direction.LEFT);
-                } else if (currentGoal.getY() > a.getY()) {
-                    a.move(Direction.DOWN);
-                } else if (currentGoal.getY() < a.getY()) {
-                    a.move(Direction.UP);
-                }
-            } else if(a instanceof FoxAgent && a.isAlive()) {//if it's a fox
-                int minDistance = 100;
-                RabbitAgent currentGoal = null;
-                for (Agent ag : agents) {
-                    if (ag instanceof RabbitAgent && ag.isAlive()) {
-                        int distance = heuristicManhattan(a, ag);
-                        if (minDistance > distance) {
-                            minDistance = distance;
-                            currentGoal = (RabbitAgent) ag;
-                        }
-                    }
-                }
-                if (currentGoal.getX() == a.getX() && currentGoal.getY() == a.getY()) {//if on goal
-                    currentGoal.setAlive(false);
-                } else if (currentGoal.getX() > a.getX()) {
-                    a.move(Direction.RIGHT);
-                } else if (currentGoal.getX() < a.getX()) {
-                    a.move(Direction.LEFT);
-                } else if (currentGoal.getY() > a.getY()) {
-                    a.move(Direction.DOWN);
-                } else if (currentGoal.getY() < a.getY()) {
-                    a.move(Direction.UP);
+    public ArrayList<Agent> foxesAtArea(int x, int y, int r) {
+        ArrayList<Agent> foxes = new ArrayList<>();
+        for (Agent ag : agents) {
+            if (ag instanceof FoxAgent) {
+                if (ag.getX() <= x + r && ag.getX() >= x - r && ag.getY() <= y + r
+                        && ag.getY() >= y - r) {//means a fox is a threat
+                    foxes.add(ag);
                 }
             }
         }
-//        for (Agent a : agents) {//direction to move
-//            int x = a.getX();
-//            int y = a.getY();
-//            double direction = Math.random();
-//            if (direction < 0.25) {
-//                x++;
-//            } else if (direction < 0.5) {
-//                y--;
-//            } else if (direction < 0.75) {
-//                x--;
-//            } else {
-//                y++;
-//            }
-//            if (x >= size) {
-//                x--;
-//            } else if (x < 0) {
-//                x++;
-//            }
-//            if (y >= size) {
-//                y--;
-//            } else if (y < 0) {
-//                y++;
-//            }
-//            if (a instanceof FoxAgent) {
-//                for (Agent r : agents) {
-//                    if (r instanceof RabbitAgent && r.getX() == x
-//                            && r.getY() == y) {
-//                        r.setAlive(false);
-//                    }
-//                }
-//            }
-//            if (a instanceof RabbitAgent && spaceOccupied(x, y) != null) {
-//                for (EnvironmentObject eo : envObjects) {
-//                    if (eo instanceof Carrot && eo.getX() == x
-//                            && eo.getY() == y) {
-//                        eo.setAlive(false);
-//                    }
-//                }
-//            }
-//            a.setPosition(x, y);
-//            redrawField();
-//        }
+        return foxes;
+    }
+
+    public int manhattanDistance(EnvironmentObject eo1, EnvironmentObject eo2) {
+        //calculates manhattan distance between agent and objects nearby
+        return Math.abs(eo2.getX()-eo1.getX()) + Math.abs(eo2.getY()-eo1.getY());
+    }
+
+    public int diagonalDistance(EnvironmentObject eo1, EnvironmentObject eo2) {
+        int xRad = Math.abs(eo1.getX() - eo2.getX());
+        int yRad = Math.abs(eo1.getY() - eo2.getY());
+        return Math.max(xRad, yRad);
+    }
+
+    public int evaluationFunction(Agent ag, EnvironmentObject eo) {
+        int result = 0, radius = diagonalDistance(ag, eo);
+
+        ArrayList<Agent> closeFoxes = foxesAtArea(eo.getX(), eo.getY(), radius);
+        if (!closeFoxes.isEmpty()) {
+            int multiplier;
+            for (Agent f : closeFoxes) {
+                int dist = diagonalDistance(ag, f);
+                switch (dist) {
+                    case 1:
+                        result += 35;
+                        break;
+                    case 2:
+                        result += 30;
+                        break;
+                    case 3:
+                        result += 20;
+                        break;
+                    case 4:
+                        result += 10;
+                        break;
+                }
+            }
+            if (result > 0) {
+                return result * manhattanDistance(ag, eo);
+            }
+        }
+
+        return manhattanDistance(ag, eo);
+    }
+
+    private Goal findGoal(Agent a) {
+        Goal goal = new Goal(null);
+        if (a instanceof RabbitAgent) {
+            System.out.println("rabbit looking for a carrot");
+            int minDistance = 10000;
+            goal = new EatCarrot(null);
+            int distance = 0;
+            for (EnvironmentObject eo : envObjects) {
+                if (eo instanceof Carrot && eo.isAlive()) {
+                    
+                    if (goalDrivenOption.isSelected()) {
+                        distance = manhattanDistance(a, eo);
+                        //System.out.println("goal drive  ");
+                    } else {
+                        distance = evaluationFunction(a, eo);
+                        //System.out.println("hybrid ");
+                    }
+                    if (minDistance > distance) {
+                        minDistance = distance;
+                        goal.setGoalObject(eo);
+                        //System.out.println("found a carrot");
+                    }
+                }
+            }
+        } else if (a instanceof FoxAgent) {//if it's a fox
+            System.out.println("fox looking for rabbbits");
+            int minDistance = 1000;
+            goal = new CatchRabbit(null);
+            int distance = 0;
+            for (Agent ag : agents) {
+                if (ag instanceof RabbitAgent && ag.isAlive()) {
+                    distance = manhattanDistance(a, ag);
+                    if (minDistance > distance) {
+                        minDistance = distance;
+                        goal.setGoalObject((RabbitAgent)ag);
+                        System.out.println("fox found "+goal.getGoalObject().getX());
+                    }
+                }
+            }
+        }
+        return goal;
+    }
+
+    public void moveTowardsGoal(Agent a, Goal g) {
+        if(a instanceof RabbitAgent){
+            System.out.println("rabbit moving");
+        }else{
+            System.out.println("fox moving");
+        }
+        int goalX = g.getGoalObject().getX();
+        int goalY = g.getGoalObject().getY();
+        int differenceX = Math.abs(goalX - a.getX());
+        int differenceY = Math.abs(goalY - a.getY());
+        if (differenceX > differenceY) {
+            if (goalX > a.getX()) {
+                a.move(Direction.RIGHT);
+            } else if (goalX < a.getX()) {
+                a.move(Direction.LEFT);
+            }
+        } else {
+            if (goalY > a.getY()) {
+                a.move(Direction.DOWN);
+            } else if (goalY < a.getY()) {
+                a.move(Direction.UP);
+            }
+        }
+        if (goalX == a.getX() && goalY == a.getY()) {//if on goal
+            g.getGoalObject().setAlive(false);
+            if(g instanceof CatchRabbit){
+                System.out.println("fox ate rabbit");
+            }
+            
+            //System.out.println("eaten" + agents.toString());
+        }
+    }
+
+    private void step() {
+
+        for (Agent a : agents) {
+            Goal goal=null;
+            if(a.isAlive()){
+                goal= findGoal(a);
+                if(goal.getGoalObject()==null){
+                    displayTimer.stop();
+                    System.out.println("Game Over!");
+                }else{
+                    moveTowardsGoal(a, goal);
+                }
+                
+            }
+//            int goalX = goal.getGoalObject().getX(),
+//                    goalY = goal.getGoalObject().getY();
+//            System.out.println("going to " + goalX + " " + goalY);
+
+            
+        }
         redrawField();
         updateStatistics();
     }
 
     public void updateStatistics() {
-        int rabbits = 0, foxes = 0, carrots = 0;
-        for (EnvironmentObject eo : envObjects) {
+        int rabbits = 0, foxes = 0, carrotsF = 0;
+        Iterator<EnvironmentObject> iter = envObjects.iterator();
+        while (iter.hasNext()) {
+            EnvironmentObject eo = iter.next();
             if (eo.isAlive()) {
                 if (eo instanceof RabbitAgent) {
                     rabbits++;
@@ -376,13 +430,21 @@ public class RVFGui extends javax.swing.JFrame {
                     foxes++;
                 }
                 if (eo instanceof Carrot) {
-                    carrots++;
+                    carrotsF++;
                 }
+            } else {
+                iter.remove();
             }
         }
+//        Iterator<Agent> iterAg = agents.iterator();
+//        while (iterAg.hasNext()) {
+//            if (iterAg.next().isAlive() == false) {
+//                iterAg.remove();
+//            }
+//        }
         rabbitsNumber.setText("" + rabbits);
         foxesNumber.setText("" + foxes);
-        carrotsNumber.setText("" + carrots);
+        carrotsNumber.setText("" + carrotsF);
     }
 
     public void visualise() {
@@ -504,7 +566,6 @@ public class RVFGui extends javax.swing.JFrame {
         goalDrivenOption.setText("Purely Goal-Driven");
         agentTypeButton.add(goalDrivenOption);
 
-        hybridOption.setSelected(true);
         hybridOption.setText("Hybrid");
         hybridOption.setToolTipText("");
         agentTypeButton.add(hybridOption);

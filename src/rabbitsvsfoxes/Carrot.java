@@ -12,5 +12,10 @@ public class Carrot extends EnvironmentObject {
         super(x, y);
         this.setIcon(new ImageIcon("images/carrot.png","Carrot icon"));
     }
+
+    @Override
+    public String toString() {
+        return "Carrot{"+this.isAlive() + " "+this.getX()+" , "+this.getY();
+    }
     
 }
