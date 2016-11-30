@@ -17,6 +17,9 @@ public class RabbitAgent extends Agent {
         super(x, y);
         this.setIcon(new ImageIcon("images/rabbit1.png","Rabbit icon"));
     }
-    
+    public RabbitAgent(){
+        
+    }
+
     
 }

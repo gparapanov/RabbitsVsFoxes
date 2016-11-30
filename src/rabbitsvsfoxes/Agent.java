@@ -13,6 +13,9 @@ public class Agent extends EnvironmentObject {
     public Agent(int x, int y) {
         super(x, y);
     }
+    public Agent(){
+        
+    }
     
     public void move(Direction d){
         switch (d){

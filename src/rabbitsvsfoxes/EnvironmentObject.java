@@ -17,6 +17,10 @@ public abstract class EnvironmentObject {
         this.y = y;
         this.alive=true;
     }
+    
+    public EnvironmentObject(){
+        
+    }
 
     public ImageIcon getIcon() {
         return icon;

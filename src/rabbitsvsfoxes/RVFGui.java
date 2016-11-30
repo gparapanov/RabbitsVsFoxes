@@ -30,10 +30,10 @@ public class RVFGui extends javax.swing.JFrame {
     private final ImageIcon grassIcon
             = new ImageIcon("images/grass.png", "Grass icon");
     ;
-    private final int RABBITS = 6;
-    private final int FOXES = 5;
+    private final int RABBITS = 1;
+    private final int FOXES = 1;
     private final int CARROTS = 20;
-    private final int BOMBS = 10;
+    private final int BOMBS = 20;
 
     private JPanel panel1;
     private final int size = 35;
@@ -56,7 +56,7 @@ public class RVFGui extends javax.swing.JFrame {
             step();
         };
         displayTimer = new Timer(500, listener);
-        displayTimer.start();
+        //displayTimer.start();
 
         this.setContentPane(panel1);
     }
@@ -159,7 +159,8 @@ public class RVFGui extends javax.swing.JFrame {
             } while (spaceOccupied(newX, newY) != null);
             RabbitAgent rabbit = new RabbitAgent(newX, newY);
             this.addEnvironmentObject(rabbit);
-        }for (int i = 0; i < f; i++) {//create foxes
+        }
+        for (int i = 0; i < f; i++) {//create foxes
             do {
                 newX = randomRange(0, size - 1);
                 newY = randomRange(0, size - 1);
@@ -277,7 +278,7 @@ public class RVFGui extends javax.swing.JFrame {
 
     public int manhattanDistance(EnvironmentObject eo1, EnvironmentObject eo2) {
         //calculates manhattan distance between agent and objects nearby
-        return Math.abs(eo2.getX()-eo1.getX()) + Math.abs(eo2.getY()-eo1.getY());
+        return Math.abs(eo2.getX() - eo1.getX()) + Math.abs(eo2.getY() - eo1.getY());
     }
 
     public int diagonalDistance(EnvironmentObject eo1, EnvironmentObject eo2) {
@@ -326,7 +327,7 @@ public class RVFGui extends javax.swing.JFrame {
             int distance = 0;
             for (EnvironmentObject eo : envObjects) {
                 if (eo instanceof Carrot && eo.isAlive()) {
-                    
+
                     if (goalDrivenOption.isSelected()) {
                         distance = manhattanDistance(a, eo);
                         //System.out.println("goal drive  ");
@@ -351,8 +352,8 @@ public class RVFGui extends javax.swing.JFrame {
                     distance = manhattanDistance(a, ag);
                     if (minDistance > distance) {
                         minDistance = distance;
-                        goal.setGoalObject((RabbitAgent)ag);
-                        System.out.println("fox found "+goal.getGoalObject().getX());
+                        goal.setGoalObject((RabbitAgent) ag);
+                        System.out.println("fox found " + goal.getGoalObject().getX());
                     }
                 }
             }
@@ -361,34 +362,88 @@ public class RVFGui extends javax.swing.JFrame {
     }
 
     public void moveTowardsGoal(Agent a, Goal g) {
-        if(a instanceof RabbitAgent){
-            System.out.println("rabbit moving");
-        }else{
-            System.out.println("fox moving");
-        }
         int goalX = g.getGoalObject().getX();
         int goalY = g.getGoalObject().getY();
         int differenceX = Math.abs(goalX - a.getX());
         int differenceY = Math.abs(goalY - a.getY());
-        if (differenceX > differenceY) {
-            if (goalX > a.getX()) {
-                a.move(Direction.RIGHT);
-            } else if (goalX < a.getX()) {
-                a.move(Direction.LEFT);
+        EnvironmentObject desiredObject;
+        if (a instanceof FoxAgent) {
+            desiredObject = new RabbitAgent();
+            System.out.println("rabbit roing to:" + goalX + " " + goalY);
+        } else {
+            desiredObject = new Carrot();
+        }
+        if (differenceX > differenceY) {//avoids 'dancing'
+            if (goalX > a.getX()) {//if goal is on the right
+                EnvironmentObject neighbour=spaceOccupied(a.getX() + 1, a.getY());
+                if (neighbour == null
+                        || neighbour.getClass().equals(desiredObject.getClass())) {
+                    a.move(Direction.RIGHT);
+                } else if (goalY < a.getY() && spaceOccupied(a.getX(), a.getY() - 1) == null
+                        && a.getY()-1 >=0) {
+                    a.move(Direction.UP);
+                } else {
+                    if (spaceOccupied(a.getX(), a.getY() + 1) == null &&
+                            a.getY()+1<size) {
+                        a.move(Direction.DOWN);
+                    } else if(a.getX()-1 >=0) {
+                        a.move(Direction.LEFT);
+                    }
+                }
+            } else if (goalX < a.getX()) {//if goal is on the left
+                if (spaceOccupied(a.getX() - 1, a.getY()) == null
+                        || spaceOccupied(a.getX() - 1, a.getY()).getClass().equals(desiredObject.getClass())) {
+                    a.move(Direction.LEFT);
+                } else if (goalY < a.getY() && spaceOccupied(a.getX(), a.getY() - 1) == null
+                        && a.getY()-1 >=0) {
+                        a.move(Direction.UP);
+                } else {
+                    if (spaceOccupied(a.getX(), a.getY() + 1) == null 
+                            && a.getY()+1 <size) {
+                        a.move(Direction.DOWN);
+                    } else if(a.getX()+1 <size) {
+                        a.move(Direction.RIGHT);
+                    }
+                }
             }
         } else {
             if (goalY > a.getY()) {
-                a.move(Direction.DOWN);
+                if (spaceOccupied(a.getX(), a.getY() + 1) == null
+                        || spaceOccupied(a.getX(), a.getY() + 1).getClass().equals(desiredObject.getClass())) {
+                    a.move(Direction.DOWN);
+                } else if (goalY > a.getY() && spaceOccupied(a.getX() + 1, a.getY()) == null 
+                        && a.getX()+1 <size) {
+                    a.move(Direction.RIGHT);
+                } else {
+                    if (spaceOccupied(a.getX() - 1, a.getY()) == null 
+                            && a.getX()-1 >=0) {
+                        a.move(Direction.LEFT);
+                    } else if (a.getY()-1 >=0) {
+                        a.move(Direction.UP);
+                    }
+                }
             } else if (goalY < a.getY()) {
-                a.move(Direction.UP);
+                if (spaceOccupied(a.getX(), a.getY() - 1) == null
+                        || spaceOccupied(a.getX(), a.getY() - 1).getClass().equals(desiredObject.getClass())) {
+                    a.move(Direction.UP);
+                } else if (goalY > a.getY() && spaceOccupied(a.getX() + 1, a.getY()) == null 
+                        && a.getX()+1 <size) {
+                    a.move(Direction.RIGHT);
+                } else {
+                    if (spaceOccupied(a.getX() + 1, a.getY()) == null 
+                            && a.getX()-1 >=0) {
+                        a.move(Direction.LEFT);
+                    } else if (a.getY()+1 <size) {
+                        a.move(Direction.DOWN);
+                    }
+                }
             }
         }
         if (goalX == a.getX() && goalY == a.getY()) {//if on goal
             g.getGoalObject().setAlive(false);
-            if(g instanceof CatchRabbit){
+            if (g instanceof CatchRabbit) {
                 System.out.println("fox ate rabbit");
             }
-            
             //System.out.println("eaten" + agents.toString());
         }
     }
@@ -396,22 +451,18 @@ public class RVFGui extends javax.swing.JFrame {
     private void step() {
 
         for (Agent a : agents) {
-            Goal goal=null;
-            if(a.isAlive()){
-                goal= findGoal(a);
-                if(goal.getGoalObject()==null){
+            if (a.isAlive()) {
+                Goal goal = findGoal(a);
+                if (goal.getGoalObject() == null) {
                     displayTimer.stop();
                     System.out.println("Game Over!");
-                }else{
+                } else {
                     moveTowardsGoal(a, goal);
                 }
-                
             }
 //            int goalX = goal.getGoalObject().getX(),
 //                    goalY = goal.getGoalObject().getY();
 //            System.out.println("going to " + goalX + " " + goalY);
-
-            
         }
         redrawField();
         updateStatistics();
