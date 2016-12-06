@@ -6,10 +6,12 @@ package rabbitsvsfoxes;
  */
 public class Goal {
     private EnvironmentObject goalObject;
-    private int priority;//1<<<<<10
+    private boolean completed;
+    private int priority;//1<<<<<10  5 is default
 
     public Goal() {
-        
+        this.priority=5;
+        this.completed=false;
     }
 
     public EnvironmentObject getGoalObject() {
@@ -18,6 +20,22 @@ public class Goal {
 
     public void setGoalObject(EnvironmentObject goalObject) {
         this.goalObject = goalObject;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
     
     

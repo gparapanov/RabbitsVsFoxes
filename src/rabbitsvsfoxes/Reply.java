@@ -5,8 +5,8 @@
  */
 package rabbitsvsfoxes;
 
-import rabbitsvsfoxes.Agent.Communication.Message;
-import rabbitsvsfoxes.Agent.Communication.MessageType;
+import rabbitsvsfoxes.Communication.Message;
+import rabbitsvsfoxes.Communication.MessageType;
 import rabbitsvsfoxes.Agent.Agent;
 import java.util.List;
 

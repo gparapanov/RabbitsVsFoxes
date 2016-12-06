@@ -3,9 +3,10 @@ package rabbitsvsfoxes.Agent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ImageIcon;
+import rabbitsvsfoxes.Agenda;
 import rabbitsvsfoxes.Direction;
 import rabbitsvsfoxes.EnvironmentObject;
-import rabbitsvsfoxes.Agent.Communication.Message;
+import rabbitsvsfoxes.Communication.Message;
 
 /**
  *
@@ -13,8 +14,11 @@ import rabbitsvsfoxes.Agent.Communication.Message;
  */
 public class Agent extends EnvironmentObject {
     
+    private Agenda agenda;
+    
     public Agent(int x, int y) {
         super(x, y);
+        agenda=new Agenda();
     }
     public Agent(){
         

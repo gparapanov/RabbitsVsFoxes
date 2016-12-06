@@ -27,29 +27,26 @@ import javax.swing.border.BevelBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
-    private final ImageIcon grassIcon
-            = new ImageIcon("images/grass.png", "Grass icon");
-    ;
+
     private final int RABBITS = 1;
     private final int FOXES = 1;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
+    private final int size = 35;
 
     private JPanel panel1;
-    private final int size = 35;
+    
     private List<JLabel> labels;
-    private Set<Agent> agents;
-    private Set<EnvironmentObject> envObjects;
-    private ArrayList<Carrot> carrots;
-    private final RVFGui env = this;
+    
     private final Color backgroundC = Color.decode("#169B08");
     private Timer displayTimer;
     private ButtonGroup agentBehaviourGroup;
+    private Environment environment;
 
     public RVFGui() {
         initComponents();//generated method
+        environment= new Environment(size,RABBITS, FOXES, CARROTS, BOMBS);
         initialiseVariables();
-        createEnvironmentObjects(RABBITS, FOXES, CARROTS, BOMBS);
         drawField();
 
         ActionListener listener = (ActionEvent event) -> {
@@ -62,9 +59,6 @@ public class RVFGui extends javax.swing.JFrame {
     }
 
     private void initialiseVariables() {
-        this.agents = new LinkedHashSet();
-        this.envObjects = new LinkedHashSet();
-        this.carrots = new ArrayList<>();
         labels = new ArrayList<>();
         panel1 = new JPanel(new GridLayout(size, size));
         agentBehaviourGroup = new ButtonGroup();
@@ -129,53 +123,9 @@ public class RVFGui extends javax.swing.JFrame {
 
     }
 
-    /**
-     *
-     * @param r number of rabbits
-     * @param f number of foxes
-     * @param c number of carrots
-     * @param b number of bombs
-     */
-    private void createEnvironmentObjects(int r, int f, int c, int b) {
-        int newX, newY;
-        for (int i = 0; i < c; i++) {//create carrots
-            do {
-                newX = randomRange(0, size - 1);
-                newY = randomRange(0, size - 1);
-            } while (spaceOccupied(newX, newY) != null);
-            this.addEnvironmentObject(new Carrot(newX, newY));
-        }
-        for (int i = 0; i < b; i++) {//create bombs
-            do {
-                newX = randomRange(0, size - 1);
-                newY = randomRange(0, size - 1);
-            } while (spaceOccupied(newX, newY) != null);
-            this.addEnvironmentObject(new Bomb(newX, newY));
-        }
-        for (int i = 0; i < r; i++) {//create rabbits
-            do {
-                newX = randomRange(0, size - 1);
-                newY = randomRange(0, size - 1);
-            } while (spaceOccupied(newX, newY) != null);
-            RabbitAgent rabbit = new RabbitAgent(newX, newY);
-            this.addEnvironmentObject(rabbit);
-        }
-        for (int i = 0; i < f; i++) {//create foxes
-            do {
-                newX = randomRange(0, size - 1);
-                newY = randomRange(0, size - 1);
-            } while (spaceOccupied(newX, newY) != null);
-            FoxAgent fox = new FoxAgent(newX, newY);
-            this.addEnvironmentObject(fox);
-        }
-        
-        
-
-    }
-
     private void drawField() {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        for (int i = 0; i < environment.getSize(); i++) {
+            for (int j = 0; j < environment.getSize(); j++) {
                 JLabel l = new JLabel("", JLabel.CENTER);
                 l.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
                 l.setBackground(backgroundC);
@@ -185,7 +135,7 @@ public class RVFGui extends javax.swing.JFrame {
                 labels.add(l);
             }
         }
-        for (EnvironmentObject eo : envObjects) {
+        for (EnvironmentObject eo : environment.getEnvObjects()) {
             if (eo.isAlive()) {
                 JLabel curLabel;
                 curLabel = this.getLabel(eo.getX(), eo.getY());
@@ -197,62 +147,20 @@ public class RVFGui extends javax.swing.JFrame {
 
     private void redrawField() {
         JLabel curLabel;
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        for (int i = 0; i < environment.getSize(); i++) {
+            for (int j = 0; j < environment.getSize(); j++) {
                 curLabel = this.getLabel(j, i);
                 curLabel.setBackground(backgroundC);
                 curLabel.setIcon(null);
             }
         }
-        for (EnvironmentObject eo : envObjects) {
+        for (EnvironmentObject eo :  environment.getEnvObjects()) {
             if (eo.isAlive()) {
                 curLabel = this.getLabel(eo.getX(), eo.getY());
                 curLabel.setIcon(eo.getIcon());
             }
 
         }
-    }
-
-    public int randomRange(int min, int max) {
-        int range = Math.abs(max - min) + 1;
-        return (int) (Math.random() * range) + (min <= max ? min : max);
-    }
-
-    public EnvironmentObject spaceOccupied(int x, int y) {
-        for (EnvironmentObject eo : envObjects) {
-            if (eo.getX() == x && eo.getY() == y) {
-                return eo;
-            }
-        }
-        return null;
-    }
-
-    public void addAgent(Agent a) {
-        addEnvironmentObject(a);
-    }
-
-    public void removeAgent(Agent a) {
-        removeEnvironmentObject(a);
-    }
-
-    public void addEnvironmentObject(EnvironmentObject eo) {
-        envObjects.add(eo);
-        if (eo instanceof Agent) {
-            Agent a = (Agent) eo;
-            if (!agents.contains(a)) {
-                agents.add(a);
-            }
-        } else if (eo instanceof Carrot) {
-            Carrot c = (Carrot) eo;
-            if (!carrots.contains(c)) {
-                carrots.add(c);
-            }
-        }
-    }
-
-    public void removeEnvironmentObject(EnvironmentObject eo) {
-        envObjects.remove(eo);
-        agents.remove(eo);
     }
 
     public JLabel getLabel(int x, int y) {
@@ -267,7 +175,7 @@ public class RVFGui extends javax.swing.JFrame {
 
     public ArrayList<Agent> foxesAtArea(int x, int y, int r) {
         ArrayList<Agent> foxes = new ArrayList<>();
-        for (Agent ag : agents) {
+        for (Agent ag : environment.getAgents()) {
             if (ag instanceof FoxAgent) {
                 if (ag.getX() <= x + r && ag.getX() >= x - r && ag.getY() <= y + r
                         && ag.getY() >= y - r) {//means a fox is a threat
@@ -329,7 +237,7 @@ public class RVFGui extends javax.swing.JFrame {
             int minDistance = 10000;
             goal = new EatCarrot(null);
             int distance = 0;
-            for (EnvironmentObject eo : envObjects) {
+            for (EnvironmentObject eo : environment.getEnvObjects()) {
                 if (eo instanceof Carrot && eo.isAlive()) {
 
                     if (goalDrivenOption.isSelected()) {
@@ -352,7 +260,7 @@ public class RVFGui extends javax.swing.JFrame {
             int minDistance = 1000;
             goal = new CatchRabbit(null);
             int distance = 0;
-            for (Agent ag : agents) {
+            for (Agent ag : environment.getAgents()) {
                 if (ag instanceof RabbitAgent && ag.isAlive()) {
                     distance = manhattanDistance(a, ag);
                     if (minDistance > distance) {
@@ -448,65 +356,65 @@ public class RVFGui extends javax.swing.JFrame {
 //            }
         if (differenceX > differenceY) {//avoids 'dancing'
             if (goalX > a.getX()) {//if goal is on the right
-                EnvironmentObject neighbour = spaceOccupied(a.getX() + 1, a.getY());
+                EnvironmentObject neighbour = environment.spaceOccupied(a.getX() + 1, a.getY());
                 if (neighbour == null
                         || neighbour.getClass().equals(desiredObject.getClass())) {
                     a.move(Direction.RIGHT);
-                } else if (goalY < a.getY() && spaceOccupied(a.getX(), a.getY() - 1) == null
+                } else if (goalY < a.getY() && environment.spaceOccupied(a.getX(), a.getY() - 1) == null
                         && a.getY() - 1 >= 0) {
                     a.move(Direction.UP);
                 } else {
-                    if (spaceOccupied(a.getX(), a.getY() + 1) == null
+                    if (environment.spaceOccupied(a.getX(), a.getY() + 1) == null
                             && a.getY() + 1 < size) {
                         a.move(Direction.DOWN);
-                    } else if (a.getX() - 1 >= 0 && spaceOccupied(a.getX() - 1, a.getY()) == null) {
+                    } else if (a.getX() - 1 >= 0 && environment.spaceOccupied(a.getX() - 1, a.getY()) == null) {
                         a.move(Direction.LEFT);
                     }
                 }
             } else if (goalX < a.getX()) {//if goal is on the left
-                if (spaceOccupied(a.getX() - 1, a.getY()) == null
-                        || spaceOccupied(a.getX() - 1, a.getY()).getClass().equals(desiredObject.getClass())) {
+                if (environment.spaceOccupied(a.getX() - 1, a.getY()) == null
+                        || environment.spaceOccupied(a.getX() - 1, a.getY()).getClass().equals(desiredObject.getClass())) {
                     a.move(Direction.LEFT);
-                } else if (goalY < a.getY() && spaceOccupied(a.getX(), a.getY() - 1) == null
+                } else if (goalY < a.getY() && environment.spaceOccupied(a.getX(), a.getY() - 1) == null
                         && a.getY() - 1 >= 0) {
                     a.move(Direction.UP);
                 } else {
-                    if (spaceOccupied(a.getX(), a.getY() + 1) == null
+                    if (environment.spaceOccupied(a.getX(), a.getY() + 1) == null
                             && a.getY() + 1 < size) {
                         a.move(Direction.DOWN);
-                    } else if (a.getX() + 1 < size && spaceOccupied(a.getX() + 1, a.getY()) == null) {
+                    } else if (a.getX() + 1 < size && environment.spaceOccupied(a.getX() + 1, a.getY()) == null) {
                         a.move(Direction.RIGHT);
                     }
                 }
             }
         } else {
             if (goalY > a.getY()) {
-                if (spaceOccupied(a.getX(), a.getY() + 1) == null
-                        || spaceOccupied(a.getX(), a.getY() + 1).getClass().equals(desiredObject.getClass())) {
+                if (environment.spaceOccupied(a.getX(), a.getY() + 1) == null
+                        || environment.spaceOccupied(a.getX(), a.getY() + 1).getClass().equals(desiredObject.getClass())) {
                     a.move(Direction.DOWN);
-                } else if (goalX > a.getX() && spaceOccupied(a.getX() + 1, a.getY()) == null
+                } else if (goalX > a.getX() && environment.spaceOccupied(a.getX() + 1, a.getY()) == null
                         && a.getX() + 1 < size) {
                     a.move(Direction.RIGHT);
                 } else {
-                    if (spaceOccupied(a.getX() - 1, a.getY()) == null
+                    if (environment.spaceOccupied(a.getX() - 1, a.getY()) == null
                             && a.getX() - 1 >= 0) {
                         a.move(Direction.LEFT);
-                    } else if (a.getY() - 1 >= 0 && spaceOccupied(a.getX(), a.getY() - 1) == null) {
+                    } else if (a.getY() - 1 >= 0 && environment.spaceOccupied(a.getX(), a.getY() - 1) == null) {
                         a.move(Direction.UP);
                     }
                 }
             } else if (goalY < a.getY()) {
-                if (spaceOccupied(a.getX(), a.getY() - 1) == null
-                        || spaceOccupied(a.getX(), a.getY() - 1).getClass().equals(desiredObject.getClass())) {
+                if (environment.spaceOccupied(a.getX(), a.getY() - 1) == null
+                        || environment.spaceOccupied(a.getX(), a.getY() - 1).getClass().equals(desiredObject.getClass())) {
                     a.move(Direction.UP);
-                } else if (goalX > a.getX() && spaceOccupied(a.getX() + 1, a.getY()) == null
+                } else if (goalX > a.getX() && environment.spaceOccupied(a.getX() + 1, a.getY()) == null
                         && a.getX() + 1 < size) {
                     a.move(Direction.RIGHT);
                 } else {
-                    if (spaceOccupied(a.getX() - 1, a.getY()) == null
+                    if (environment.spaceOccupied(a.getX() - 1, a.getY()) == null
                             && a.getX() - 1 >= 0) {
                         a.move(Direction.LEFT);
-                    } else if (a.getY() + 1 < size && spaceOccupied(a.getX(), a.getY() + 1) == null) {
+                    } else if (a.getY() + 1 < size && environment.spaceOccupied(a.getX(), a.getY() + 1) == null) {
                         a.move(Direction.DOWN);
                     }
                 }
@@ -552,7 +460,7 @@ public class RVFGui extends javax.swing.JFrame {
 
     private void step() {
 
-        for (Agent a : agents) {
+        for (Agent a : environment.getAgents()) {
             if (a.isAlive()) {
                 Goal goal = findGoal(a);
                 if (goal.getGoalObject() == null) {
@@ -572,7 +480,7 @@ public class RVFGui extends javax.swing.JFrame {
 
     public void updateStatistics() {
         int rabbits = 0, foxes = 0, carrotsF = 0;
-        Iterator<EnvironmentObject> iter = envObjects.iterator();
+        Iterator<EnvironmentObject> iter = environment.getEnvObjects().iterator();
         while (iter.hasNext()) {
             EnvironmentObject eo = iter.next();
             if (eo.isAlive()) {
@@ -589,12 +497,6 @@ public class RVFGui extends javax.swing.JFrame {
                 iter.remove();
             }
         }
-//        Iterator<Agent> iterAg = agents.iterator();
-//        while (iterAg.hasNext()) {
-//            if (iterAg.next().isAlive() == false) {
-//                iterAg.remove();
-//            }
-//        }
         rabbitsNumber.setText("" + rabbits);
         foxesNumber.setText("" + foxes);
         carrotsNumber.setText("" + carrotsF);
