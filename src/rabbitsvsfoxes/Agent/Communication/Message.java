@@ -3,14 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package rabbitsvsfoxes;
+package rabbitsvsfoxes.Agent.Communication;
 
 /**
  *
  * @author Georgi
  */
-public enum MessageType {
-    Inform, AskObjectsNearby, ReplyObjectsNearby,AskAgentNearby,
-    ReplyAgentsNearby, InformRabbitSpotted, InformFoxSpotted;
+public class Message {
+    protected MessageType msgType;
+
+    public Message(MessageType type) {
+        this.msgType = type;
+    }
     
 }

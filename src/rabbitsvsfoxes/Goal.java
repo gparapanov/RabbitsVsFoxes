@@ -6,9 +6,10 @@ package rabbitsvsfoxes;
  */
 public class Goal {
     private EnvironmentObject goalObject;
+    private int priority;//1<<<<<10
 
-    public Goal(EnvironmentObject goalObject) {
-        this.goalObject = goalObject;
+    public Goal() {
+        
     }
 
     public EnvironmentObject getGoalObject() {

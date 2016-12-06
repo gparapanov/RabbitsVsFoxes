@@ -7,7 +7,7 @@ package rabbitsvsfoxes;
 public class CatchRabbit extends Goal {
 
     public CatchRabbit(EnvironmentObject goalObject) {
-        super(goalObject);
+        this.setGoalObject(goalObject);
     }
     
 }

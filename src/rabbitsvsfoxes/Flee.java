@@ -6,8 +6,8 @@ package rabbitsvsfoxes;
  */
 public class Flee extends Goal {
 
-    public Flee(EnvironmentObject goalObject) {
-        super(goalObject);
+    public Flee() {
+        
     }
     
 }

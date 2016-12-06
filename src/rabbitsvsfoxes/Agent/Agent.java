@@ -1,8 +1,11 @@
-package rabbitsvsfoxes;
+package rabbitsvsfoxes.Agent;
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ImageIcon;
+import rabbitsvsfoxes.Direction;
+import rabbitsvsfoxes.EnvironmentObject;
+import rabbitsvsfoxes.Agent.Communication.Message;
 
 /**
  *
