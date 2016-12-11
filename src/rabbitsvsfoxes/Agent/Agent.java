@@ -7,6 +7,7 @@ import rabbitsvsfoxes.Agenda;
 import rabbitsvsfoxes.Direction;
 import rabbitsvsfoxes.EnvironmentObject;
 import rabbitsvsfoxes.Communication.Message;
+import rabbitsvsfoxes.Goal;
 
 /**
  *
@@ -38,7 +39,35 @@ public class Agent extends EnvironmentObject {
             case RIGHT:
                 setX(getX()+1);
                 break;
+            case UPLEFT:
+                setY(getY()-1);
+                setX(getX()-1);
+                break;
+            case DOWNLEFT:
+                setY(getY()+1);
+                setX(getX()-1);
+                break;
+            case UPRIGHT:
+                setX(getX()+1);
+                setY(getY()-1);
+                break;
+            case DOWNRIGHT:
+                setX(getX()+1);
+                setY(getY()+1);
+                break;
         }
+    }
+    
+    private void findGoal(){
+        
+    }
+    
+    public void addGoal(Goal g){
+        this.agenda.addTask(g);
+    }
+
+    public Agenda getAgenda() {
+        return agenda;
     }
     
     public void sendMessage(Agent target,Message msg){

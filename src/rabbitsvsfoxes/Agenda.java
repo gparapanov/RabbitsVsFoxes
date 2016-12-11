@@ -28,4 +28,23 @@ public class Agenda {
     public void removeTask(Goal g) {
         tasks.remove(g);
     }
+    
+    public Goal getTop(){
+        if(!tasks.isEmpty())return tasks.get(0);
+        return null;
+    }
+    
+    public ArrayList getTasks(){
+        return this.tasks;
+    }
+    
+    public boolean checkExistists(Goal goal){
+        for(Goal g:tasks){
+            if(g.getGoalObject()!=null && g.getGoalObject().getX()==goal.getGoalObject().getX()
+                    && g.getGoalObject().getY()==goal.getGoalObject().getY()){
+                return true;
+            }
+        }
+        return false;
+    }
 }
