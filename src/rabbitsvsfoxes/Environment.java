@@ -23,12 +23,14 @@ public class Environment {
     private Set<EnvironmentObject> envObjects;
     private ArrayList<Carrot> carrots;
     private int size;
+    private RVFGui gui;
 
-    public Environment(int size, int r, int f, int c, int b) {
+    public Environment(int size, int r, int f, int c, int b,RVFGui gui) {
         this.size = size;
         this.agents = new LinkedHashSet();
         this.envObjects = new LinkedHashSet();
         this.carrots = new ArrayList<>();
+        this.gui=gui;
 
         int newX, newY;
         for (int i = 0; i < c; i++) {//create carrots
@@ -50,7 +52,7 @@ public class Environment {
                 newX = randomRange(0, size - 1);
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
-            RabbitAgent rabbit = new RabbitAgent(newX, newY);
+            RabbitAgent rabbit = new RabbitAgent(newX, newY,this);
             this.addEnvironmentObject(rabbit);
         }
         for (int i = 0; i < f; i++) {//create foxes
@@ -58,7 +60,7 @@ public class Environment {
                 newX = randomRange(0, size - 1);
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
-            FoxAgent fox = new FoxAgent(newX, newY);
+            FoxAgent fox = new FoxAgent(newX, newY,this);
             this.addEnvironmentObject(fox);
         }
         
@@ -111,6 +113,10 @@ public class Environment {
         return null;
     }
 
+    public RVFGui getGui(){
+        return gui;
+    }
+    
     public int getSize() {
         return size;
     }
@@ -130,4 +136,5 @@ public class Environment {
     public ArrayList<Carrot> getCarrots() {
         return carrots;
     }
+
 }
