@@ -28,10 +28,10 @@ import javax.swing.border.BevelBorder;
 public class RVFGui extends javax.swing.JFrame {
 
     private final int RABBITS = 1;
-    private final int FOXES = 1;
+    private final int FOXES = 0;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
-    private final int size = 35;
+    private final int size = 45;
 
     private JPanel panel1;
 
@@ -380,22 +380,23 @@ public class RVFGui extends javax.swing.JFrame {
 //    }
 
     private void step() {
-        for (Agent a : environment.getAgents()) {
-            if (a.isAlive()) {
-                a.makeAStep();
-//                findGoal(a);
-//                Goal curGoal = a.getAgenda().getTop();
-//                if (curGoal == null) {
-//                    displayTimer.stop();
-//                    System.out.println("Game Over!");
-//                } else {
-//                    moveTowardsGoal(a, curGoal);
-//                }
-            }
-//            int goalX = goal.getGoalObject().getX(),
-//                    goalY = goal.getGoalObject().getY();
-//            System.out.println("going to " + goalX + " " + goalY);
-        }
+//        for (Agent a : environment.getAgents()) {
+//            if (a.isAlive()) {
+//                a.makeAStep();
+////                findGoal(a);
+////                Goal curGoal = a.getAgenda().getTop();
+////                if (curGoal == null) {
+////                    displayTimer.stop();
+////                    System.out.println("Game Over!");
+////                } else {
+////                    moveTowardsGoal(a, curGoal);
+////                }
+//            }
+////            int goalX = goal.getGoalObject().getX(),
+////                    goalY = goal.getGoalObject().getY();
+////            System.out.println("going to " + goalX + " " + goalY);
+//        }
+        environment.step();
         redrawField();
         updateStatistics();
     }
@@ -419,7 +420,6 @@ public class RVFGui extends javax.swing.JFrame {
         Iterator<EnvironmentObject> iter = environment.getEnvObjects().iterator();
         while (iter.hasNext()) {
             EnvironmentObject eo = iter.next();
-            if (eo.isAlive()) {
                 if (eo instanceof RabbitAgent) {
                     rabbits++;
                 }
@@ -429,9 +429,6 @@ public class RVFGui extends javax.swing.JFrame {
                 if (eo instanceof Carrot) {
                     carrotsF++;
                 }
-            } else {
-                iter.remove();
-            }
         }
         rabbitsNumber.setText("" + rabbits);
         foxesNumber.setText("" + foxes);

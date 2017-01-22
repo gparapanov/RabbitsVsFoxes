@@ -58,4 +58,9 @@ public abstract class EnvironmentObject {
     public int getY() {
         return y;
     }
+    
+    @Override
+    public String toString() {
+        return this.getX()+" "+this.getY();
+    }
 }

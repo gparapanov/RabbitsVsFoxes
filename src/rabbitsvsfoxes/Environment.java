@@ -6,6 +6,7 @@
 package rabbitsvsfoxes;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import rabbitsvsfoxes.Agent.Agent;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,12 +26,12 @@ public class Environment {
     private int size;
     private RVFGui gui;
 
-    public Environment(int size, int r, int f, int c, int b,RVFGui gui) {
+    public Environment(int size, int r, int f, int c, int b, RVFGui gui) {
         this.size = size;
         this.agents = new LinkedHashSet();
         this.envObjects = new LinkedHashSet();
         this.carrots = new ArrayList<>();
-        this.gui=gui;
+        this.gui = gui;
 
         int newX, newY;
         for (int i = 0; i < c; i++) {//create carrots
@@ -52,7 +53,7 @@ public class Environment {
                 newX = randomRange(0, size - 1);
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
-            RabbitAgent rabbit = new RabbitAgent(newX, newY,this);
+            RabbitAgent rabbit = new RabbitAgent(newX, newY, this);
             this.addEnvironmentObject(rabbit);
         }
         for (int i = 0; i < f; i++) {//create foxes
@@ -60,10 +61,10 @@ public class Environment {
                 newX = randomRange(0, size - 1);
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
-            FoxAgent fox = new FoxAgent(newX, newY,this);
+            FoxAgent fox = new FoxAgent(newX, newY, this);
             this.addEnvironmentObject(fox);
         }
-        
+
     }
 
     public void addAgent(Agent a) {
@@ -96,9 +97,23 @@ public class Environment {
     }
 
     public void step() {
-
+        for (Agent a : getAgents()) {
+            if (a.isAlive()) {
+                a.makeAStep();
+            }
+        }
     }
-
+    public void cleanup(){
+        ArrayList<EnvironmentObject>toRemove=new ArrayList<>();
+        Iterator<EnvironmentObject> iter = getEnvObjects().iterator();
+        while (iter.hasNext()) {
+            EnvironmentObject eo = iter.next();
+            if(!eo.isAlive()){
+                iter.remove();
+            }
+        }
+        
+    }
     private int randomRange(int min, int max) {
         int range = Math.abs(max - min) + 1;
         return (int) (Math.random() * range) + (min <= max ? min : max);
@@ -113,10 +128,10 @@ public class Environment {
         return null;
     }
 
-    public RVFGui getGui(){
+    public RVFGui getGui() {
         return gui;
     }
-    
+
     public int getSize() {
         return size;
     }

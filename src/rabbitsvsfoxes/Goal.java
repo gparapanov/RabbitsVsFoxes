@@ -13,6 +13,12 @@ public class Goal {
         this.priority=5;
         this.completed=false;
     }
+    
+    public Goal(EnvironmentObject eo) {
+        this.priority=5;
+        this.completed=false;
+        this.setGoalObject(eo);
+    }
 
     public EnvironmentObject getGoalObject() {
         return goalObject;

@@ -7,6 +7,7 @@ package rabbitsvsfoxes.Agent;
 
 import rabbitsvsfoxes.Agent.Agent;
 import javax.swing.ImageIcon;
+import rabbitsvsfoxes.Carrot;
 import rabbitsvsfoxes.CatchRabbit;
 import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.EnvironmentObject;
@@ -31,7 +32,7 @@ public class FoxAgent extends Agent {
         CatchRabbit goal=null;
         int distance = 0;
         for (EnvironmentObject eo : objAround) {
-            if (eo instanceof RabbitAgent && eo.isAlive()) {
+            if (eo.isAlive()) {
                 distance = manhattanDistance(this, eo);
                 if (minDistance > distance) {
                     minDistance = distance;
@@ -44,5 +45,18 @@ public class FoxAgent extends Agent {
             this.addGoal(goal);
         }
     }
+
+    @Override
+    public void lookAround(int radius) {
+        objAround.clear();
+        for (Agent envObj : env.getAgents()) {
+            if (envObj instanceof RabbitAgent && envObj.getX() > (this.getX() - radius) && 
+                    envObj.getX() < (this.getX() + radius) && envObj.getY() > (this.getY() - radius)
+                    && envObj.getY() < (this.getY() + radius)) {
+                objAround.add(envObj);
+            }
+        }
+    }
+    
 
 }

@@ -11,7 +11,9 @@ import rabbitsvsfoxes.EnvironmentObject;
 import rabbitsvsfoxes.Communication.Message;
 import rabbitsvsfoxes.EatCarrot;
 import rabbitsvsfoxes.Environment;
+import rabbitsvsfoxes.Exploration;
 import rabbitsvsfoxes.Goal;
+import rabbitsvsfoxes.UnexploredSpace;
 
 /**
  *
@@ -19,21 +21,34 @@ import rabbitsvsfoxes.Goal;
  */
 public class Agent extends EnvironmentObject {
 
-    private final int radius = 10;
+    private final int radius = 7;
 
     protected Agenda agenda;
     protected Environment env;
     protected ArrayList<EnvironmentObject> objAround;
+    protected ArrayList<UnexploredSpace> toExplore;
 
     public Agent(int x, int y, Environment env) {
         super(x, y);
         this.env = env;
         this.agenda = new Agenda();
         this.objAround = new ArrayList<>();
+        this.toExplore = new ArrayList<>();
+        discoverExplorationSpaces();
     }
 
     public Agent() {
 
+    }
+
+    protected void discoverExplorationSpaces() {
+        for (int i = radius; i < env.getSize(); i += (radius * 2) + 1) {
+            for (int j = radius; j < env.getSize(); j += (radius * 2) + 1) {
+                toExplore.add(new UnexploredSpace(i, j));
+                //System.out.println("will explore x:"+i+",y:"+j);
+            }
+        }
+        System.out.println(toExplore.toString());
     }
 
     public void move(Direction d) {
@@ -89,25 +104,18 @@ public class Agent extends EnvironmentObject {
     }
 
     public void lookAround(int radius) {
-        objAround.clear();
-        for (EnvironmentObject envObj : env.getEnvObjects()) {
-            if (envObj.getX() > (this.getX() - radius) && envObj.getX() < (this.getX() + radius)
-                    && envObj.getY() > (this.getY() - radius) && envObj.getY() < (this.getY() + radius)) {
-                objAround.add(envObj);
-            }
-        }
 
     }
 
     public void makeAStep() {
         lookAround(radius);
         findGoal();
-        if(agenda.getTop()!=null){
+        if (agenda.getTop() != null) {
             moveTowardsGoal(agenda.getTop());
-        }else{
+        } else {
             System.out.println("Game Over!");
         }
-        
+
     }
 
     public void moveTowardsGoal(Goal g) {
@@ -205,7 +213,11 @@ public class Agent extends EnvironmentObject {
             agenda.removeTask(g);
             if (g instanceof CatchRabbit) {
                 System.out.println("fox ate rabbit");
+            } else if (g instanceof Exploration) {
+                this.toExplore.remove(g.getGoalObject());
             }
+            env.removeEnvironmentObject(g.getGoalObject());
+
             //System.out.println("eaten" + agents.toString());
         }
 

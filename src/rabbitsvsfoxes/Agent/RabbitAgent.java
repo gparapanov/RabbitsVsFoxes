@@ -11,7 +11,9 @@ import rabbitsvsfoxes.Carrot;
 import rabbitsvsfoxes.EatCarrot;
 import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.EnvironmentObject;
+import rabbitsvsfoxes.Exploration;
 import rabbitsvsfoxes.Goal;
+import rabbitsvsfoxes.UnexploredSpace;
 
 /**
  *
@@ -35,26 +37,56 @@ public class RabbitAgent extends Agent {
         int minDistance = 10000;
         goal = new EatCarrot(null);
         int distance = 0;
-        for (EnvironmentObject eo : objAround) {
-            if (eo instanceof Carrot && eo.isAlive()) {
-                if (env.getGui().getBehaviour() == 1) {
-                    distance = manhattanDistance(this, eo);
-                    //System.out.println("goal drive  ");
-                } else {
-                    distance = evaluationFunction(this, eo);
-                    //System.out.println("hybrid ");
+        if (!objAround.isEmpty()) {
+            for (EnvironmentObject eo : objAround) {
+                if (true) {
+                    if (env.getGui().getBehaviour() == 1) {
+                        distance = manhattanDistance(this, eo);
+                        //System.out.println("goal drive  ");
+                    } else {
+                        distance = evaluationFunction(this, eo);
+                        //System.out.println("hybrid ");
+                    }
+                    if (minDistance > distance) {
+                        minDistance = distance;
+                        goal.setGoalObject(eo);
+                        //System.out.println("found a carrot");
+                    }
                 }
-                if (minDistance > distance) {
-                    minDistance = distance;
-                    goal.setGoalObject(eo);
-                    //System.out.println("found a carrot");
+            }
+        } else {
+            System.out.println("no objects around");
+            goal=new Exploration(null);
+            if(toExplore.isEmpty()){
+                discoverExplorationSpaces();
+            }
+            for(UnexploredSpace us:toExplore){
+                System.out.println("looking for spaces");
+                distance=manhattanDistance(this,us);
+                if(distance<minDistance){
+                    minDistance=distance;
+                    goal.setGoalObject(us);
+                    goal.setPriority(4);
+                    //System.out.println("better space found:"+distance);
                 }
             }
         }
+
         if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
             this.addGoal(goal);
         }
         System.out.println("rabbit found carrot with score: " + minDistance); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void lookAround(int radius) {
+        objAround.clear();
+        for (Carrot envObj : env.getCarrots()) {
+            if (envObj.getX() >= (this.getX() - radius) && envObj.getX() <= (this.getX() + radius)
+                    && envObj.getY() >= (this.getY() - radius) && envObj.getY() <= (this.getY() + radius)) {
+                objAround.add(envObj);
+            }
+        }
     }
 
     public ArrayList<Agent> foxesAtArea(int x, int y, int r) {
