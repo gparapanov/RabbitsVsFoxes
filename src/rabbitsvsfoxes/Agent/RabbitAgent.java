@@ -34,8 +34,9 @@ public class RabbitAgent extends Agent {
     @Override
     public void findGoal() {
         Goal goal;
-        int minDistance = 10000;
         goal = new EatCarrot(null);
+        int minDistance = 10000;
+        
         int distance = 0;
         if (!objAround.isEmpty()) {
             for (EnvironmentObject eo : objAround) {
