@@ -5,14 +5,14 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import rabbitsvsfoxes.Agenda;
 import rabbitsvsfoxes.Carrot;
-import rabbitsvsfoxes.CatchRabbit;
+import rabbitsvsfoxes.Goals.CatchRabbit;
 import rabbitsvsfoxes.Direction;
 import rabbitsvsfoxes.EnvironmentObject;
 import rabbitsvsfoxes.Communication.Message;
-import rabbitsvsfoxes.EatCarrot;
+import rabbitsvsfoxes.Goals.EatCarrot;
 import rabbitsvsfoxes.Environment;
-import rabbitsvsfoxes.Exploration;
-import rabbitsvsfoxes.Goal;
+import rabbitsvsfoxes.Goals.Exploration;
+import rabbitsvsfoxes.Goals.Goal;
 import rabbitsvsfoxes.UnexploredSpace;
 
 /**
@@ -113,7 +113,7 @@ public class Agent extends EnvironmentObject {
         if (agenda.getTop() != null) {
             moveTowardsGoal(agenda.getTop());
         } else {
-            System.out.println("Game Over!");
+            //System.out.println("Game Over!");
         }
 
     }
@@ -222,7 +222,37 @@ public class Agent extends EnvironmentObject {
         }
 
     }
-
+    
+    public boolean checkAndMove(Direction d){
+        switch (d) {
+            case UP:
+                if(getY()-1>=0 && env.spaceOccupied(getX(), getY()-1)==null){
+                    //setY(getY() - 1);
+                    return true;
+                }
+                break;
+            case DOWN:
+                if(getY()+1<env.getSize() && env.spaceOccupied(getX(), getY()+1)==null){
+                    //setY(getY() + 1);
+                    return true;
+                }
+                break;
+            case LEFT:
+                if(getX()-1>=0 && env.spaceOccupied(getX()-1, getY())==null){
+                    //setY(getX() - 1);
+                    return true;
+                }
+                break;
+            case RIGHT:
+                if(getX()+1<env.getSize() && env.spaceOccupied(getX()+1, getY())==null){
+                    //setY(getX() + 1);
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
+    
     public void addGoal(Goal g) {
         this.agenda.addTask(g);
     }

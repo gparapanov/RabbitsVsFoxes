@@ -1,5 +1,6 @@
 package rabbitsvsfoxes;
 
+import rabbitsvsfoxes.Goals.Goal;
 import java.util.ArrayList;
 
 /**

@@ -1,4 +1,6 @@
-package rabbitsvsfoxes;
+package rabbitsvsfoxes.Goals;
+
+import rabbitsvsfoxes.EnvironmentObject;
 
 /**
  *

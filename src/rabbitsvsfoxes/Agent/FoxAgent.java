@@ -8,11 +8,11 @@ package rabbitsvsfoxes.Agent;
 import rabbitsvsfoxes.Agent.Agent;
 import javax.swing.ImageIcon;
 import rabbitsvsfoxes.Carrot;
-import rabbitsvsfoxes.CatchRabbit;
+import rabbitsvsfoxes.Goals.CatchRabbit;
 import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.EnvironmentObject;
-import rabbitsvsfoxes.Exploration;
-import rabbitsvsfoxes.Goal;
+import rabbitsvsfoxes.Goals.Exploration;
+import rabbitsvsfoxes.Goals.Goal;
 import rabbitsvsfoxes.UnexploredSpace;
 
 /**
@@ -50,7 +50,7 @@ public class FoxAgent extends Agent {
                 discoverExplorationSpaces();
             }
             for(UnexploredSpace us:toExplore){
-                System.out.println("looking for spaces");
+                //System.out.println("looking for spaces");
                 distance=manhattanDistance(this,us);
                 if(distance<minDistance){
                     minDistance=distance;

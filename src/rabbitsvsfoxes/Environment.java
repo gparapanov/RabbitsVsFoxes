@@ -92,7 +92,7 @@ public class Environment {
 
     public void removeEnvironmentObject(EnvironmentObject eo) {
         envObjects.remove(eo);
-        agents.remove(eo);
+        //agents.remove(eo);
         carrots.remove(eo);
     }
 
@@ -102,6 +102,7 @@ public class Environment {
                 a.makeAStep();
             }
         }
+        
     }
     public void cleanup(){
         ArrayList<EnvironmentObject>toRemove=new ArrayList<>();
