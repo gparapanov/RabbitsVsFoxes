@@ -28,7 +28,7 @@ public class FoxAgent extends Agent {
 
     @Override
     public void findGoal() {
-        System.out.println("fox looking for rabbbits");
+        //System.out.println("fox looking for rabbbits");
         int minDistance = 1000;
         Goal goal = null;
         int distance = 0;
@@ -44,7 +44,7 @@ public class FoxAgent extends Agent {
                 }
             }
         } else {
-            System.out.println("no objects around");
+            //System.out.println("no objects around");
             goal=new Exploration(null);
             if(toExplore.isEmpty()){
                 discoverExplorationSpaces();

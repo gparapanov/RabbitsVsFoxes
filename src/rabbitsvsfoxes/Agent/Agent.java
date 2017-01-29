@@ -126,10 +126,10 @@ public class Agent extends EnvironmentObject {
         EnvironmentObject desiredObject;
         if (this instanceof FoxAgent) {
             desiredObject = new RabbitAgent();
-            System.out.println("fox roing to:" + goalX + " " + goalY);
+            //System.out.println("fox roing to:" + goalX + " " + goalY);
         } else {
             desiredObject = new Carrot();
-            System.out.println("rabbit roing to:" + goalX + " " + goalY);
+            //System.out.println("rabbit roing to:" + goalX + " " + goalY);
         }
         if (differenceX == 1 && differenceY == 1) {
             if (goalX > getX() && goalY > getY()) {

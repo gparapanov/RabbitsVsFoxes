@@ -25,7 +25,7 @@ import rabbitsvsfoxes.UnexploredSpace;
 public class RabbitAgent extends Agent {
 
     private ArrayList<FoxAgent> foxesAround;
-    private final int threatRadius = 3;
+    private final int threatRadius = 4;
 
     public RabbitAgent(int x, int y, Environment env) {
         super(x, y, env);
@@ -43,9 +43,9 @@ public class RabbitAgent extends Agent {
         goal = new EatCarrot(null);
         int minDistance = 10000;
         int distance = 0;
-        if (!objAround.isEmpty()) {//there are carrots near by
+        if (!objAround.isEmpty()) {//there are carrots nearby
             if (foxesAround.isEmpty()) {//no dangerous foxes
-                
+
                 for (EnvironmentObject eo : objAround) {
                     if (true) {
                         if (env.getGui().getBehaviour() == 1) {
@@ -63,57 +63,107 @@ public class RabbitAgent extends Agent {
                     }
                 }
             } else {//there are carrots and foxes around .i.e flee
-                boolean enemyL=false,enemyR=false,enemyU=false,enemyD=false;
+                boolean enemyL = false, enemyR = false, enemyU = false, enemyD = false;
                 //checks on which sides the enemies are, so that the direction too flee
                 //can be determined
                 System.out.println("there is a fox around");
-                for(FoxAgent fox:foxesAround){
-                    if(fox.getX()<=this.getX()+1 && fox.getX()>=this.getX()-1 
-                            && fox.getY()<=this.getY()+threatRadius
-                            && fox.getY()>=this.getY()){
-                        enemyD=true;
+                for (FoxAgent fox : foxesAround) {
+
+                    if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
+                            && fox.getY() <= this.getY() + threatRadius
+                            && fox.getY() >= this.getY()) {
+                        enemyD = true;
+                        System.out.println("there is a fox down");
+                        //there is an enemy down
+                    } else if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
+                            && fox.getY() >= this.getY() - threatRadius
+                            && fox.getY() <= this.getY()) {
+                        enemyU = true;
+                        System.out.println("there is a fox up");
                         //there is an enemy up
-                    }else if(fox.getX()<=this.getX()+1 && fox.getX()>=this.getX()-1 
-                            && fox.getY()>=this.getY()-threatRadius
-                            && fox.getY()<=this.getY()){
-                        enemyU=true;
-                        //there is an enemy over
-                    }else if(fox.getX()<=this.getX()+threatRadius && fox.getX()>=this.getX() 
-                            && fox.getY()<=this.getY()+1
-                            && fox.getY()>=this.getY()-1){
-                        enemyR=true;
+                    } else if (fox.getX() <= this.getX() + threatRadius && fox.getX() >= this.getX()
+                            && fox.getY() <= this.getY() + 1
+                            && fox.getY() >= this.getY() - 1) {
+                        enemyR = true;
+                        System.out.println("there is a fox right");
                         //enemy on the right
-                    }else if(fox.getX()<=this.getX() && fox.getX()>=this.getX()-threatRadius 
-                            && fox.getY()<=this.getY()+1
-                            && fox.getY()>=this.getY()-1){
-                        enemyL=true;
+                    } else if (fox.getX() <= this.getX() && fox.getX() >= this.getX() - threatRadius
+                            && fox.getY() <= this.getY() + 1
+                            && fox.getY() >= this.getY() - 1) {
+                        enemyL = true;
+                        System.out.println("there is a fox left");
                         //enemy on the left
                     }
                 }
-                goal=new Flee(null);
-                if(enemyU){
-                    if(checkAndMove(Direction.DOWN)){
-                        goal.setGoalObject(new FleeSpace(getX(),getY()+1));
-                    }else if (checkAndMove(Direction.LEFT)) {
-                        goal.setGoalObject(new FleeSpace(getX()-1,getY()));;
+                //now figure out in which direction to go to avoid the threat
+                goal = new Flee(null);
+                if (enemyU && enemyD && enemyL && checkAndMove(Direction.RIGHT)) {
+                    goal.setGoalObject(new FleeSpace(getX() + 1, getY()));
+                } else if (enemyU && enemyD && enemyR && checkAndMove(Direction.LEFT)) {
+                    goal.setGoalObject(new FleeSpace(getX() - 1, getY()));
+                } else if (enemyU && enemyR && enemyL && checkAndMove(Direction.DOWN)) {
+                    goal.setGoalObject(new FleeSpace(getX(), getY() + 1));
+                } else if (enemyD && enemyR && enemyL && checkAndMove(Direction.UP)) {
+                    goal.setGoalObject(new FleeSpace(getX(), getY() - 1));
+                } else if (enemyU && enemyD) {
+                    if (checkAndMove(Direction.LEFT)) {
+                        goal.setGoalObject(new FleeSpace(getX() - 1, getY()));
+                    } else if (checkAndMove(Direction.RIGHT)) {
+                        goal.setGoalObject(new FleeSpace(getX() + 1, getY()));
                     }
-                }else if(enemyD){
-                    if(checkAndMove(Direction.UP)){
-                        goal.setGoalObject(new FleeSpace(getX(),getY()-1));
-                    }else if(checkAndMove(Direction.RIGHT)){
-                        goal.setGoalObject(new FleeSpace(getX()+1,getY()));
+                } else if (enemyU && enemyR) {
+                    if (checkAndMove(Direction.LEFT)) {
+                        goal.setGoalObject(new FleeSpace(getX() - 1, getY()));
+                    } else if (checkAndMove(Direction.DOWN)) {
+                        goal.setGoalObject(new FleeSpace(getX(), getY() + 1));
                     }
-                }else if(enemyR){
-                    if(checkAndMove(Direction.LEFT)){
-                       goal.setGoalObject(new FleeSpace(getX()-1,getY()));
-                    }else if( checkAndMove(Direction.UP)){
-                        goal.setGoalObject(new FleeSpace(getX(),getY()-1));
+                } else if (enemyU && enemyL) {
+                    if (checkAndMove(Direction.RIGHT)) {
+                        goal.setGoalObject(new FleeSpace(getX() + 1, getY()));
+                    } else if (checkAndMove(Direction.DOWN)) {
+                        goal.setGoalObject(new FleeSpace(getX(), getY() + 1));
                     }
-                }else if(enemyL){
-                    if(checkAndMove(Direction.RIGHT)){
-                        goal.setGoalObject(new FleeSpace(getX()+1,getY()));
-                    }else if(checkAndMove(Direction.DOWN)){
-                        goal.setGoalObject(new FleeSpace(getX(),getY()+1));
+                } else if (enemyR && enemyL) {
+                    if (checkAndMove(Direction.UP)) {
+                        goal.setGoalObject(new FleeSpace(getX(), getY() - 1));
+                    } else if (checkAndMove(Direction.DOWN)) {
+                        goal.setGoalObject(new FleeSpace(getX(), getY() + 1));
+                    }
+                } else if (enemyD && enemyL) {
+                    if (checkAndMove(Direction.UP)) {
+                        goal.setGoalObject(new FleeSpace(getX(), getY() - 1));
+                    } else if (checkAndMove(Direction.RIGHT)) {
+                        goal.setGoalObject(new FleeSpace(getX() + 1, getY()));
+                    }
+                } else if (enemyD && enemyR) {
+                    if (checkAndMove(Direction.LEFT)) {
+                        goal.setGoalObject(new FleeSpace(getX() - 1, getY()));
+                    } else if (checkAndMove(Direction.UP)) {
+                        goal.setGoalObject(new FleeSpace(getX(), getY() - 1));
+                    }
+                } else if (enemyU) {
+                    if (checkAndMove(Direction.DOWN)) {
+                        goal.setGoalObject(new FleeSpace(getX(), getY() + 1));
+                    } else if (checkAndMove(Direction.LEFT)) {
+                        goal.setGoalObject(new FleeSpace(getX() - 1, getY()));;
+                    }
+                } else if (enemyD) {
+                    if (checkAndMove(Direction.UP)) {
+                        goal.setGoalObject(new FleeSpace(getX(), getY() - 1));
+                    } else if (checkAndMove(Direction.RIGHT)) {
+                        goal.setGoalObject(new FleeSpace(getX() + 1, getY()));
+                    }
+                } else if (enemyR) {
+                    if (checkAndMove(Direction.LEFT)) {
+                        goal.setGoalObject(new FleeSpace(getX() - 1, getY()));
+                    } else if (checkAndMove(Direction.UP)) {
+                        goal.setGoalObject(new FleeSpace(getX(), getY() - 1));
+                    }
+                } else if (enemyL) {
+                    if (checkAndMove(Direction.RIGHT)) {
+                        goal.setGoalObject(new FleeSpace(getX() + 1, getY()));
+                    } else if (checkAndMove(Direction.DOWN)) {
+                        goal.setGoalObject(new FleeSpace(getX(), getY() + 1));
                     }
                 }
                 System.out.println("running away!");
@@ -121,7 +171,7 @@ public class RabbitAgent extends Agent {
 
         } else {
             //start exploring
-            System.out.println("no objects around");
+            //System.out.println("no objects around");
             goal = new Exploration(null);
             if (toExplore.isEmpty()) {
                 discoverExplorationSpaces();
@@ -140,9 +190,9 @@ public class RabbitAgent extends Agent {
         if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
             this.addGoal(goal);
         }
-        System.out.println("rabbit found carrot with score: " + minDistance); //To change body of generated methods, choose Tools | Templates.
+        //System.out.println("rabbit found carrot with score: " + minDistance); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     @Override
     public void lookAround(int radius) {
         objAround.clear();
@@ -153,7 +203,15 @@ public class RabbitAgent extends Agent {
             }
         }
         foxesAround.clear();
-        foxesAround = foxesAtArea(this.getX(), this.getY(), threatRadius);
+        for (Agent envObj : env.getAgents()) {
+            if (envObj instanceof FoxAgent) {
+                if (envObj.getX() >= (this.getX() - threatRadius) && envObj.getX() <= (this.getX() + threatRadius)
+                        && envObj.getY() >= (this.getY() - threatRadius) && envObj.getY() <= (this.getY() + threatRadius)) {
+                    foxesAround.add((FoxAgent) envObj);
+                }
+            }
+        }
+        //foxesAround = foxesAtArea(this.getX(), this.getY(), threatRadius);
     }
 
     public ArrayList<FoxAgent> foxesAtArea(int x, int y, int r) {
