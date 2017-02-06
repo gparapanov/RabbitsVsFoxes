@@ -175,7 +175,7 @@ public class Agent extends EnvironmentObject {
                 }
             }
         } else {
-            if (goalY > getY()) {
+            if (goalY > getY()) {//if goal is up
                 if (env.spaceOccupied(getX(), getY() + 1) == null
                         || env.spaceOccupied(getX(), getY() + 1).getClass().equals(desiredObject.getClass())) {
                     move(Direction.DOWN);
@@ -190,7 +190,7 @@ public class Agent extends EnvironmentObject {
                         move(Direction.UP);
                     }
                 }
-            } else if (goalY < getY()) {
+            } else if (goalY < getY()) {//if goal is down
                 if (env.spaceOccupied(getX(), getY() - 1) == null
                         || env.spaceOccupied(getX(), getY() - 1).getClass().equals(desiredObject.getClass())) {
                     move(Direction.UP);

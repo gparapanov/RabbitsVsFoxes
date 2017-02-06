@@ -30,38 +30,38 @@ public class FoxAgent extends Agent {
     public void findGoal() {
         //System.out.println("fox looking for rabbbits");
         int minDistance = 1000;
-        Goal goal = null;
+        Goal goal = new CatchRabbit(null);
         int distance = 0;
-        if (!objAround.isEmpty()) {
+        if (!objAround.isEmpty()) {//there are objects around
+            System.out.println("there's sth around");
             for (EnvironmentObject eo : objAround) {
                 if (eo.isAlive()) {
                     distance = manhattanDistance(this, eo);
                     if (minDistance > distance) {
                         minDistance = distance;
                         goal = new CatchRabbit((RabbitAgent) eo);
-                        System.out.println("fox found rabbit" + goal.getGoalObject().getX());
+                        //System.out.println("fox found rabbit" + goal.getGoalObject().getX());
                     }
                 }
             }
         } else {
-            //System.out.println("no objects around");
-            goal=new Exploration(null);
-            if(toExplore.isEmpty()){
+            System.out.println("no objects around - exploring");
+            goal = new Exploration(null);
+            if (toExplore.isEmpty()) {
                 discoverExplorationSpaces();
             }
-            for(UnexploredSpace us:toExplore){
-                //System.out.println("looking for spaces");
-                distance=manhattanDistance(this,us);
-                if(distance<minDistance){
-                    minDistance=distance;
+            
+            for (UnexploredSpace us : toExplore) {
+                distance = manhattanDistance(this, us);
+                if (distance < minDistance) {
+                    minDistance = distance;
                     goal.setGoalObject(us);
                     goal.setPriority(4);
                     //System.out.println("better space found:"+distance);
                 }
             }
         }
-
-        if (goal != null && !agenda.checkExistists(goal)) {
+        if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
             this.addGoal(goal);
         }
     }
@@ -70,9 +70,9 @@ public class FoxAgent extends Agent {
     public void lookAround(int radius) {
         objAround.clear();
         for (Agent envObj : env.getAgents()) {
-            if (envObj instanceof RabbitAgent && envObj.getX() > (this.getX() - radius)
-                    && envObj.getX() < (this.getX() + radius) && envObj.getY() > (this.getY() - radius)
-                    && envObj.getY() < (this.getY() + radius)) {
+            if (envObj instanceof RabbitAgent && envObj.isAlive() && envObj.getX() >= (this.getX() - radius)
+                    && envObj.getX() <= (this.getX() + radius) && envObj.getY() >= (this.getY() - radius)
+                    && envObj.getY() <= (this.getY() + radius)) {
                 objAround.add(envObj);
             }
         }

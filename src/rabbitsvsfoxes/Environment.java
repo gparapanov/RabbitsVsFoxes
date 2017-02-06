@@ -64,7 +64,7 @@ public class Environment {
             FoxAgent fox = new FoxAgent(newX, newY, this);
             this.addEnvironmentObject(fox);
         }
-
+        System.out.println(envObjects.toString());
     }
 
     public void addAgent(Agent a) {

@@ -10,5 +10,6 @@ import rabbitsvsfoxes.Goals.Goal;
 public class Exploration extends Goal {
     public Exploration(EnvironmentObject goalObject) {
         this.setGoalObject(goalObject);
+        this.setPriority(4);
     }
 }
