@@ -43,9 +43,9 @@ public class RabbitAgent extends Agent {
         goal = new EatCarrot(null);
         int minDistance = 10000;
         int distance = 0;
-        if (!objAround.isEmpty()) {//there are carrots nearby
-            if (foxesAround.isEmpty()) {//no dangerous foxes
-                System.out.println("no foxes around, so i'm gonna eat that carrot");
+        if (foxesAround.isEmpty()) {//no dangerous foxes
+            if (!objAround.isEmpty()) {//there are carrots nearby
+                //System.out.println("no foxes around, so i'm gonna eat that carrot");
                 for (EnvironmentObject eo : objAround) {
                     if (true) {
                         if (env.getGui().getBehaviour() == 1) {
@@ -62,60 +62,61 @@ public class RabbitAgent extends Agent {
                         }
                     }
                 }
-            } else {//there are carrots and foxes around .i.e flee
-                boolean enemyL = false, enemyR = false, enemyU = false, enemyD = false;
-                //checks on which sides the enemies are, so that the direction too flee
-                //can be determined
-                System.out.println("there is a fox around");
-                for (FoxAgent fox : foxesAround) {
-                    if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
-                            && fox.getY() <= this.getY() + threatRadius
-                            && fox.getY() >= this.getY()) {
-                        enemyD = true;
-                        System.out.println("there is a fox down");
-                        //there is an enemy down
-                    } else if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
-                            && fox.getY() >= this.getY() - threatRadius
-                            && fox.getY() <= this.getY()) {
-                        enemyU = true;
-                        System.out.println("there is a fox up");
-                        //there is an enemy up
-                    } else if (fox.getX() <= this.getX() + threatRadius && fox.getX() >= this.getX()
-                            && fox.getY() <= this.getY() + 1
-                            && fox.getY() >= this.getY() - 1) {
-                        enemyR = true;
-                        System.out.println("there is a fox right");
-                        //enemy on the right
-                    } else if (fox.getX() <= this.getX() && fox.getX() >= this.getX() - threatRadius
-                            && fox.getY() <= this.getY() + 1
-                            && fox.getY() >= this.getY() - 1) {
-                        enemyL = true;
-                        System.out.println("there is a fox left");
-                        //enemy on the left
+            } else {
+                //start exploring
+                //System.out.println("no objects around - exploring");
+                goal = new Exploration(null);
+                if (toExplore.isEmpty()) {
+                    discoverExplorationSpaces();
+                }
+                for (UnexploredSpace us : toExplore) {
+                    //System.out.println("looking for spaces");
+                    distance = manhattanDistance(this, us);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        goal.setGoalObject(us);
+                        goal.setPriority(4);
+                        //System.out.println("better space found:"+distance);
                     }
                 }
-                //now figure out in which direction to go to avoid the threat
-                goal = new Flee(null);
-                goal.setGoalObject(determineFleeDirection(enemyU, enemyD, enemyR, enemyL));
-                System.out.println("running away!");
             }
         } else {
-            //start exploring
-            System.out.println("no objects around - exploring");
-            goal = new Exploration(null);
-            if (toExplore.isEmpty()) {
-                discoverExplorationSpaces();
-            }
-            for (UnexploredSpace us : toExplore) {
-                //System.out.println("looking for spaces");
-                distance = manhattanDistance(this, us);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    goal.setGoalObject(us);
-                    goal.setPriority(4);
-                    //System.out.println("better space found:"+distance);
+            //foxes around .i.e flee
+            boolean enemyL = false, enemyR = false, enemyU = false, enemyD = false;
+                //checks on which sides the enemies are, so that the direction too flee
+            //can be determined
+            System.out.println("there is a fox around");
+            for (FoxAgent fox : foxesAround) {
+                if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
+                        && fox.getY() <= this.getY() + threatRadius
+                        && fox.getY() >= this.getY()) {
+                    enemyD = true;
+                    System.out.println("there is a fox down");
+                    //there is an enemy down
+                } else if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
+                        && fox.getY() >= this.getY() - threatRadius
+                        && fox.getY() <= this.getY()) {
+                    enemyU = true;
+                    System.out.println("there is a fox up");
+                    //there is an enemy up
+                } else if (fox.getX() <= this.getX() + threatRadius && fox.getX() >= this.getX()
+                        && fox.getY() <= this.getY() + 1
+                        && fox.getY() >= this.getY() - 1) {
+                    enemyR = true;
+                    System.out.println("there is a fox right");
+                    //enemy on the right
+                } else if (fox.getX() <= this.getX() && fox.getX() >= this.getX() - threatRadius
+                        && fox.getY() <= this.getY() + 1
+                        && fox.getY() >= this.getY() - 1) {
+                    enemyL = true;
+                    System.out.println("there is a fox left");
+                    //enemy on the left
                 }
             }
+            //now figure out in which direction to go to avoid the threat
+            goal = new Flee(null);
+            goal.setGoalObject(determineFleeDirection(enemyU, enemyD, enemyR, enemyL));
+            System.out.println("running away!");
         }
         if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
             this.addGoal(goal);

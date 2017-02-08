@@ -33,7 +33,7 @@ public class FoxAgent extends Agent {
         Goal goal = new CatchRabbit(null);
         int distance = 0;
         if (!objAround.isEmpty()) {//there are objects around
-            System.out.println("there's sth around");
+            //System.out.println("there's sth around");
             for (EnvironmentObject eo : objAround) {
                 if (eo.isAlive()) {
                     distance = manhattanDistance(this, eo);
@@ -45,7 +45,7 @@ public class FoxAgent extends Agent {
                 }
             }
         } else {
-            System.out.println("no objects around - exploring");
+            //System.out.println("no objects around - exploring");
             goal = new Exploration(null);
             if (toExplore.isEmpty()) {
                 discoverExplorationSpaces();
