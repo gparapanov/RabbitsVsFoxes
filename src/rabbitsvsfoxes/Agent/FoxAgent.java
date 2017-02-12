@@ -11,7 +11,7 @@ import rabbitsvsfoxes.Carrot;
 import rabbitsvsfoxes.Goals.CatchRabbit;
 import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.EnvironmentObject;
-import rabbitsvsfoxes.Goals.Exploration;
+import rabbitsvsfoxes.Goals.Explore;
 import rabbitsvsfoxes.Goals.Goal;
 import rabbitsvsfoxes.UnexploredSpace;
 
@@ -46,7 +46,7 @@ public class FoxAgent extends Agent {
             }
         } else {
             //System.out.println("no objects around - exploring");
-            goal = new Exploration(null);
+            goal = new Explore(null);
             if (toExplore.isEmpty()) {
                 discoverExplorationSpaces();
             }

@@ -7,8 +7,8 @@ import rabbitsvsfoxes.Goals.Goal;
  *
  * @author Georgi
  */
-public class Exploration extends Goal {
-    public Exploration(EnvironmentObject goalObject) {
+public class Explore extends Goal {
+    public Explore(EnvironmentObject goalObject) {
         this.setGoalObject(goalObject);
         this.setPriority(4);
     }

@@ -14,6 +14,8 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 
@@ -182,7 +184,6 @@ public class RVFGui extends javax.swing.JFrame {
 //        }
 //        return foxes;
 //    }
-
 //    public int manhattanDistance(EnvironmentObject eo1, EnvironmentObject eo2) {
 //        //calculates manhattan distance between agent and objects nearby
 //        return Math.abs(eo2.getX() - eo1.getX()) + Math.abs(eo2.getY() - eo1.getY());
@@ -226,7 +227,6 @@ public class RVFGui extends javax.swing.JFrame {
 //
 //        return manhattanDistance(ag, eo);
 //    }
-
 //    private void findGoal(Agent a) {
 //        Goal goal = new Goal();
 //        if (a instanceof RabbitAgent) {
@@ -273,7 +273,6 @@ public class RVFGui extends javax.swing.JFrame {
 //        }
 //        //return goal;
 //    }
-
 //    public void moveTowardsGoal(Agent a, Goal g) {
 //        int goalX = g.getGoalObject().getX();
 //        int goalY = g.getGoalObject().getY();
@@ -374,7 +373,6 @@ public class RVFGui extends javax.swing.JFrame {
 //        }
 //
 //    }
-
     private void step() {
 //        for (Agent a : environment.getAgents()) {
 //            if (a.isAlive()) {
@@ -411,20 +409,27 @@ public class RVFGui extends javax.swing.JFrame {
         }
     }
 
+    public boolean getCarrotsRegenCheck() {
+        if (carrotsRegenCheck.isSelected()) {
+            return true;
+        }
+        return false;
+    }
+
     public void updateStatistics() {
         int rabbits = 0, foxes = 0, carrotsF = 0;
         Iterator<EnvironmentObject> iter = environment.getEnvObjects().iterator();
         while (iter.hasNext()) {
             EnvironmentObject eo = iter.next();
-                if (eo instanceof RabbitAgent) {
-                    rabbits++;
-                }
-                if (eo instanceof FoxAgent) {
-                    foxes++;
-                }
-                if (eo instanceof Carrot) {
-                    carrotsF++;
-                }
+            if (eo instanceof RabbitAgent) {
+                rabbits++;
+            }
+            if (eo instanceof FoxAgent) {
+                foxes++;
+            }
+            if (eo instanceof Carrot) {
+                carrotsF++;
+            }
         }
         rabbitsNumber.setText("" + rabbits);
         foxesNumber.setText("" + foxes);
@@ -461,6 +466,7 @@ public class RVFGui extends javax.swing.JFrame {
         agentTypeButton = new javax.swing.JMenu();
         goalDrivenOption = new javax.swing.JRadioButtonMenuItem();
         hybridOption = new javax.swing.JRadioButtonMenuItem();
+        carrotsRegenCheck = new javax.swing.JCheckBoxMenuItem();
         infoMenuButton = new javax.swing.JMenu();
         showStatsButton = new javax.swing.JMenuItem();
 
@@ -545,15 +551,24 @@ public class RVFGui extends javax.swing.JFrame {
         stopMenu.setText("Stop");
         jMenuBar1.add(stopMenu);
 
-        agentTypeButton.setText("Agent Type");
+        agentTypeButton.setText("Options");
 
         goalDrivenOption.setSelected(true);
         goalDrivenOption.setText("Purely Goal-Driven");
+        goalDrivenOption.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                goalDrivenOptionActionPerformed(evt);
+            }
+        });
         agentTypeButton.add(goalDrivenOption);
 
         hybridOption.setText("Hybrid");
         hybridOption.setToolTipText("");
         agentTypeButton.add(hybridOption);
+        agentTypeButton.add(new JSeparator(SwingConstants.HORIZONTAL));
+
+        carrotsRegenCheck.setText("Carrots Regeneration");
+        agentTypeButton.add(carrotsRegenCheck);
 
         jMenuBar1.add(agentTypeButton);
 
@@ -590,6 +605,10 @@ public class RVFGui extends javax.swing.JFrame {
         statisticsDialog.setVisible(true);
         statisticsDialog.setLocationRelativeTo(null);
     }//GEN-LAST:event_showStatsButtonActionPerformed
+
+    private void goalDrivenOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goalDrivenOptionActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_goalDrivenOptionActionPerformed
 
     /**
      * @param args the command line arguments
@@ -629,6 +648,7 @@ public class RVFGui extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu agentTypeButton;
     private javax.swing.JLabel carrotsNumber;
+    private javax.swing.JCheckBoxMenuItem carrotsRegenCheck;
     private javax.swing.JLabel foxesNumber;
     private javax.swing.JRadioButtonMenuItem goalDrivenOption;
     private javax.swing.JRadioButtonMenuItem hybridOption;

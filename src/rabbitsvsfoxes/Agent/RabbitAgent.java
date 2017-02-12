@@ -13,7 +13,7 @@ import rabbitsvsfoxes.Goals.EatCarrot;
 import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.EnvironmentObject;
 import rabbitsvsfoxes.FleeSpace;
-import rabbitsvsfoxes.Goals.Exploration;
+import rabbitsvsfoxes.Goals.Explore;
 import rabbitsvsfoxes.Goals.Flee;
 import rabbitsvsfoxes.Goals.Goal;
 import rabbitsvsfoxes.UnexploredSpace;
@@ -43,7 +43,8 @@ public class RabbitAgent extends Agent {
         goal = new EatCarrot(null);
         int minDistance = 10000;
         int distance = 0;
-        if (foxesAround.isEmpty()) {//no dangerous foxes
+        //if (foxesAround.isEmpty()) {//no dangerous foxes; flee ON
+        if (true) {//flee OFF
             if (!objAround.isEmpty()) {//there are carrots nearby
                 //System.out.println("no foxes around, so i'm gonna eat that carrot");
                 for (EnvironmentObject eo : objAround) {
@@ -65,7 +66,7 @@ public class RabbitAgent extends Agent {
             } else {
                 //start exploring
                 //System.out.println("no objects around - exploring");
-                goal = new Exploration(null);
+                goal = new Explore(null);
                 if (toExplore.isEmpty()) {
                     discoverExplorationSpaces();
                 }

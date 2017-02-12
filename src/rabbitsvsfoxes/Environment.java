@@ -25,6 +25,7 @@ public class Environment {
     private ArrayList<Carrot> carrots;
     private int size;
     private RVFGui gui;
+    private final int initialCarrots;
 
     public Environment(int size, int r, int f, int c, int b, RVFGui gui) {
         this.size = size;
@@ -32,7 +33,12 @@ public class Environment {
         this.envObjects = new LinkedHashSet();
         this.carrots = new ArrayList<>();
         this.gui = gui;
+        this.initialCarrots=c;
 
+        populateMap(r, f, c, b);//creates agents, carrots, bombs in the env
+    }
+
+    private void populateMap(int r, int f, int c, int b) {
         int newX, newY;
         for (int i = 0; i < c; i++) {//create carrots
             do {
@@ -102,19 +108,34 @@ public class Environment {
                 a.makeAStep();
             }
         }
-        
+        if(this.getGui().getCarrotsRegenCheck()){
+            regenerateCarrots();
+        }
+        cleanup();
     }
-    public void cleanup(){
-        ArrayList<EnvironmentObject>toRemove=new ArrayList<>();
-        Iterator<EnvironmentObject> iter = getEnvObjects().iterator();
+    
+    private void regenerateCarrots(){
+        int newX, newY;
+        for (int i = carrots.size(); i < initialCarrots; i++) {//create carrots
+            do {
+                newX = randomRange(0, size - 1);
+                newY = randomRange(0, size - 1);
+            } while (spaceOccupied(newX, newY) != null);
+            this.addEnvironmentObject(new Carrot(newX, newY));
+        }
+    }
+    
+    public void cleanup() {//remove dead agents from the collection
+        Iterator<Agent> iter = getAgents().iterator();
         while (iter.hasNext()) {
-            EnvironmentObject eo = iter.next();
-            if(!eo.isAlive()){
+            Agent eo = iter.next();
+            if (!eo.isAlive()) {
                 iter.remove();
             }
         }
-        
+
     }
+
     private int randomRange(int min, int max) {
         int range = Math.abs(max - min) + 1;
         return (int) (Math.random() * range) + (min <= max ? min : max);

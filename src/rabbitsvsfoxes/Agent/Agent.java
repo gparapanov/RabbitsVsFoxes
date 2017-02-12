@@ -11,7 +11,7 @@ import rabbitsvsfoxes.EnvironmentObject;
 import rabbitsvsfoxes.Communication.Message;
 import rabbitsvsfoxes.Goals.EatCarrot;
 import rabbitsvsfoxes.Environment;
-import rabbitsvsfoxes.Goals.Exploration;
+import rabbitsvsfoxes.Goals.Explore;
 import rabbitsvsfoxes.Goals.Goal;
 import rabbitsvsfoxes.UnexploredSpace;
 
@@ -213,7 +213,7 @@ public class Agent extends EnvironmentObject {
             agenda.removeTask(g);
             if (g instanceof CatchRabbit) {
                 System.out.println("fox ate rabbit");
-            } else if (g instanceof Exploration) {
+            } else if (g instanceof Explore) {
                 this.toExplore.remove(g.getGoalObject());
             }
             env.removeEnvironmentObject(g.getGoalObject());
