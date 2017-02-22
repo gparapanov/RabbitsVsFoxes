@@ -49,7 +49,7 @@ public class RVFGui extends javax.swing.JFrame {
         ActionListener listener = (ActionEvent event) -> {
             step();
         };
-        displayTimer = new Timer(500, listener);
+        displayTimer = new Timer(100, listener);
         //displayTimer.start();
 
         this.setContentPane(panel1);

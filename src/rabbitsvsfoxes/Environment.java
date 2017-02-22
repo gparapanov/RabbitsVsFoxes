@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import rabbitsvsfoxes.Agent.FoxAgent;
 import rabbitsvsfoxes.Agent.RabbitAgent;
+import rabbitsvsfoxes.Communication.*;
 
 /**
  *
@@ -26,6 +27,8 @@ public class Environment {
     private int size;
     private RVFGui gui;
     private final int initialCarrots;
+    private MessageGroup foxesGroup;
+    private MessageGroup rabbitsGroup;
 
     public Environment(int size, int r, int f, int c, int b, RVFGui gui) {
         this.size = size;
@@ -34,6 +37,8 @@ public class Environment {
         this.carrots = new ArrayList<>();
         this.gui = gui;
         this.initialCarrots=c;
+        this.foxesGroup=new MessageGroup();
+        this.rabbitsGroup=new MessageGroup();
 
         populateMap(r, f, c, b);//creates agents, carrots, bombs in the env
     }
@@ -85,14 +90,15 @@ public class Environment {
         envObjects.add(eo);
         if (eo instanceof Agent) {
             Agent a = (Agent) eo;
-            if (!agents.contains(a)) {
+           // if (!agents.contains(a)) {
                 agents.add(a);
-            }
+                
+            //}
         } else if (eo instanceof Carrot) {
             Carrot c = (Carrot) eo;
-            if (!carrots.contains(c)) {
+            //if (!carrots.contains(c)) {
                 carrots.add(c);
-            }
+            //}
         }
     }
 
@@ -104,9 +110,9 @@ public class Environment {
 
     public void step() {
         for (Agent a : getAgents()) {
-            if (a.isAlive()) {
-                a.makeAStep();
-            }
+            
+            a.makeAStep();
+            
         }
         if(this.getGui().getCarrotsRegenCheck()){
             regenerateCarrots();

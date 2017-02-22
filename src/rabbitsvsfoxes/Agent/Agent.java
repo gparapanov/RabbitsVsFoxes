@@ -48,7 +48,7 @@ public class Agent extends EnvironmentObject {
                 //System.out.println("will explore x:"+i+",y:"+j);
             }
         }
-        System.out.println(toExplore.toString());
+        //System.out.println(toExplore.toString());
     }
 
     public void move(Direction d) {
