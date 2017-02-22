@@ -111,6 +111,7 @@ public class Environment {
         if(this.getGui().getCarrotsRegenCheck()){
             regenerateCarrots();
         }
+        RabbitAgent.communityGoals.clear();
         cleanup();
     }
     

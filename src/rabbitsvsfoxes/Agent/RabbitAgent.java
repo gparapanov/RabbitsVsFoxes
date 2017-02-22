@@ -26,11 +26,13 @@ public class RabbitAgent extends Agent {
 
     private ArrayList<FoxAgent> foxesAround;
     private final int threatRadius = 5;
+    public static ArrayList<EnvironmentObject> communityGoals=new ArrayList<>();
 
     public RabbitAgent(int x, int y, Environment env) {
         super(x, y, env);
         this.setIcon(new ImageIcon("images/rabbit1.png", "Rabbit icon"));
         foxesAround = new ArrayList<>();
+        
     }
 
     public RabbitAgent() {
@@ -43,25 +45,26 @@ public class RabbitAgent extends Agent {
         goal = new EatCarrot(null);
         int minDistance = 10000;
         int distance = 0;
-        //if (foxesAround.isEmpty()) {//no dangerous foxes; flee ON
-        if (true) {//flee OFF
+        if (foxesAround.isEmpty()) {//no dangerous foxes; flee ON
+            //if (true) {//flee OFF
             if (!objAround.isEmpty()) {//there are carrots nearby
                 //System.out.println("no foxes around, so i'm gonna eat that carrot");
                 for (EnvironmentObject eo : objAround) {
-                    if (true) {
-                        if (env.getGui().getBehaviour() == 1) {
-                            distance = manhattanDistance(this, eo);
-                            //System.out.println("goal drive  ");
-                        } else {
-                            distance = evaluationFunction(this, eo);
-                            //System.out.println("hybrid ");
-                        }
-                        if (minDistance > distance) {
-                            minDistance = distance;
-                            goal.setGoalObject(eo);
-                            //System.out.println("found a carrot");
-                        }
+                    if (env.getGui().getBehaviour() == 1) {
+                        distance = manhattanDistance(this, eo);
+                        //System.out.println("goal drive  ");
+                    } else {
+                        distance = evaluationFunction(this, eo);
+                        //System.out.println("hybrid ");
                     }
+                    if (minDistance > distance && !communityGoals.contains(eo)) {
+                        minDistance = distance;
+                        goal.setGoalObject(eo);
+                        //System.out.println("found a carrot");
+                    }
+                }
+                if(goal.getGoalObject()!=null){
+                    communityGoals.add(goal.getGoalObject());
                 }
             } else {
                 //start exploring
@@ -84,7 +87,7 @@ public class RabbitAgent extends Agent {
         } else {
             //foxes around .i.e flee
             boolean enemyL = false, enemyR = false, enemyU = false, enemyD = false;
-                //checks on which sides the enemies are, so that the direction too flee
+            //checks on which sides the enemies are, so that the direction too flee
             //can be determined
             System.out.println("there is a fox around");
             for (FoxAgent fox : foxesAround) {
