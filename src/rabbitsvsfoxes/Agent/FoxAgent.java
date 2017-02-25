@@ -8,6 +8,9 @@ package rabbitsvsfoxes.Agent;
 import rabbitsvsfoxes.Agent.Agent;
 import javax.swing.ImageIcon;
 import rabbitsvsfoxes.Carrot;
+import rabbitsvsfoxes.Communication.Message;
+import rabbitsvsfoxes.Communication.MessageGroup;
+import rabbitsvsfoxes.Communication.MessageType;
 import rabbitsvsfoxes.Goals.CatchRabbit;
 import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.EnvironmentObject;
@@ -21,14 +24,24 @@ import rabbitsvsfoxes.UnexploredSpace;
  */
 public class FoxAgent extends Agent {
 
-    public FoxAgent(int x, int y, Environment env) {
-        super(x, y, env);
+    public FoxAgent(int x, int y, Environment env, MessageGroup mg) {
+        super(x, y, env,mg);
         this.setIcon(new ImageIcon("images/fox (1).png", "Fox icon"));
     }
 
     @Override
     public void findGoal() {
-        //System.out.println("fox looking for rabbbits");
+        System.out.println("my agenda contains: ");
+        for(Goal g:agenda.getTasks()){
+            
+            if(g instanceof CatchRabbit){
+                System.out.println("a rabbit with priority: "+g.getPriority());
+            }else if(g instanceof Explore){
+                System.out.println("exploration ");
+            }
+            
+        }
+        
         int minDistance = 1000;
         Goal goal = new CatchRabbit(null);
         int distance = 0;
@@ -61,11 +74,48 @@ public class FoxAgent extends Agent {
                 }
             }
         }
-        if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
+        if (goal.getGoalObject() != null && !agenda.checkExistists(goal)
+                && (agenda.getTop()!=null || !(agenda.getTop() instanceof CatchRabbit))) {
+            
+            //&& agenda.getTop()!=null && !(agenda.getTop() instanceof CatchRabbit) add this up
             this.addGoal(goal);
+            //If the goal is catch a rabbit, then the agent could message other foxes
+            //about the rabbit's location
+            if(goal instanceof CatchRabbit && env.getGui().getFoxesTeamwork()
+                    ){
+               // CatchRabbit teamGoal=new CatchRabbit(goal.getGoalObject());
+                goal.setPriority(6);
+                Message messageToSend=new Message(MessageType.RequestBackup,goal.getGoalObject());
+                myGroup.broadcastMessage(messageToSend);
+                System.out.println("asking for help");
+            }
         }
+        Goal postGoal=openPostbox();
+        if(postGoal!=null && !agenda.checkExistists(postGoal)){
+            //this.addGoal(postGoal);
+            this.agenda.getTasks().add(0,postGoal);
+            System.out.println("going for help");
+        }
+        if(!agenda.getTop().getGoalObject().isAlive()){
+            agenda.removeTop();
+        }
+            
     }
 
+    public Goal openPostbox(){
+        Message newestMessage=myGroup.getMessage(messagesReadIndex);
+        if(newestMessage!=null){//there is a valid message there
+            messagesReadIndex++;
+            if(newestMessage.getMsgType().equals(MessageType.RequestBackup)){
+                System.out.println("someone needs backup");
+                Goal teamGoal=new CatchRabbit(newestMessage.getTargetObject());
+                teamGoal.setPriority(6);
+                return teamGoal;
+            }
+        }
+        return null;
+    }
+    
     @Override
     public void lookAround(int radius) {
         objAround.clear();

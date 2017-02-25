@@ -12,12 +12,14 @@ import java.util.Iterator;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.TitledBorder;
 
 /**
  *
@@ -26,7 +28,7 @@ import javax.swing.border.BevelBorder;
 public class RVFGui extends javax.swing.JFrame {
 
     private final int RABBITS = 5;
-    private final int FOXES = 1;
+    private final int FOXES = 2;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
     private final int size = 45;
@@ -49,7 +51,7 @@ public class RVFGui extends javax.swing.JFrame {
         ActionListener listener = (ActionEvent event) -> {
             step();
         };
-        displayTimer = new Timer(100, listener);
+        displayTimer = new Timer(400, listener);
         //displayTimer.start();
 
         this.setContentPane(panel1);
@@ -172,224 +174,11 @@ public class RVFGui extends javax.swing.JFrame {
         labels.set(index, newLabel);
     }
 
-//    public ArrayList<Agent> foxesAtArea(int x, int y, int r) {
-//        ArrayList<Agent> foxes = new ArrayList<>();
-//        for (Agent ag : environment.getAgents()) {
-//            if (ag instanceof FoxAgent) {
-//                if (ag.getX() <= x + r && ag.getX() >= x - r && ag.getY() <= y + r
-//                        && ag.getY() >= y - r) {//means a fox is a threat
-//                    foxes.add(ag);
-//                }
-//            }
-//        }
-//        return foxes;
-//    }
-//    public int manhattanDistance(EnvironmentObject eo1, EnvironmentObject eo2) {
-//        //calculates manhattan distance between agent and objects nearby
-//        return Math.abs(eo2.getX() - eo1.getX()) + Math.abs(eo2.getY() - eo1.getY());
-//    }
-//
-//    public int diagonalDistance(EnvironmentObject eo1, EnvironmentObject eo2) {
-//        int xRad = Math.abs(eo1.getX() - eo2.getX());
-//        int yRad = Math.abs(eo1.getY() - eo2.getY());
-//        return Math.max(xRad, yRad);
-//    }
-//
-//    public int evaluationFunction(Agent ag, EnvironmentObject eo) {
-//        int result = 0, radius = (diagonalDistance(ag, eo) == 1 ? 2 : diagonalDistance(ag, eo));
-//
-//        ArrayList<Agent> closeFoxes = foxesAtArea(eo.getX(), eo.getY(), radius);
-//        if (!closeFoxes.isEmpty()) {
-//            for (Agent f : closeFoxes) {
-//                int dist = diagonalDistance(ag, f);
-//                switch (dist) {
-//                    case 1:
-//                        result += 55;
-//                        break;
-//                    case 2:
-//                        result += 40;
-//                        break;
-//                    case 3:
-//                        result += 30;
-//                        break;
-//                    case 4:
-//                        result += 15;
-//                        break;
-//                    default:
-//                        result += dist;
-//                        break;
-//                }
-//            }
-//            if (result > 0) {
-//                return result * manhattanDistance(ag, eo);
-//            }
-//        }
-//
-//        return manhattanDistance(ag, eo);
-//    }
-//    private void findGoal(Agent a) {
-//        Goal goal = new Goal();
-//        if (a instanceof RabbitAgent) {
-//            int minDistance = 10000;
-//            goal = new EatCarrot(null);
-//            int distance = 0;
-//            for (EnvironmentObject eo : environment.getEnvObjects()) {
-//                if (eo instanceof Carrot && eo.isAlive()) {
-//
-//                    if (getBehaviour()==1) {
-//                        distance = manhattanDistance(a, eo);
-//                        //System.out.println("goal drive  ");
-//                    } else {
-//                        distance = evaluationFunction(a, eo);
-//                        //System.out.println("hybrid ");
-//                    }
-//                    if (minDistance > distance) {
-//                        minDistance = distance;
-//                        goal.setGoalObject(eo);
-//                        //System.out.println("found a carrot");
-//                    }
-//                }
-//            }
-//            System.out.println("rabbit found carrot with score: " + minDistance);
-//        } else if (a instanceof FoxAgent) {//if it's a fox
-//            System.out.println("fox looking for rabbbits");
-//            int minDistance = 1000;
-//            goal = new CatchRabbit(null);
-//            int distance = 0;
-//            for (Agent ag : environment.getAgents()) {
-//                if (ag instanceof RabbitAgent && ag.isAlive()) {
-//                    distance = manhattanDistance(a, ag);
-//                    if (minDistance > distance) {
-//                        minDistance = distance;
-//                        goal.setGoalObject((RabbitAgent) ag);
-//                        //System.out.println("fox found " + goal.getGoalObject().getX());
-//                    }
-//                }
-//            }
-//
-//        }
-//        if (goal.getGoalObject() != null && !a.getAgenda().checkExistists(goal)) {
-//            a.addGoal(goal);
-//        }
-//        //return goal;
-//    }
-//    public void moveTowardsGoal(Agent a, Goal g) {
-//        int goalX = g.getGoalObject().getX();
-//        int goalY = g.getGoalObject().getY();
-//        int differenceX = Math.abs(goalX - a.getX());
-//        int differenceY = Math.abs(goalY - a.getY());
-//        EnvironmentObject desiredObject;
-//        if (a instanceof FoxAgent) {
-//            desiredObject = new RabbitAgent();
-//            System.out.println("fox roing to:" + goalX + " " + goalY);
-//        } else {
-//            desiredObject = new Carrot();
-//            System.out.println("rabbit roing to:" + goalX + " " + goalY);
-//        }
-//        if (differenceX == 1 && differenceY == 1) {
-//            if (goalX > a.getX() && goalY > a.getY()) {
-//                a.move(Direction.DOWNRIGHT);
-//            } else if (goalX > a.getX() && goalY < a.getY()) {
-//                a.move(Direction.UPRIGHT);
-//            } else if (goalX < a.getX() && goalY > a.getY()) {
-//                a.move(Direction.DOWNLEFT);
-//            } else {
-//                a.move(Direction.UPLEFT);
-//            }
-//        } else if (differenceX > differenceY) {//avoids 'dancing'
-//            if (goalX > a.getX()) {//if goal is on the right
-//                EnvironmentObject neighbour = environment.spaceOccupied(a.getX() + 1, a.getY());
-//                if (neighbour == null
-//                        || neighbour.getClass().equals(desiredObject.getClass())) {
-//                    a.move(Direction.RIGHT);
-//                } else if (goalY < a.getY() && environment.spaceOccupied(a.getX(), a.getY() - 1) == null
-//                        && a.getY() - 1 >= 0) {
-//                    a.move(Direction.UP);
-//                } else {
-//                    if (environment.spaceOccupied(a.getX(), a.getY() + 1) == null
-//                            && a.getY() + 1 < size) {
-//                        a.move(Direction.DOWN);
-//                    } else if (a.getX() - 1 >= 0 && environment.spaceOccupied(a.getX() - 1, a.getY()) == null) {
-//                        a.move(Direction.LEFT);
-//                    }
-//                }
-//            } else if (goalX < a.getX()) {//if goal is on the left
-//                if (environment.spaceOccupied(a.getX() - 1, a.getY()) == null
-//                        || environment.spaceOccupied(a.getX() - 1, a.getY()).getClass().equals(desiredObject.getClass())) {
-//                    a.move(Direction.LEFT);
-//                } else if (goalY < a.getY() && environment.spaceOccupied(a.getX(), a.getY() - 1) == null
-//                        && a.getY() - 1 >= 0) {
-//                    a.move(Direction.UP);
-//                } else {
-//                    if (environment.spaceOccupied(a.getX(), a.getY() + 1) == null
-//                            && a.getY() + 1 < size) {
-//                        a.move(Direction.DOWN);
-//                    } else if (a.getX() + 1 < size && environment.spaceOccupied(a.getX() + 1, a.getY()) == null) {
-//                        a.move(Direction.RIGHT);
-//                    }
-//                }
-//            }
-//        } else {
-//            if (goalY > a.getY()) {
-//                if (environment.spaceOccupied(a.getX(), a.getY() + 1) == null
-//                        || environment.spaceOccupied(a.getX(), a.getY() + 1).getClass().equals(desiredObject.getClass())) {
-//                    a.move(Direction.DOWN);
-//                } else if (goalX > a.getX() && environment.spaceOccupied(a.getX() + 1, a.getY()) == null
-//                        && a.getX() + 1 < size) {
-//                    a.move(Direction.RIGHT);
-//                } else {
-//                    if (environment.spaceOccupied(a.getX() - 1, a.getY()) == null
-//                            && a.getX() - 1 >= 0) {
-//                        a.move(Direction.LEFT);
-//                    } else if (a.getY() - 1 >= 0 && environment.spaceOccupied(a.getX(), a.getY() - 1) == null) {
-//                        a.move(Direction.UP);
-//                    }
-//                }
-//            } else if (goalY < a.getY()) {
-//                if (environment.spaceOccupied(a.getX(), a.getY() - 1) == null
-//                        || environment.spaceOccupied(a.getX(), a.getY() - 1).getClass().equals(desiredObject.getClass())) {
-//                    a.move(Direction.UP);
-//                } else if (goalX > a.getX() && environment.spaceOccupied(a.getX() + 1, a.getY()) == null
-//                        && a.getX() + 1 < size) {
-//                    a.move(Direction.RIGHT);
-//                } else {
-//                    if (environment.spaceOccupied(a.getX() - 1, a.getY()) == null
-//                            && a.getX() - 1 >= 0) {
-//                        a.move(Direction.LEFT);
-//                    } else if (a.getY() + 1 < size && environment.spaceOccupied(a.getX(), a.getY() + 1) == null) {
-//                        a.move(Direction.DOWN);
-//                    }
-//                }
-//            }
-//        }
-//        if (goalX == a.getX() && goalY == a.getY()) {//if on goal
-//            g.getGoalObject().setAlive(false);
-//            g.setCompleted(true);
-//            a.getAgenda().removeTask(g);
-//            if (g instanceof CatchRabbit) {
-//                System.out.println("fox ate rabbit");
-//            }
-//            //System.out.println("eaten" + agents.toString());
-//        }
-//
-//    }
+    public boolean getFoxesTeamwork() {
+        return foxesTeamwork.isSelected();
+    }
+
     private void step() {
-//        for (Agent a : environment.getAgents()) {
-//            if (a.isAlive()) {
-//                a.makeAStep();
-////                findGoal(a);
-////                Goal curGoal = a.getAgenda().getTop();
-////                if (curGoal == null) {
-////                    displayTimer.stop();
-////                    System.out.println("Game Over!");
-////                } else {
-////                    moveTowardsGoal(a, curGoal);
-////                }
-//            }
-////            int goalX = goal.getGoalObject().getX(),
-////                    goalY = goal.getGoalObject().getY();
-////            System.out.println("going to " + goalX + " " + goalY);
-//        }
         environment.step();
         redrawField();
         updateStatistics();
@@ -467,6 +256,7 @@ public class RVFGui extends javax.swing.JFrame {
         goalDrivenOption = new javax.swing.JRadioButtonMenuItem();
         hybridOption = new javax.swing.JRadioButtonMenuItem();
         carrotsRegenCheck = new javax.swing.JCheckBoxMenuItem();
+        foxesTeamwork = new javax.swing.JCheckBoxMenuItem();
         infoMenuButton = new javax.swing.JMenu();
         showStatsButton = new javax.swing.JMenuItem();
 
@@ -569,6 +359,10 @@ public class RVFGui extends javax.swing.JFrame {
 
         carrotsRegenCheck.setText("Carrots Regeneration");
         agentTypeButton.add(carrotsRegenCheck);
+        agentTypeButton.add(new JSeparator(SwingConstants.HORIZONTAL));
+
+        foxesTeamwork.setText("Foxes Teamwork");
+        agentTypeButton.add(foxesTeamwork);
 
         jMenuBar1.add(agentTypeButton);
 
@@ -650,6 +444,7 @@ public class RVFGui extends javax.swing.JFrame {
     private javax.swing.JLabel carrotsNumber;
     private javax.swing.JCheckBoxMenuItem carrotsRegenCheck;
     private javax.swing.JLabel foxesNumber;
+    private javax.swing.JCheckBoxMenuItem foxesTeamwork;
     private javax.swing.JRadioButtonMenuItem goalDrivenOption;
     private javax.swing.JRadioButtonMenuItem hybridOption;
     private javax.swing.JMenu infoMenuButton;

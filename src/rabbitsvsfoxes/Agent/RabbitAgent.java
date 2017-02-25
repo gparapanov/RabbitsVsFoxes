@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.ImageIcon;
 import rabbitsvsfoxes.Carrot;
+import rabbitsvsfoxes.Communication.MessageGroup;
 import rabbitsvsfoxes.Direction;
 import rabbitsvsfoxes.Goals.EatCarrot;
 import rabbitsvsfoxes.Environment;
@@ -28,12 +29,13 @@ public class RabbitAgent extends Agent {
     private ArrayList<FoxAgent> foxesAround;
     private final int threatRadius = 5;
     public static ArrayList<EnvironmentObject> communityGoals = new ArrayList<>();
+    
 
-    public RabbitAgent(int x, int y, Environment env) {
-        super(x, y, env);
+    public RabbitAgent(int x, int y, Environment env,MessageGroup mg) {
+        super(x, y, env,mg);
         this.setIcon(new ImageIcon("images/rabbit1.png", "Rabbit icon"));
         foxesAround = new ArrayList<>();
-
+        
     }
 
     public RabbitAgent() {
@@ -88,38 +90,38 @@ public class RabbitAgent extends Agent {
             boolean enemyL = false, enemyR = false, enemyU = false, enemyD = false;
             //checks on which sides the enemies are, so that the direction too flee
             //can be determined
-            System.out.println("there is a fox around");
+            //System.out.println("there is a fox around");
             for (FoxAgent fox : foxesAround) {
                 if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
                         && fox.getY() <= this.getY() + threatRadius
                         && fox.getY() >= this.getY()) {
                     enemyD = true;
-                    System.out.println("there is a fox down");
+                    //System.out.println("there is a fox down");
                     //there is an enemy down
                 } else if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
                         && fox.getY() >= this.getY() - threatRadius
                         && fox.getY() <= this.getY()) {
                     enemyU = true;
-                    System.out.println("there is a fox up");
+                    //System.out.println("there is a fox up");
                     //there is an enemy up
                 } else if (fox.getX() <= this.getX() + threatRadius && fox.getX() >= this.getX()
                         && fox.getY() <= this.getY() + 1
                         && fox.getY() >= this.getY() - 1) {
                     enemyR = true;
-                    System.out.println("there is a fox right");
+                    //System.out.println("there is a fox right");
                     //enemy on the right
                 } else if (fox.getX() <= this.getX() && fox.getX() >= this.getX() - threatRadius
                         && fox.getY() <= this.getY() + 1
                         && fox.getY() >= this.getY() - 1) {
                     enemyL = true;
-                    System.out.println("there is a fox left");
+                    //System.out.println("there is a fox left");
                     //enemy on the left
                 }
             }
             //now figure out in which direction to go to avoid the threat
             goal = new Flee(null);
             goal.setGoalObject(determineFleeDirection(enemyU, enemyD, enemyR, enemyL));
-            System.out.println("running away!");
+            //System.out.println("running away!");
         }
         if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
             if (!communityGoals.contains(goal.getGoalObject())) {

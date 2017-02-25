@@ -9,6 +9,7 @@ import rabbitsvsfoxes.Goals.CatchRabbit;
 import rabbitsvsfoxes.Direction;
 import rabbitsvsfoxes.EnvironmentObject;
 import rabbitsvsfoxes.Communication.Message;
+import rabbitsvsfoxes.Communication.MessageGroup;
 import rabbitsvsfoxes.Goals.EatCarrot;
 import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.Goals.Explore;
@@ -27,13 +28,16 @@ public class Agent extends EnvironmentObject {
     protected Environment env;
     protected ArrayList<EnvironmentObject> objAround;
     protected ArrayList<UnexploredSpace> toExplore;
+    protected MessageGroup myGroup;
+    protected int messagesReadIndex=0;
 
-    public Agent(int x, int y, Environment env) {
+    public Agent(int x, int y, Environment env,MessageGroup mg) {
         super(x, y);
         this.env = env;
         this.agenda = new Agenda();
         this.objAround = new ArrayList<>();
         this.toExplore = new ArrayList<>();
+        myGroup=mg;
         discoverExplorationSpaces();
     }
 
@@ -212,7 +216,7 @@ public class Agent extends EnvironmentObject {
             g.setCompleted(true);
             agenda.removeTask(g);
             if (g instanceof CatchRabbit) {
-                System.out.println("fox ate rabbit");
+                //System.out.println("fox ate rabbit");
             } else if (g instanceof Explore) {
                 this.toExplore.remove(g.getGoalObject());
             }

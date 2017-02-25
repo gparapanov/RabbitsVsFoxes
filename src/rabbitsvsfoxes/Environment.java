@@ -64,7 +64,7 @@ public class Environment {
                 newX = randomRange(0, size - 1);
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
-            RabbitAgent rabbit = new RabbitAgent(newX, newY, this);
+            RabbitAgent rabbit = new RabbitAgent(newX, newY, this,rabbitsGroup);
             this.addEnvironmentObject(rabbit);
         }
         for (int i = 0; i < f; i++) {//create foxes
@@ -72,7 +72,7 @@ public class Environment {
                 newX = randomRange(0, size - 1);
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
-            FoxAgent fox = new FoxAgent(newX, newY, this);
+            FoxAgent fox = new FoxAgent(newX, newY, this,foxesGroup);
             this.addEnvironmentObject(fox);
         }
         System.out.println(envObjects.toString());
@@ -92,7 +92,11 @@ public class Environment {
             Agent a = (Agent) eo;
            // if (!agents.contains(a)) {
                 agents.add(a);
-                
+                if(a instanceof RabbitAgent){
+                    rabbitsGroup.addMember(a);
+                }else{
+                    foxesGroup.addMember(a);
+                }
             //}
         } else if (eo instanceof Carrot) {
             Carrot c = (Carrot) eo;

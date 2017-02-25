@@ -20,8 +20,22 @@ public class MessageGroup {
         members.add(a);
     }
     
-    public void addBroadcastedMessage(Message m){
+    public void broadcastMessage(Message m){
         groupMessages.add(m);
+    }
+    /**
+     * Method returns a Message object at a specified position (index) if it exists,
+     * or a null object if there is no such message.
+     * 
+     * @param index
+     * @return 
+     */
+    public Message getMessage(int index){
+        if(index<groupMessages.size()){
+            return groupMessages.get(index);
+        }else{
+            return null;
+        }
     }
     
     
