@@ -75,14 +75,13 @@ public class FoxAgent extends Agent {
             }
         }
         if (goal.getGoalObject() != null && !agenda.checkExistists(goal)
-                && (agenda.getTop()!=null || !(agenda.getTop() instanceof CatchRabbit))) {
+                &&!(agenda.getTop() instanceof CatchRabbit)) {
             
             //&& agenda.getTop()!=null && !(agenda.getTop() instanceof CatchRabbit) add this up
             this.addGoal(goal);
             //If the goal is catch a rabbit, then the agent could message other foxes
             //about the rabbit's location
-            if(goal instanceof CatchRabbit && env.getGui().getFoxesTeamwork()
-                    ){
+            if(goal instanceof CatchRabbit && env.getGui().getFoxesTeamwork()){
                // CatchRabbit teamGoal=new CatchRabbit(goal.getGoalObject());
                 goal.setPriority(6);
                 Message messageToSend=new Message(MessageType.RequestBackup,goal.getGoalObject());
@@ -90,10 +89,17 @@ public class FoxAgent extends Agent {
                 System.out.println("asking for help");
             }
         }
+        //open the postbox to check if there are any messages
         Goal postGoal=openPostbox();
+        //if there is a valid message there and the goal is not already in the
+        //agenda, then add it and remove other targeted rabbits
         if(postGoal!=null && !agenda.checkExistists(postGoal)){
+            
             //this.addGoal(postGoal);
-            this.agenda.getTasks().add(0,postGoal);
+            if(agenda.getTop() !=null){
+                agenda.removeTop();
+            }
+            this.agenda.getTasks().add(postGoal);
             System.out.println("going for help");
         }
         if(!agenda.getTop().getGoalObject().isAlive()){

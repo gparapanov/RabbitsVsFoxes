@@ -27,8 +27,8 @@ import javax.swing.border.TitledBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
-    private final int RABBITS = 5;
-    private final int FOXES = 2;
+    private final int RABBITS = 10;
+    private final int FOXES = 5;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
     private final int size = 45;
@@ -51,7 +51,7 @@ public class RVFGui extends javax.swing.JFrame {
         ActionListener listener = (ActionEvent event) -> {
             step();
         };
-        displayTimer = new Timer(400, listener);
+        displayTimer = new Timer(200, listener);
         //displayTimer.start();
 
         this.setContentPane(panel1);
