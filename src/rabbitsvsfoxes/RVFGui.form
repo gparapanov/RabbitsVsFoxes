@@ -152,9 +152,14 @@
                 <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="agentTypeButton.add(new JSeparator(SwingConstants.HORIZONTAL));"/>
               </AuxValues>
             </MenuItem>
-            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="foxesTeamwork">
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="foxesTeamwork1">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Foxes Teamwork"/>
+                <Property name="text" type="java.lang.String" value="Foxes - All for one"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="foxesTeamwork2">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Foxes - Ambush"/>
               </Properties>
             </MenuItem>
           </SubComponents>

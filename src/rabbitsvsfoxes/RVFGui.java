@@ -27,8 +27,8 @@ import javax.swing.border.TitledBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
-    private final int RABBITS = 10;
-    private final int FOXES = 5;
+    private final int RABBITS = 7;
+    private final int FOXES = 3;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
     private final int size = 45;
@@ -51,7 +51,7 @@ public class RVFGui extends javax.swing.JFrame {
         ActionListener listener = (ActionEvent event) -> {
             step();
         };
-        displayTimer = new Timer(200, listener);
+        displayTimer = new Timer(500, listener);
         //displayTimer.start();
 
         this.setContentPane(panel1);
@@ -174,8 +174,12 @@ public class RVFGui extends javax.swing.JFrame {
         labels.set(index, newLabel);
     }
 
-    public boolean getFoxesTeamwork() {
-        return foxesTeamwork.isSelected();
+    public boolean getFoxesTeamwork1() {
+        return foxesTeamwork1.isSelected();
+    }
+    
+    public boolean getFoxesTeamwork2() {
+        return foxesTeamwork2.isSelected();
     }
 
     private void step() {
@@ -256,7 +260,8 @@ public class RVFGui extends javax.swing.JFrame {
         goalDrivenOption = new javax.swing.JRadioButtonMenuItem();
         hybridOption = new javax.swing.JRadioButtonMenuItem();
         carrotsRegenCheck = new javax.swing.JCheckBoxMenuItem();
-        foxesTeamwork = new javax.swing.JCheckBoxMenuItem();
+        foxesTeamwork1 = new javax.swing.JCheckBoxMenuItem();
+        foxesTeamwork2 = new javax.swing.JCheckBoxMenuItem();
         infoMenuButton = new javax.swing.JMenu();
         showStatsButton = new javax.swing.JMenuItem();
 
@@ -361,8 +366,11 @@ public class RVFGui extends javax.swing.JFrame {
         agentTypeButton.add(carrotsRegenCheck);
         agentTypeButton.add(new JSeparator(SwingConstants.HORIZONTAL));
 
-        foxesTeamwork.setText("Foxes Teamwork");
-        agentTypeButton.add(foxesTeamwork);
+        foxesTeamwork1.setText("Foxes - All for one");
+        agentTypeButton.add(foxesTeamwork1);
+
+        foxesTeamwork2.setText("Foxes - Ambush");
+        agentTypeButton.add(foxesTeamwork2);
 
         jMenuBar1.add(agentTypeButton);
 
@@ -444,7 +452,8 @@ public class RVFGui extends javax.swing.JFrame {
     private javax.swing.JLabel carrotsNumber;
     private javax.swing.JCheckBoxMenuItem carrotsRegenCheck;
     private javax.swing.JLabel foxesNumber;
-    private javax.swing.JCheckBoxMenuItem foxesTeamwork;
+    private javax.swing.JCheckBoxMenuItem foxesTeamwork1;
+    private javax.swing.JCheckBoxMenuItem foxesTeamwork2;
     private javax.swing.JRadioButtonMenuItem goalDrivenOption;
     private javax.swing.JRadioButtonMenuItem hybridOption;
     private javax.swing.JMenu infoMenuButton;

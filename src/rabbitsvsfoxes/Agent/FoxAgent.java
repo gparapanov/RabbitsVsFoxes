@@ -11,6 +11,7 @@ import rabbitsvsfoxes.Carrot;
 import rabbitsvsfoxes.Communication.Message;
 import rabbitsvsfoxes.Communication.MessageGroup;
 import rabbitsvsfoxes.Communication.MessageType;
+import rabbitsvsfoxes.Direction;
 import rabbitsvsfoxes.Goals.CatchRabbit;
 import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.EnvironmentObject;
@@ -25,23 +26,23 @@ import rabbitsvsfoxes.UnexploredSpace;
 public class FoxAgent extends Agent {
 
     public FoxAgent(int x, int y, Environment env, MessageGroup mg) {
-        super(x, y, env,mg);
+        super(x, y, env, mg);
         this.setIcon(new ImageIcon("images/fox (1).png", "Fox icon"));
     }
 
     @Override
     public void findGoal() {
         System.out.println("my agenda contains: ");
-        for(Goal g:agenda.getTasks()){
-            
-            if(g instanceof CatchRabbit){
-                System.out.println("a rabbit with priority: "+g.getPriority());
-            }else if(g instanceof Explore){
+        for (Goal g : agenda.getTasks()) {
+
+            if (g instanceof CatchRabbit) {
+                System.out.println("a rabbit with priority: " + g.getPriority());
+            } else if (g instanceof Explore) {
                 System.out.println("exploration ");
             }
-            
+
         }
-        
+
         int minDistance = 1000;
         Goal goal = new CatchRabbit(null);
         int distance = 0;
@@ -63,7 +64,7 @@ public class FoxAgent extends Agent {
             if (toExplore.isEmpty()) {
                 discoverExplorationSpaces();
             }
-            
+
             for (UnexploredSpace us : toExplore) {
                 distance = manhattanDistance(this, us);
                 if (distance < minDistance) {
@@ -75,53 +76,120 @@ public class FoxAgent extends Agent {
             }
         }
         if (goal.getGoalObject() != null && !agenda.checkExistists(goal)
-                &&!(agenda.getTop() instanceof CatchRabbit)) {
-            
+                && !(agenda.getTop() instanceof CatchRabbit)) {
+
             //&& agenda.getTop()!=null && !(agenda.getTop() instanceof CatchRabbit) add this up
             this.addGoal(goal);
             //If the goal is catch a rabbit, then the agent could message other foxes
             //about the rabbit's location
-            if(goal instanceof CatchRabbit && env.getGui().getFoxesTeamwork()){
-               // CatchRabbit teamGoal=new CatchRabbit(goal.getGoalObject());
-                goal.setPriority(6);
-                Message messageToSend=new Message(MessageType.RequestBackup,goal.getGoalObject());
-                myGroup.broadcastMessage(messageToSend);
-                System.out.println("asking for help");
+            if (goal instanceof CatchRabbit) {
+                // CatchRabbit teamGoal=new CatchRabbit(goal.getGoalObject());
+                if (env.getGui().getFoxesTeamwork1()) {
+                    //this is teamwork type 1 in which all foxes go after the same  rabbit
+                    goal.setPriority(6);
+                    Message messageToSend = new Message(MessageType.RequestBackup, goal.getGoalObject());
+                    myGroup.broadcastMessage(messageToSend);
+                    System.out.println("asking for help");
+                } else if (env.getGui().getFoxesTeamwork2()) {
+                    //this is teamwork type 2, in which a fox asks for an ambush 
+                    //for a rabbit it is chasing
+                    goal.setPriority(6);
+                    RabbitAgent targetAgent = (RabbitAgent) goal.getGoalObject();
+                    Direction d = directionToObject(targetAgent);
+
+                    Message messageToSend = new Message(MessageType.RequestAmbush, goal.getGoalObject(), d);
+                    myGroup.broadcastMessage(messageToSend);
+                    System.out.println("asking for ambush");
+                }
+
             }
         }
         //open the postbox to check if there are any messages
-        Goal postGoal=openPostbox();
+        Goal postGoal = openPostbox();
         //if there is a valid message there and the goal is not already in the
         //agenda, then add it and remove other targeted rabbits
-        if(postGoal!=null && !agenda.checkExistists(postGoal)){
-            
-            //this.addGoal(postGoal);
-            if(agenda.getTop() !=null){
+        if (postGoal != null && !agenda.checkExistists(postGoal)) {
+            if (agenda.getTop() != null) {
+                //If the agent has something else to - do remove it -
+                //this is done to avoid keeping a reference another rabbit and
+                //making sure that the foxes won't go after it unless it can see it.
                 agenda.removeTop();
             }
-            this.agenda.getTasks().add(postGoal);
+            this.addGoal(postGoal);
+            //this.agenda.getTasks().add(postGoal);
             System.out.println("going for help");
         }
-        if(!agenda.getTop().getGoalObject().isAlive()){
+        if (!agenda.getTop().getGoalObject().isAlive()) {
             agenda.removeTop();
         }
-            
+
     }
 
-    public Goal openPostbox(){
-        Message newestMessage=myGroup.getMessage(messagesReadIndex);
-        if(newestMessage!=null){//there is a valid message there
+    public Goal openPostbox() {
+        Message newestMessage = myGroup.getMessage(messagesReadIndex);
+        if (newestMessage != null) {//there is a valid message there
             messagesReadIndex++;
-            if(newestMessage.getMsgType().equals(MessageType.RequestBackup)){
-                System.out.println("someone needs backup");
-                Goal teamGoal=new CatchRabbit(newestMessage.getTargetObject());
+            if (newestMessage.getMsgType().equals(MessageType.RequestBackup)) {
+                System.out.println("someone needs backup I can go and help");
+                Goal teamGoal = new CatchRabbit(newestMessage.getTargetObject());
                 teamGoal.setPriority(6);
                 return teamGoal;
+            } else if (newestMessage.getMsgType().equals(MessageType.RequestAmbush)) {
+                System.out.println("someone has requested an ambush");
+                /*
+                 Conditions that need to be satisfied in order for the ambush to work.
+                 E.g. if the sender of the message fox is chasing a rabbit and 
+                 they are both going to the right, the recipient has to be
+                 on their right so that it can go left to catch the rabbit. The
+                 effect will be both foxes going in opposite direction, thus leaving
+                 less space for the rabbit to run away.
+                 */
+                boolean condition1 = newestMessage.getDirectionToTarget() == Direction.RIGHT
+                        && directionToObject(newestMessage.getTargetObject()) == Direction.LEFT;
+                boolean condition2 = newestMessage.getDirectionToTarget() == Direction.LEFT
+                        && directionToObject(newestMessage.getTargetObject()) == Direction.RIGHT;
+                boolean condition3 = newestMessage.getDirectionToTarget() == Direction.UP
+                        && directionToObject(newestMessage.getTargetObject()) == Direction.DOWN;
+                boolean condition4 = newestMessage.getDirectionToTarget() == Direction.DOWN
+                        && directionToObject(newestMessage.getTargetObject()) == Direction.UP;
+                if (condition1 || condition2 || condition3 || condition4) {
+                    Goal teamGoal = new CatchRabbit(newestMessage.getTargetObject());
+                    teamGoal.setPriority(6);
+                    return teamGoal;
+                }
             }
         }
         return null;
     }
-    
+
+    public Direction directionToObject(EnvironmentObject targetAgent) {
+        int differenceX = Math.abs(targetAgent.getX() - this.getX());
+        int differenceY = Math.abs(targetAgent.getY() - this.getY());
+        //figure out in which direction is the chase going
+        if (differenceX > differenceY) {
+            if (targetAgent.getX() > this.getX()) {
+                return Direction.RIGHT;
+            } else if (targetAgent.getX() < this.getX()) {
+                return Direction.LEFT;
+            } else if (targetAgent.getY() < this.getY()) {
+                return Direction.UP;
+            } else {
+                return Direction.DOWN;
+            }
+        } else {
+            if (targetAgent.getY() < this.getY()) {
+                return Direction.UP;
+            } else if (targetAgent.getY() > this.getY()) {
+                return Direction.DOWN;
+            } else if (targetAgent.getX() > this.getX()) {
+                return Direction.RIGHT;
+            } else {
+                return Direction.LEFT;
+            }
+        }
+
+    }
+
     @Override
     public void lookAround(int radius) {
         objAround.clear();
