@@ -166,7 +166,7 @@ public class FoxAgent extends Agent {
         int differenceX = Math.abs(targetAgent.getX() - this.getX());
         int differenceY = Math.abs(targetAgent.getY() - this.getY());
         //figure out in which direction is the chase going
-        if (differenceX > differenceY) {
+        if (differenceX >= differenceY) {
             if (targetAgent.getX() > this.getX()) {
                 return Direction.RIGHT;
             } else if (targetAgent.getX() < this.getX()) {

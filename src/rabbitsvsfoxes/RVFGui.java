@@ -27,8 +27,8 @@ import javax.swing.border.TitledBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
-    private final int RABBITS = 7;
-    private final int FOXES = 3;
+    private final int RABBITS = 10;
+    private final int FOXES = 5;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
     private final int size = 45;
@@ -40,6 +40,7 @@ public class RVFGui extends javax.swing.JFrame {
     private final Color backgroundC = Color.decode("#169B08");
     private Timer displayTimer;
     private ButtonGroup agentBehaviourGroup;
+    private ButtonGroup speedButtonGroup;
     private Environment environment;
 
     public RVFGui() {
@@ -52,6 +53,7 @@ public class RVFGui extends javax.swing.JFrame {
             step();
         };
         displayTimer = new Timer(500, listener);
+        
         //displayTimer.start();
 
         this.setContentPane(panel1);
@@ -63,7 +65,12 @@ public class RVFGui extends javax.swing.JFrame {
         agentBehaviourGroup = new ButtonGroup();
         agentBehaviourGroup.add(this.goalDrivenOption);
         agentBehaviourGroup.add(this.hybridOption);
-        //hybridOption.setSelected(true);
+        
+        speedButtonGroup = new ButtonGroup();
+        speedButtonGroup.add(fastRB);
+        speedButtonGroup.add(veryFastRB);
+        speedButtonGroup.add(normalRB);
+        speedButtonGroup.add(slowRB);
 
         startMenu.addMouseListener(new MouseListener() {
 
@@ -253,15 +260,20 @@ public class RVFGui extends javax.swing.JFrame {
         carrotsNumber = new javax.swing.JLabel();
         jMenuItem1 = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
-        jMenuBar1 = new javax.swing.JMenuBar();
+        menuBar = new javax.swing.JMenuBar();
         startMenu = new javax.swing.JMenu();
         stopMenu = new javax.swing.JMenu();
-        agentTypeButton = new javax.swing.JMenu();
+        optionsButton = new javax.swing.JMenu();
         goalDrivenOption = new javax.swing.JRadioButtonMenuItem();
         hybridOption = new javax.swing.JRadioButtonMenuItem();
         carrotsRegenCheck = new javax.swing.JCheckBoxMenuItem();
         foxesTeamwork1 = new javax.swing.JCheckBoxMenuItem();
         foxesTeamwork2 = new javax.swing.JCheckBoxMenuItem();
+        speedMenu = new javax.swing.JMenu();
+        veryFastRB = new javax.swing.JRadioButtonMenuItem();
+        fastRB = new javax.swing.JRadioButtonMenuItem();
+        normalRB = new javax.swing.JRadioButtonMenuItem();
+        slowRB = new javax.swing.JRadioButtonMenuItem();
         infoMenuButton = new javax.swing.JMenu();
         showStatsButton = new javax.swing.JMenuItem();
 
@@ -341,12 +353,12 @@ public class RVFGui extends javax.swing.JFrame {
         );
 
         startMenu.setText("Start");
-        jMenuBar1.add(startMenu);
+        menuBar.add(startMenu);
 
         stopMenu.setText("Stop");
-        jMenuBar1.add(stopMenu);
+        menuBar.add(stopMenu);
 
-        agentTypeButton.setText("Options");
+        optionsButton.setText("Options");
 
         goalDrivenOption.setSelected(true);
         goalDrivenOption.setText("Purely Goal-Driven");
@@ -355,24 +367,66 @@ public class RVFGui extends javax.swing.JFrame {
                 goalDrivenOptionActionPerformed(evt);
             }
         });
-        agentTypeButton.add(goalDrivenOption);
+        optionsButton.add(goalDrivenOption);
 
         hybridOption.setText("Hybrid");
         hybridOption.setToolTipText("");
-        agentTypeButton.add(hybridOption);
-        agentTypeButton.add(new JSeparator(SwingConstants.HORIZONTAL));
+        hybridOption.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hybridOptionActionPerformed(evt);
+            }
+        });
+        optionsButton.add(hybridOption);
+        optionsButton.add(new JSeparator(SwingConstants.HORIZONTAL));
 
         carrotsRegenCheck.setText("Carrots Regeneration");
-        agentTypeButton.add(carrotsRegenCheck);
-        agentTypeButton.add(new JSeparator(SwingConstants.HORIZONTAL));
+        optionsButton.add(carrotsRegenCheck);
+        optionsButton.add(new JSeparator(SwingConstants.HORIZONTAL));
 
         foxesTeamwork1.setText("Foxes - All for one");
-        agentTypeButton.add(foxesTeamwork1);
+        optionsButton.add(foxesTeamwork1);
 
         foxesTeamwork2.setText("Foxes - Ambush");
-        agentTypeButton.add(foxesTeamwork2);
+        optionsButton.add(foxesTeamwork2);
 
-        jMenuBar1.add(agentTypeButton);
+        menuBar.add(optionsButton);
+
+        speedMenu.setText("Speed");
+
+        veryFastRB.setText("Very Fast");
+        veryFastRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                veryFastRBActionPerformed(evt);
+            }
+        });
+        speedMenu.add(veryFastRB);
+
+        fastRB.setText("Fast");
+        fastRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fastRBActionPerformed(evt);
+            }
+        });
+        speedMenu.add(fastRB);
+
+        normalRB.setSelected(true);
+        normalRB.setText("Normal");
+        normalRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                normalRBActionPerformed(evt);
+            }
+        });
+        speedMenu.add(normalRB);
+
+        slowRB.setText("Slow");
+        slowRB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                slowRBActionPerformed(evt);
+            }
+        });
+        speedMenu.add(slowRB);
+
+        menuBar.add(speedMenu);
 
         infoMenuButton.setText("Info");
         infoMenuButton.setToolTipText("");
@@ -385,9 +439,9 @@ public class RVFGui extends javax.swing.JFrame {
         });
         infoMenuButton.add(showStatsButton);
 
-        jMenuBar1.add(infoMenuButton);
+        menuBar.add(infoMenuButton);
 
-        setJMenuBar(jMenuBar1);
+        setJMenuBar(menuBar);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -411,6 +465,26 @@ public class RVFGui extends javax.swing.JFrame {
     private void goalDrivenOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goalDrivenOptionActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_goalDrivenOptionActionPerformed
+
+    private void hybridOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hybridOptionActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_hybridOptionActionPerformed
+
+    private void veryFastRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_veryFastRBActionPerformed
+        displayTimer.setDelay(100);
+    }//GEN-LAST:event_veryFastRBActionPerformed
+
+    private void fastRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fastRBActionPerformed
+        displayTimer.setDelay(300);
+    }//GEN-LAST:event_fastRBActionPerformed
+
+    private void normalRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_normalRBActionPerformed
+        displayTimer.setDelay(500);
+    }//GEN-LAST:event_normalRBActionPerformed
+
+    private void slowRBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_slowRBActionPerformed
+        displayTimer.setDelay(700);
+    }//GEN-LAST:event_slowRBActionPerformed
 
     /**
      * @param args the command line arguments
@@ -448,9 +522,9 @@ public class RVFGui extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu agentTypeButton;
     private javax.swing.JLabel carrotsNumber;
     private javax.swing.JCheckBoxMenuItem carrotsRegenCheck;
+    private javax.swing.JRadioButtonMenuItem fastRB;
     private javax.swing.JLabel foxesNumber;
     private javax.swing.JCheckBoxMenuItem foxesTeamwork1;
     private javax.swing.JCheckBoxMenuItem foxesTeamwork2;
@@ -461,13 +535,18 @@ public class RVFGui extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JMenuBar menuBar;
+    private javax.swing.JRadioButtonMenuItem normalRB;
+    private javax.swing.JMenu optionsButton;
     private javax.swing.JLabel rabbitsNumber;
     private javax.swing.JMenuItem showStatsButton;
+    private javax.swing.JRadioButtonMenuItem slowRB;
+    private javax.swing.JMenu speedMenu;
     private javax.swing.JMenu startMenu;
     private javax.swing.JDialog statisticsDialog;
     private javax.swing.JMenu stopMenu;
+    private javax.swing.JRadioButtonMenuItem veryFastRB;
     // End of variables declaration//GEN-END:variables
 }
