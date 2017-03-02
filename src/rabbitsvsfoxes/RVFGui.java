@@ -27,8 +27,8 @@ import javax.swing.border.TitledBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
-    private final int RABBITS = 10;
-    private final int FOXES = 5;
+    private final int RABBITS = 8;
+    private final int FOXES = 10;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
     private final int size = 45;
@@ -188,6 +188,9 @@ public class RVFGui extends javax.swing.JFrame {
     public boolean getFoxesTeamwork2() {
         return foxesTeamwork2.isSelected();
     }
+    public boolean getFoxesTeamwork3() {
+        return foxesTeamwork3.isSelected();
+    }
 
     private void step() {
         environment.step();
@@ -269,6 +272,7 @@ public class RVFGui extends javax.swing.JFrame {
         carrotsRegenCheck = new javax.swing.JCheckBoxMenuItem();
         foxesTeamwork1 = new javax.swing.JCheckBoxMenuItem();
         foxesTeamwork2 = new javax.swing.JCheckBoxMenuItem();
+        foxesTeamwork3 = new javax.swing.JCheckBoxMenuItem();
         speedMenu = new javax.swing.JMenu();
         veryFastRB = new javax.swing.JRadioButtonMenuItem();
         fastRB = new javax.swing.JRadioButtonMenuItem();
@@ -384,10 +388,28 @@ public class RVFGui extends javax.swing.JFrame {
         optionsButton.add(new JSeparator(SwingConstants.HORIZONTAL));
 
         foxesTeamwork1.setText("Foxes - All for one");
+        foxesTeamwork1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                foxesTeamwork1ActionPerformed(evt);
+            }
+        });
         optionsButton.add(foxesTeamwork1);
 
         foxesTeamwork2.setText("Foxes - Ambush");
+        foxesTeamwork2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                foxesTeamwork2ActionPerformed(evt);
+            }
+        });
         optionsButton.add(foxesTeamwork2);
+
+        foxesTeamwork3.setText("Foxes - Group work");
+        foxesTeamwork3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                foxesTeamwork3ActionPerformed(evt);
+            }
+        });
+        optionsButton.add(foxesTeamwork3);
 
         menuBar.add(optionsButton);
 
@@ -486,6 +508,27 @@ public class RVFGui extends javax.swing.JFrame {
         displayTimer.setDelay(700);
     }//GEN-LAST:event_slowRBActionPerformed
 
+    private void foxesTeamwork1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_foxesTeamwork1ActionPerformed
+        if(foxesTeamwork1.isSelected()){
+            foxesTeamwork2.setSelected(false);
+            foxesTeamwork3.setSelected(false);
+        }
+    }//GEN-LAST:event_foxesTeamwork1ActionPerformed
+
+    private void foxesTeamwork2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_foxesTeamwork2ActionPerformed
+        if(foxesTeamwork2.isSelected()){
+            foxesTeamwork1.setSelected(false);
+            foxesTeamwork3.setSelected(false);
+        }
+    }//GEN-LAST:event_foxesTeamwork2ActionPerformed
+
+    private void foxesTeamwork3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_foxesTeamwork3ActionPerformed
+        if(foxesTeamwork3.isSelected()){
+            foxesTeamwork1.setSelected(false);
+            foxesTeamwork2.setSelected(false);
+        }
+    }//GEN-LAST:event_foxesTeamwork3ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -528,6 +571,7 @@ public class RVFGui extends javax.swing.JFrame {
     private javax.swing.JLabel foxesNumber;
     private javax.swing.JCheckBoxMenuItem foxesTeamwork1;
     private javax.swing.JCheckBoxMenuItem foxesTeamwork2;
+    private javax.swing.JCheckBoxMenuItem foxesTeamwork3;
     private javax.swing.JRadioButtonMenuItem goalDrivenOption;
     private javax.swing.JRadioButtonMenuItem hybridOption;
     private javax.swing.JMenu infoMenuButton;

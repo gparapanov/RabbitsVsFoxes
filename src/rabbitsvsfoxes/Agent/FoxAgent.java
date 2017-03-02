@@ -100,6 +100,12 @@ public class FoxAgent extends Agent {
                     Message messageToSend = new Message(MessageType.RequestAmbush, goal.getGoalObject(), d);
                     myGroup.broadcastMessage(messageToSend);
                     System.out.println("asking for ambush");
+                } else if (env.getGui().getFoxesTeamwork3()) {
+                    //this is teamwork type 3 in which all foxes help their nearby foxes
+                    goal.setPriority(6);
+                    Message messageToSend = new Message(MessageType.RequestGroupWork, goal.getGoalObject());
+                    myGroup.broadcastMessage(messageToSend);
+                    System.out.println("asking for group work");
                 }
 
             }
@@ -109,7 +115,7 @@ public class FoxAgent extends Agent {
         //if there is a valid message there and the goal is not already in the
         //agenda, then add it and remove other targeted rabbits
         if (postGoal != null && !agenda.checkExistists(postGoal)) {
-            if (agenda.getTop() != null) {
+            if (agenda.getTop() != null && postGoal.getPriority()>agenda.getTop().getPriority()) {
                 //If the agent has something else to - do remove it -
                 //this is done to avoid keeping a reference another rabbit and
                 //making sure that the foxes won't go after it unless it can see it.
@@ -153,6 +159,13 @@ public class FoxAgent extends Agent {
                 boolean condition4 = newestMessage.getDirectionToTarget() == Direction.DOWN
                         && directionToObject(newestMessage.getTargetObject()) == Direction.UP;
                 if (condition1 || condition2 || condition3 || condition4) {
+                    Goal teamGoal = new CatchRabbit(newestMessage.getTargetObject());
+                    teamGoal.setPriority(6);
+                    return teamGoal;
+                }
+            } else if (newestMessage.getMsgType().equals(MessageType.RequestGroupWork)) {
+                if (diagonalDistance(this, newestMessage.getTargetObject()) <= env.getSize() / 5) {
+                    System.out.println("someone nearby needs backup I can go and help");
                     Goal teamGoal = new CatchRabbit(newestMessage.getTargetObject());
                     teamGoal.setPriority(6);
                     return teamGoal;

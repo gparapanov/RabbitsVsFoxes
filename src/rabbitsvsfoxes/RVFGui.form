@@ -159,11 +159,25 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Foxes - All for one"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="foxesTeamwork1ActionPerformed"/>
+              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JCheckBoxMenuItem" name="foxesTeamwork2">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Foxes - Ambush"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="foxesTeamwork2ActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="foxesTeamwork3">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Foxes - Group work"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="foxesTeamwork3ActionPerformed"/>
+              </Events>
             </MenuItem>
           </SubComponents>
         </Menu>

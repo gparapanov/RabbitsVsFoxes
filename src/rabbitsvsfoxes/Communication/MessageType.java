@@ -6,6 +6,7 @@ package rabbitsvsfoxes.Communication;
  */
 public enum MessageType {
     RequestBackup,
-    RequestAmbush;
+    RequestAmbush,
+    RequestGroupWork;
     
 }
