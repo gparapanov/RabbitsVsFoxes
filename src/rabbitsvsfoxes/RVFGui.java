@@ -27,8 +27,8 @@ import javax.swing.border.TitledBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
-    private final int RABBITS = 8;
-    private final int FOXES = 10;
+    private final int RABBITS = 20;
+    private final int FOXES = 1;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
     private final int size = 45;

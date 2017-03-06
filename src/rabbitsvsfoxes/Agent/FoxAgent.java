@@ -75,10 +75,19 @@ public class FoxAgent extends Agent {
                 }
             }
         }
-        if (goal.getGoalObject() != null && !agenda.checkExistists(goal)
-                && !(agenda.getTop() instanceof CatchRabbit)) {
-
-            //&& agenda.getTop()!=null && !(agenda.getTop() instanceof CatchRabbit) add this up
+        if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
+            /*
+            The check below makes sure that a fox could be distracted.
+            If there is already a rabbit in its agenda, but it finds a new rabbit,
+            which is closer, the closer rabbit ill be inserted in the agenda and the
+            first one removed.
+            */
+            if(agenda.getTop() instanceof CatchRabbit &&
+                    (manhattanDistance(this,agenda.getTop().getGoalObject())>
+                     manhattanDistance(this,goal.getGoalObject())) &&
+                    agenda.getTop().getPriority()<=goal.getPriority()){
+                agenda.removeTop();
+            }
             this.addGoal(goal);
             //If the goal is catch a rabbit, then the agent could message other foxes
             //about the rabbit's location
