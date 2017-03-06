@@ -75,17 +75,16 @@ public class FoxAgent extends Agent {
                 }
             }
         }
-        if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
-            /*
-            The check below makes sure that a fox could be distracted.
-            If there is already a rabbit in its agenda, but it finds a new rabbit,
-            which is closer, the closer rabbit ill be inserted in the agenda and the
-            first one removed.
-            */
-            if(agenda.getTop() instanceof CatchRabbit &&
-                    (manhattanDistance(this,agenda.getTop().getGoalObject())>
-                     manhattanDistance(this,goal.getGoalObject())) &&
-                    agenda.getTop().getPriority()<=goal.getPriority()){
+        //now we need to add the object to the agenda, but make some checks first
+        boolean cond1 = goal.getGoalObject() != null;
+        boolean cond2 = !agenda.checkExistists(goal);
+        boolean cond3 = !(agenda.getTop() instanceof CatchRabbit);
+        boolean cond4 = (agenda.getTop() instanceof CatchRabbit)
+                && (manhattanDistance(this, agenda.getTop().getGoalObject())
+                > manhattanDistance(this, goal.getGoalObject()))
+                && agenda.getTop().getPriority() <= goal.getPriority();
+        if (cond1 && cond2 && (cond3 || cond4)) {
+            if(cond4){
                 agenda.removeTop();
             }
             this.addGoal(goal);
@@ -124,7 +123,7 @@ public class FoxAgent extends Agent {
         //if there is a valid message there and the goal is not already in the
         //agenda, then add it and remove other targeted rabbits
         if (postGoal != null && !agenda.checkExistists(postGoal)) {
-            if (agenda.getTop() != null && postGoal.getPriority()>agenda.getTop().getPriority()) {
+            if (agenda.getTop() != null && postGoal.getPriority() > agenda.getTop().getPriority()) {
                 //If the agent has something else to - do remove it -
                 //this is done to avoid keeping a reference another rabbit and
                 //making sure that the foxes won't go after it unless it can see it.
