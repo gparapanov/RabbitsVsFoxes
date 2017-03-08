@@ -114,14 +114,11 @@ public class Environment {
 
     public void step() {
         for (Agent a : getAgents()) {
-            
             a.makeAStep();
-            
         }
         if(this.getGui().getCarrotsRegenCheck()){
             regenerateCarrots();
         }
-        RabbitAgent.communityGoals.clear();
         cleanup();
     }
     
