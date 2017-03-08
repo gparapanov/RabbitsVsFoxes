@@ -25,6 +25,9 @@ public class Agenda {
         }
         tasks.add(posToAdd, g);
     }
+    public void addTask(int pos,Goal g) {
+        tasks.add(pos, g);
+    }
     
     public void removeTask(Goal g) {
         tasks.remove(g);

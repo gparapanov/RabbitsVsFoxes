@@ -227,7 +227,7 @@ public class Agent extends EnvironmentObject {
 
     }
     
-    public boolean checkAndMove(Direction d){
+    public boolean checkMove(Direction d){
         switch (d) {
             case UP:
                 if(getY()-1>=0 && env.spaceOccupied(getX(), getY()-1)==null){

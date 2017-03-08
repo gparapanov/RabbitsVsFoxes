@@ -84,7 +84,7 @@ public class FoxAgent extends Agent {
                 > manhattanDistance(this, goal.getGoalObject()))
                 && agenda.getTop().getPriority() <= goal.getPriority();
         if (cond1 && cond2 && (cond3 || cond4)) {
-            if(cond4){
+            if (cond4) {
                 agenda.removeTop();
             }
             this.addGoal(goal);

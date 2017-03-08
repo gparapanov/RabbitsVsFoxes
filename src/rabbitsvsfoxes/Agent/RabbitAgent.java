@@ -9,7 +9,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.ImageIcon;
 import rabbitsvsfoxes.Carrot;
+import rabbitsvsfoxes.Communication.Message;
 import rabbitsvsfoxes.Communication.MessageGroup;
+import rabbitsvsfoxes.Communication.MessageType;
 import rabbitsvsfoxes.Direction;
 import rabbitsvsfoxes.Goals.EatCarrot;
 import rabbitsvsfoxes.Environment;
@@ -28,14 +30,12 @@ public class RabbitAgent extends Agent {
 
     private ArrayList<FoxAgent> foxesAround;
     private final int threatRadius = 5;
-    public static ArrayList<EnvironmentObject> communityGoals = new ArrayList<>();
-    
 
-    public RabbitAgent(int x, int y, Environment env,MessageGroup mg) {
-        super(x, y, env,mg);
+    public RabbitAgent(int x, int y, Environment env, MessageGroup mg) {
+        super(x, y, env, mg);
         this.setIcon(new ImageIcon("images/rabbit1.png", "Rabbit icon"));
         foxesAround = new ArrayList<>();
-        
+
     }
 
     public RabbitAgent() {
@@ -44,6 +44,16 @@ public class RabbitAgent extends Agent {
 
     @Override
     public void findGoal() {
+        System.out.println("my agenda contains: ");
+        for (Goal g : agenda.getTasks()) {
+
+            if (g instanceof EatCarrot) {
+                System.out.println("a carrot with priority: " + g.getPriority());
+            } else if (g instanceof Explore) {
+                System.out.println("exploration ");
+            }
+
+        }
         Goal goal;
         goal = new EatCarrot(null);
         int minDistance = 10000;
@@ -52,7 +62,6 @@ public class RabbitAgent extends Agent {
             //if (true) {//flee OFF
             if (!objAround.isEmpty()) {//there are carrots nearby
                 //System.out.println("no foxes around, so i'm gonna eat that carrot");
-
                 for (EnvironmentObject eo : objAround) {
                     if (env.getGui().getBehaviour() == 1) {
                         distance = manhattanDistance(this, eo);
@@ -124,87 +133,165 @@ public class RabbitAgent extends Agent {
             //System.out.println("running away!");
         }
         if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
-            if (!communityGoals.contains(goal.getGoalObject())) {
-                communityGoals.add(goal.getGoalObject());
-                this.addGoal(goal);
+            if (goal instanceof EatCarrot) {
+                //if (!(agenda.getTop() instanceof EatCarrot)) {
+                    //agenda top is not eat carrot
+                    if (myGroup.checkCarrotClaimed(goal.getGoalObject())) {
+                        //if someone has targeted it, then find goal again
+                        System.out.println("someone already has targeted this");
+                        objAround.remove(goal.getGoalObject());
+                        findGoal();
+                    } else {
+                        //no one has targeted it, add this goal to the agenda
+                        System.out.println("this carrot seems free");
+                        myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot,goal.getGoalObject()));
+                        this.addGoal(goal);
+                    }
+//                } else {
+//                    //agenda top is a carrot, so check if the new one is closer
+//                    if ((manhattanDistance(this, agenda.getTop().getGoalObject())
+//                            > manhattanDistance(this, goal.getGoalObject()))
+//                            && agenda.getTop().getPriority() <= goal.getPriority()) {
+//                        if (myGroup.checkCarrotClaimed(goal.getGoalObject())) {
+//                            //if someone has targeted it, then find goal again
+//                            objAround.remove(goal.getGoalObject());
+//                            findGoal();
+//                        } else {
+//                            System.out.println("changing my goal");
+//                            EnvironmentObject currentTarget = agenda.getTop().getGoalObject();
+//                            agenda.removeTop();
+//                            myGroup.broadcastMessage(new Message(MessageType.UnclaimCarrot,goal.getGoalObject()));
+//
+//                            myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot,goal.getGoalObject()));
+//                            this.agenda.addTask(goal);
+//                        }
+//                    }
+//                }
             } else {
-                objAround.remove(goal.getGoalObject());
-                findGoal();
+                this.addGoal(goal);
             }
+        }
+        if (agenda.getTop()!=null && !agenda.getTop().getGoalObject().isAlive()) {
+            agenda.removeTop();
         }
         //System.out.println("rabbit found carrot with score: " + minDistance); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public boolean checkMove(Direction d) {
+        switch (d) {
+            case UP:
+                if (getY() - 1 >= 0 && (env.spaceOccupied(getX(), getY() - 1) == null
+                        || env.spaceOccupied(getX(), getY() - 1) instanceof Carrot)) {
+                    //setY(getY() - 1);
+                    return true;
+                }
+                break;
+            case DOWN:
+                if (getY() + 1 < env.getSize() && (env.spaceOccupied(getX(), getY() + 1) == null
+                        || env.spaceOccupied(getX(), getY() + 1) instanceof Carrot)) {
+                    //setY(getY() + 1);
+                    return true;
+                }
+                break;
+            case LEFT:
+                if (getX() - 1 >= 0 && (env.spaceOccupied(getX() - 1, getY()) == null
+                        || env.spaceOccupied(getX() - 1, getY()) instanceof Carrot)) {
+                    //setY(getX() - 1);
+                    return true;
+                }
+                break;
+            case RIGHT:
+                if (getX() + 1 < env.getSize() && (env.spaceOccupied(getX() + 1, getY()) == null
+                        || env.spaceOccupied(getX() + 1, getY()) instanceof Carrot)) {
+                    //setY(getX() + 1);
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
+
     public FleeSpace determineFleeDirection(boolean enemyU, boolean enemyD, boolean enemyR, boolean enemyL) {
-        if (enemyU && enemyD && enemyL && checkAndMove(Direction.RIGHT)) {
+        if (enemyU && enemyD && enemyL && checkMove(Direction.RIGHT)) {
             //enemies up, down, left, therefore go right
+
             return new FleeSpace(getX() + 1, getY());
-        } else if (enemyU && enemyD && enemyR && checkAndMove(Direction.LEFT)) {
+        } else if (enemyU && enemyD && enemyR && checkMove(Direction.LEFT)) {
             //enemies up, down, right, therefore go left etc....
             return new FleeSpace(getX() - 1, getY());
-        } else if (enemyU && enemyR && enemyL && checkAndMove(Direction.DOWN)) {
+        } else if (enemyU && enemyR && enemyL && checkMove(Direction.DOWN)) {
             return new FleeSpace(getX(), getY() + 1);
-        } else if (enemyD && enemyR && enemyL && checkAndMove(Direction.UP)) {
+        } else if (enemyD && enemyR && enemyL && checkMove(Direction.UP)) {
             return new FleeSpace(getX(), getY() - 1);
         } else if (enemyU && enemyD) {
-            if (checkAndMove(Direction.LEFT)) {
+            if (checkMove(Direction.LEFT)) {
                 return new FleeSpace(getX() - 1, getY());
-            } else if (checkAndMove(Direction.RIGHT)) {
+            } else if (checkMove(Direction.RIGHT)) {
                 return new FleeSpace(getX() + 1, getY());
             }
         } else if (enemyU && enemyR) {
-            if (checkAndMove(Direction.LEFT)) {
+            if (checkMove(Direction.LEFT)) {
                 return new FleeSpace(getX() - 1, getY());
-            } else if (checkAndMove(Direction.DOWN)) {
+            } else if (checkMove(Direction.DOWN)) {
                 return new FleeSpace(getX(), getY() + 1);
             }
         } else if (enemyU && enemyL) {
-            if (checkAndMove(Direction.RIGHT)) {
+            if (checkMove(Direction.RIGHT)) {
                 return new FleeSpace(getX() + 1, getY());
-            } else if (checkAndMove(Direction.DOWN)) {
+            } else if (checkMove(Direction.DOWN)) {
                 return new FleeSpace(getX(), getY() + 1);
             }
         } else if (enemyR && enemyL) {
-            if (checkAndMove(Direction.UP)) {
+            if (checkMove(Direction.UP)) {
                 return new FleeSpace(getX(), getY() - 1);
-            } else if (checkAndMove(Direction.DOWN)) {
+            } else if (checkMove(Direction.DOWN)) {
                 return new FleeSpace(getX(), getY() + 1);
             }
         } else if (enemyD && enemyL) {
-            if (checkAndMove(Direction.UP)) {
+            if (checkMove(Direction.UP)) {
                 return new FleeSpace(getX(), getY() - 1);
-            } else if (checkAndMove(Direction.RIGHT)) {
+            } else if (checkMove(Direction.RIGHT)) {
                 return new FleeSpace(getX() + 1, getY());
             }
         } else if (enemyD && enemyR) {
-            if (checkAndMove(Direction.LEFT)) {
+            if (checkMove(Direction.LEFT)) {
                 return new FleeSpace(getX() - 1, getY());
-            } else if (checkAndMove(Direction.UP)) {
+            } else if (checkMove(Direction.UP)) {
                 return new FleeSpace(getX(), getY() - 1);
             }
         } else if (enemyU) {
-            if (checkAndMove(Direction.DOWN)) {
+            if (checkMove(Direction.DOWN)) {
                 return new FleeSpace(getX(), getY() + 1);
-            } else if (checkAndMove(Direction.LEFT)) {
+            } else if (checkMove(Direction.LEFT)) {
                 return new FleeSpace(getX() - 1, getY());
             }
         } else if (enemyD) {
-            if (checkAndMove(Direction.UP)) {
+            if (checkMove(Direction.UP)) {
                 return new FleeSpace(getX(), getY() - 1);
-            } else if (checkAndMove(Direction.RIGHT)) {
+            } else if (checkMove(Direction.RIGHT)) {
                 return new FleeSpace(getX() + 1, getY());
             }
         } else if (enemyR) {
-            if (checkAndMove(Direction.LEFT)) {
+            if (checkMove(Direction.LEFT)) {
                 return new FleeSpace(getX() - 1, getY());
-            } else if (checkAndMove(Direction.UP)) {
+            } else if (checkMove(Direction.UP)) {
                 return new FleeSpace(getX(), getY() - 1);
             }
         } else if (enemyL) {
-            if (checkAndMove(Direction.RIGHT)) {
+            if (checkMove(Direction.RIGHT)) {
                 return new FleeSpace(getX() + 1, getY());
-            } else if (checkAndMove(Direction.DOWN)) {
+            } else if (checkMove(Direction.DOWN)) {
                 return new FleeSpace(getX(), getY() + 1);
+            }
+        }
+        return null;
+    }
+
+    public Carrot findCarrotAt(int x, int y) {
+        for (Carrot c : env.getCarrots()) {
+            if (x == c.getX() && y == c.getY()) {
+                return c;
             }
         }
         return null;

@@ -2,6 +2,8 @@ package rabbitsvsfoxes.Communication;
 
 import java.util.ArrayList;
 import rabbitsvsfoxes.Agent.Agent;
+import rabbitsvsfoxes.Carrot;
+import rabbitsvsfoxes.EnvironmentObject;
 
 /**
  *
@@ -10,10 +12,12 @@ import rabbitsvsfoxes.Agent.Agent;
 public class MessageGroup {
     private ArrayList<Agent> members;
     private ArrayList<Message>groupMessages;
+    private ArrayList<EnvironmentObject>claimedCarrots;
 
     public MessageGroup() {
         this.members = new ArrayList<>();
         this.groupMessages = new ArrayList<>();
+        this.claimedCarrots = new ArrayList<>();
     }
     
     public void addMember(Agent a){
@@ -21,7 +25,13 @@ public class MessageGroup {
     }
     
     public void broadcastMessage(Message m){
-        groupMessages.add(m);
+        if(m.getMsgType()==MessageType.ClaimCarrot){
+            claimedCarrots.add(m.getTargetObject());
+        }else if(m.getMsgType()==MessageType.UnclaimCarrot){
+            claimedCarrots.remove(m.getTargetObject());
+        }else{
+            groupMessages.add(m);
+        }
     }
     /**
      * Method returns a Message object at a specified position (index) if it exists,
@@ -38,5 +48,8 @@ public class MessageGroup {
         }
     }
     
+    public boolean checkCarrotClaimed(EnvironmentObject eo){
+        return this.claimedCarrots.contains(eo);
+    }
     
 }
