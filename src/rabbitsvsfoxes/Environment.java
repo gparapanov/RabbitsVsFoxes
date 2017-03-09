@@ -5,11 +5,13 @@
  */
 package rabbitsvsfoxes;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 import rabbitsvsfoxes.Agent.Agent;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import rabbitsvsfoxes.Agent.FoxAgent;
 import rabbitsvsfoxes.Agent.RabbitAgent;
@@ -36,15 +38,18 @@ public class Environment {
         this.envObjects = new LinkedHashSet();
         this.carrots = new ArrayList<>();
         this.gui = gui;
-        this.initialCarrots=c;
-        this.foxesGroup=new MessageGroup();
-        this.rabbitsGroup=new MessageGroup();
+        this.initialCarrots = c;
+        this.foxesGroup = new MessageGroup();
+        this.rabbitsGroup = new MessageGroup();
 
         populateMap(r, f, c, b);//creates agents, carrots, bombs in the env
     }
 
     private void populateMap(int r, int f, int c, int b) {
         int newX, newY;
+        Random random = new Random();
+        final float saturation = 0.9f;//1.0 for brilliant, 0.0 for dull
+        final float luminance = 1.0f; //1.0 for brighter, 0.0 for black
         for (int i = 0; i < c; i++) {//create carrots
             do {
                 newX = randomRange(0, size - 1);
@@ -64,7 +69,11 @@ public class Environment {
                 newX = randomRange(0, size - 1);
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
-            RabbitAgent rabbit = new RabbitAgent(newX, newY, this,rabbitsGroup);
+            RabbitAgent rabbit = new RabbitAgent(newX, newY, this, rabbitsGroup);
+            
+            final float hue = random.nextFloat();
+            rabbit.setMyColor(Color.getHSBColor(hue, saturation, luminance));
+            
             this.addEnvironmentObject(rabbit);
         }
         for (int i = 0; i < f; i++) {//create foxes
@@ -72,7 +81,9 @@ public class Environment {
                 newX = randomRange(0, size - 1);
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
-            FoxAgent fox = new FoxAgent(newX, newY, this,foxesGroup);
+            FoxAgent fox = new FoxAgent(newX, newY, this, foxesGroup);
+            final float hue = random.nextFloat();
+            fox.setMyColor(Color.getHSBColor(hue, saturation, luminance));
             this.addEnvironmentObject(fox);
         }
         System.out.println(envObjects.toString());
@@ -90,18 +101,18 @@ public class Environment {
         envObjects.add(eo);
         if (eo instanceof Agent) {
             Agent a = (Agent) eo;
-           // if (!agents.contains(a)) {
-                agents.add(a);
-                if(a instanceof RabbitAgent){
-                    rabbitsGroup.addMember(a);
-                }else{
-                    foxesGroup.addMember(a);
-                }
+            // if (!agents.contains(a)) {
+            agents.add(a);
+            if (a instanceof RabbitAgent) {
+                rabbitsGroup.addMember(a);
+            } else {
+                foxesGroup.addMember(a);
+            }
             //}
         } else if (eo instanceof Carrot) {
             Carrot c = (Carrot) eo;
             //if (!carrots.contains(c)) {
-                carrots.add(c);
+            carrots.add(c);
             //}
         }
     }
@@ -116,13 +127,13 @@ public class Environment {
         for (Agent a : getAgents()) {
             a.makeAStep();
         }
-        if(this.getGui().getCarrotsRegenCheck()){
+        if (this.getGui().getCarrotsRegenCheck()) {
             regenerateCarrots();
         }
         cleanup();
     }
-    
-    private void regenerateCarrots(){
+
+    private void regenerateCarrots() {
         int newX, newY;
         for (int i = carrots.size(); i < initialCarrots; i++) {//create carrots
             do {
@@ -132,7 +143,7 @@ public class Environment {
             this.addEnvironmentObject(new Carrot(newX, newY));
         }
     }
-    
+
     public void cleanup() {//remove dead agents from the collection
         Iterator<Agent> iter = getAgents().iterator();
         while (iter.hasNext()) {

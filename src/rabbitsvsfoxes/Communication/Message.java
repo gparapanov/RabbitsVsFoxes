@@ -1,5 +1,6 @@
 package rabbitsvsfoxes.Communication;
 
+import java.awt.Color;
 import rabbitsvsfoxes.Agent.RabbitAgent;
 import rabbitsvsfoxes.Direction;
 import rabbitsvsfoxes.EnvironmentObject;
@@ -13,6 +14,7 @@ public class Message {
     protected MessageType msgType;
     protected EnvironmentObject targetObject;
     protected Direction directionToTarget;
+    protected Color teamColor;
 
     public Message(MessageType type) {
         this.msgType = type;
@@ -51,6 +53,14 @@ public class Message {
 
     public EnvironmentObject getTargetObject() {
         return targetObject;
+    }
+
+    public Color getTeamColor() {
+        return teamColor;
+    }
+
+    public void setTeamColor(Color teamColor) {
+        this.teamColor = teamColor;
     }
 
     

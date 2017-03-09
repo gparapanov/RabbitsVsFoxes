@@ -1,5 +1,6 @@
 package rabbitsvsfoxes.Goals;
 
+import java.awt.Color;
 import rabbitsvsfoxes.EnvironmentObject;
 
 /**
@@ -9,6 +10,7 @@ import rabbitsvsfoxes.EnvironmentObject;
 public class Goal {
     private EnvironmentObject goalObject;
     private boolean completed;
+    protected Color teamColor=null;
     private int priority;//1<<<<<10  5 is default
 
     public Goal() {
@@ -44,6 +46,14 @@ public class Goal {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public Color getTeamColor() {
+        return teamColor;
+    }
+
+    public void setTeamColor(Color teamColor) {
+        this.teamColor = teamColor;
     }
     
     

@@ -181,29 +181,29 @@ public class RabbitAgent extends Agent {
     public boolean checkMove(Direction d) {
         switch (d) {
             case UP:
-                if (getY() - 1 >= 0 && (env.spaceOccupied(getX(), getY() - 1) == null
-                        || env.spaceOccupied(getX(), getY() - 1) instanceof Carrot)) {
+                if (getY() - 1 >= 0 && (env.spaceOccupied(getX(), getY() - 1) == null)){
+                     //   || env.spaceOccupied(getX(), getY() - 1) instanceof Carrot)) {
                     //setY(getY() - 1);
                     return true;
                 }
                 break;
             case DOWN:
-                if (getY() + 1 < env.getSize() && (env.spaceOccupied(getX(), getY() + 1) == null
-                        || env.spaceOccupied(getX(), getY() + 1) instanceof Carrot)) {
+                if (getY() + 1 < env.getSize() && (env.spaceOccupied(getX(), getY() + 1) == null)){
+                       // || env.spaceOccupied(getX(), getY() + 1) instanceof Carrot)) {
                     //setY(getY() + 1);
                     return true;
                 }
                 break;
             case LEFT:
-                if (getX() - 1 >= 0 && (env.spaceOccupied(getX() - 1, getY()) == null
-                        || env.spaceOccupied(getX() - 1, getY()) instanceof Carrot)) {
+                if (getX() - 1 >= 0 && (env.spaceOccupied(getX() - 1, getY()) == null)){
+                      //  || env.spaceOccupied(getX() - 1, getY()) instanceof Carrot)) {
                     //setY(getX() - 1);
                     return true;
                 }
                 break;
             case RIGHT:
-                if (getX() + 1 < env.getSize() && (env.spaceOccupied(getX() + 1, getY()) == null
-                        || env.spaceOccupied(getX() + 1, getY()) instanceof Carrot)) {
+                if (getX() + 1 < env.getSize() && (env.spaceOccupied(getX() + 1, getY()) == null)){
+                      //  || env.spaceOccupied(getX() + 1, getY()) instanceof Carrot)) {
                     //setY(getX() + 1);
                     return true;
                 }

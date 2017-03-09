@@ -1,5 +1,6 @@
 package rabbitsvsfoxes.Agent;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ImageIcon;
@@ -25,6 +26,8 @@ public class Agent extends EnvironmentObject {
     private final int radius = 7;
 
     protected Agenda agenda;
+    protected Color myColor;
+    protected Color teamColor;
     protected Environment env;
     protected ArrayList<EnvironmentObject> objAround;
     protected ArrayList<UnexploredSpace> toExplore;
@@ -263,6 +266,22 @@ public class Agent extends EnvironmentObject {
 
     public Agenda getAgenda() {
         return agenda;
+    }
+
+    public Color getMyColor() {
+        return myColor;
+    }
+
+    public void setMyColor(Color myColor) {
+        this.myColor = myColor;
+    }
+
+    public Color getTeamColor() {
+        return teamColor;
+    }
+
+    public void setTeamColor(Color teamColor) {
+        this.teamColor = teamColor;
     }
 
     public void sendMessage(Agent target, Message msg) {

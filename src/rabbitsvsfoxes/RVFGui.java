@@ -3,6 +3,7 @@ package rabbitsvsfoxes;
 import rabbitsvsfoxes.Agent.*;
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -12,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,7 +29,7 @@ import javax.swing.border.TitledBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
-    private final int RABBITS = 5;
+    private final int RABBITS = 10;
     private final int FOXES = 2;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
@@ -53,9 +55,8 @@ public class RVFGui extends javax.swing.JFrame {
             step();
         };
         displayTimer = new Timer(500, listener);
-        
-        //displayTimer.start();
 
+        //displayTimer.start();
         this.setContentPane(panel1);
     }
 
@@ -65,7 +66,7 @@ public class RVFGui extends javax.swing.JFrame {
         agentBehaviourGroup = new ButtonGroup();
         agentBehaviourGroup.add(this.goalDrivenOption);
         agentBehaviourGroup.add(this.hybridOption);
-        
+
         speedButtonGroup = new ButtonGroup();
         speedButtonGroup.add(fastRB);
         speedButtonGroup.add(veryFastRB);
@@ -166,14 +167,30 @@ public class RVFGui extends javax.swing.JFrame {
         for (EnvironmentObject eo : environment.getEnvObjects()) {
             if (eo.isAlive()) {
                 curLabel = this.getLabel(eo.getX(), eo.getY());
-                curLabel.setIcon(eo.getIcon());
+                //curLabel.setIcon(eo.getIcon());
                 
-                curLabel.setToolTipText("<html>"+eo.toString()+"</html>");
+                Image image = eo.getIcon().getImage(); // transform it 
+                Image newimg = image.getScaledInstance(curLabel.getSize().width, curLabel.getSize().height, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
+                curLabel.setIcon(new ImageIcon(newimg));  // transform it back
+                
+                //show information about objects on hover
+                curLabel.setToolTipText("<html>" + eo.toString() + "</html>");
+                
+                if(eo instanceof FoxAgent ){
+                    curLabel.setBackground(((Agent)eo).getMyColor());
+                    if(((Agent)eo).getTeamColor()!=null){
+                        curLabel.setBackground(((Agent)eo).getTeamColor());
+                    }
+                }
             }
 
         }
     }
-
+    
+    public boolean isInBoundaries(int x, int y){
+        return (x>=0 && x<size) && (y>=0 && y<size);
+    }
+    
     public JLabel getLabel(int x, int y) {
         int index = y * size + x;
         return labels.get(index);
@@ -187,10 +204,11 @@ public class RVFGui extends javax.swing.JFrame {
     public boolean getFoxesTeamwork1() {
         return foxesTeamwork1.isSelected();
     }
-    
+
     public boolean getFoxesTeamwork2() {
         return foxesTeamwork2.isSelected();
     }
+
     public boolean getFoxesTeamwork3() {
         return foxesTeamwork3.isSelected();
     }
@@ -512,21 +530,21 @@ public class RVFGui extends javax.swing.JFrame {
     }//GEN-LAST:event_slowRBActionPerformed
 
     private void foxesTeamwork1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_foxesTeamwork1ActionPerformed
-        if(foxesTeamwork1.isSelected()){
+        if (foxesTeamwork1.isSelected()) {
             foxesTeamwork2.setSelected(false);
             foxesTeamwork3.setSelected(false);
         }
     }//GEN-LAST:event_foxesTeamwork1ActionPerformed
 
     private void foxesTeamwork2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_foxesTeamwork2ActionPerformed
-        if(foxesTeamwork2.isSelected()){
+        if (foxesTeamwork2.isSelected()) {
             foxesTeamwork1.setSelected(false);
             foxesTeamwork3.setSelected(false);
         }
     }//GEN-LAST:event_foxesTeamwork2ActionPerformed
 
     private void foxesTeamwork3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_foxesTeamwork3ActionPerformed
-        if(foxesTeamwork3.isSelected()){
+        if (foxesTeamwork3.isSelected()) {
             foxesTeamwork1.setSelected(false);
             foxesTeamwork2.setSelected(false);
         }
