@@ -279,7 +279,9 @@ public class Agent extends EnvironmentObject {
 
     @Override
     public String toString() {
-        return "Agent{" + this.isAlive() + " " + this.getX() + " , " + this.getY();
+        return super.toString()+"<br>Agenda:<br>"+agenda; 
     }
+
+    
 
 }

@@ -141,6 +141,7 @@ public class Environment {
                 iter.remove();
             }
         }
+        rabbitsGroup.removeEatenCarrots();
 
     }
 

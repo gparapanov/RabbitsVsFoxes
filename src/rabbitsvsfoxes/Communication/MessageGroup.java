@@ -1,6 +1,7 @@
 package rabbitsvsfoxes.Communication;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import rabbitsvsfoxes.Agent.Agent;
 import rabbitsvsfoxes.Carrot;
 import rabbitsvsfoxes.EnvironmentObject;
@@ -50,6 +51,16 @@ public class MessageGroup {
     
     public boolean checkCarrotClaimed(EnvironmentObject eo){
         return this.claimedCarrots.contains(eo);
+    }
+    
+    public void removeEatenCarrots(){
+        Iterator<EnvironmentObject> iter = claimedCarrots.iterator();
+        while (iter.hasNext()) {
+            EnvironmentObject eo = iter.next();
+            if (!eo.isAlive()) {
+                iter.remove();
+            }
+        }
     }
     
 }

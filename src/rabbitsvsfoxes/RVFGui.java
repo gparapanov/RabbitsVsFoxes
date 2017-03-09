@@ -28,7 +28,7 @@ import javax.swing.border.TitledBorder;
 public class RVFGui extends javax.swing.JFrame {
 
     private final int RABBITS = 5;
-    private final int FOXES = 0;
+    private final int FOXES = 2;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
     private final int size = 45;
@@ -160,12 +160,15 @@ public class RVFGui extends javax.swing.JFrame {
                 curLabel = this.getLabel(j, i);
                 curLabel.setBackground(backgroundC);
                 curLabel.setIcon(null);
+                curLabel.setToolTipText(null);
             }
         }
         for (EnvironmentObject eo : environment.getEnvObjects()) {
             if (eo.isAlive()) {
                 curLabel = this.getLabel(eo.getX(), eo.getY());
                 curLabel.setIcon(eo.getIcon());
+                
+                curLabel.setToolTipText("<html>"+eo.toString()+"</html>");
             }
 
         }

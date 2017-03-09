@@ -61,6 +61,6 @@ public abstract class EnvironmentObject {
     
     @Override
     public String toString() {
-        return this.getX()+" "+this.getY();
+        return getClass().getSimpleName()+"<br>x: "+this.getX()+" y:"+this.getY();
     }
 }

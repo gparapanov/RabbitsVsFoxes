@@ -16,9 +16,5 @@ public class Carrot extends EnvironmentObject {
         
     }
 
-    @Override
-    public String toString() {
-        return "Carrot{"+this.isAlive() + " "+this.getX()+" , "+this.getY();
-    }
     
 }

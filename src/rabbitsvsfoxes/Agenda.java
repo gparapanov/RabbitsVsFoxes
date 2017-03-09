@@ -58,4 +58,14 @@ public class Agenda {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        String outputString="";
+        for(Goal g:tasks){
+            outputString+=g.getClass().getSimpleName()+ " Priority: "+g.getPriority()+"<br>";
+        }
+        return outputString;
+    }
+    
 }
