@@ -72,10 +72,32 @@ public class FoxAgent extends Agent {
                     minDistance = distance;
                     goal.setGoalObject(us);
                     goal.setPriority(4);
+                    goal.setTeamColor(myColor);
                     //System.out.println("better space found:"+distance);
                 }
             }
         }
+        //open the postbox to check if there are any messages
+        Goal postGoal = openPostbox();
+        //if there is a valid message there and the goal is not already in the
+        //agenda, then add it and remove other targeted rabbits
+        if (postGoal != null) {
+            if (agenda.getTop() != null && postGoal.getPriority() > agenda.getTop().getPriority()) {
+                //If the agent has something else to - do remove it -
+                //this is done to avoid keeping a reference another rabbit and
+                //making sure that the foxes won't go after it unless it can see it.
+                agenda.removeTop();
+            }
+            if (agenda.checkExistists(postGoal)) {
+                //setTeamColor(postGoal.getTeamColor());
+            } else {
+                this.addGoal(postGoal);
+            }
+
+            //this.agenda.getTasks().add(postGoal);
+            System.out.println("going for help");
+        }
+
         //now we need to add the object to the agenda, but make some checks first
         boolean cond1 = goal.getGoalObject() != null;
         boolean cond2 = !agenda.checkExistists(goal);
@@ -83,7 +105,7 @@ public class FoxAgent extends Agent {
         boolean cond4 = (agenda.getTop() instanceof CatchRabbit)
                 && (manhattanDistance(this, agenda.getTop().getGoalObject())
                 > manhattanDistance(this, goal.getGoalObject()))
-                && agenda.getTop().getPriority() < goal.getPriority();
+                && agenda.getTop().getPriority() <= goal.getPriority();
         if (cond1 && cond2 && (cond3 || cond4)) {
             if (cond4) {
                 agenda.removeTop();
@@ -96,6 +118,7 @@ public class FoxAgent extends Agent {
                 if (env.getGui().getFoxesTeamwork1()) {
                     //this is teamwork type 1 in which all foxes go after the same  rabbit
                     goal.setPriority(6);
+                    goal.setTeamColor(myColor);
                     Message messageToSend = new Message(MessageType.RequestBackup, goal.getGoalObject());
                     messageToSend.setTeamColor(goal.getTeamColor());
                     myGroup.broadcastMessage(messageToSend);
@@ -108,47 +131,23 @@ public class FoxAgent extends Agent {
                     Direction d = directionToObject(targetAgent);
 
                     Message messageToSend = new Message(MessageType.RequestAmbush, goal.getGoalObject(), d);
+                    messageToSend.setTeamColor(goal.getTeamColor());
                     myGroup.broadcastMessage(messageToSend);
                     System.out.println("asking for ambush");
                 } else if (env.getGui().getFoxesTeamwork3()) {
                     //this is teamwork type 3 in which all foxes help their nearby foxes
                     goal.setPriority(6);
                     Message messageToSend = new Message(MessageType.RequestGroupWork, goal.getGoalObject());
+                    messageToSend.setTeamColor(goal.getTeamColor());
                     myGroup.broadcastMessage(messageToSend);
                     System.out.println("asking for group work");
                 }
 
             }
         }
-        //open the postbox to check if there are any messages
-        Goal postGoal = openPostbox();
-        //if there is a valid message there and the goal is not already in the
-        //agenda, then add it and remove other targeted rabbits
-        if (postGoal != null ) {
-            if (agenda.getTop() != null && postGoal.getPriority() > agenda.getTop().getPriority()) {
-                //If the agent has something else to - do remove it -
-                //this is done to avoid keeping a reference another rabbit and
-                //making sure that the foxes won't go after it unless it can see it.
-                agenda.removeTop();
-            }
-            if(agenda.checkExistists(postGoal)){
-                setTeamColor(postGoal.getTeamColor());
-            }else{
-                this.addGoal(postGoal);
-            }
-            
-            //this.agenda.getTasks().add(postGoal);
-            System.out.println("going for help");
-        }
+
         if (!agenda.getTop().getGoalObject().isAlive()) {
             agenda.removeTop();
-        }
-        if(agenda.getTop()!=null ){
-            if(agenda.getTop() instanceof CatchRabbit){
-                this.setTeamColor(agenda.getTop().getTeamColor());
-            }else{
-                this.setTeamColor(myColor);
-            }
         }
 
     }
@@ -184,6 +183,7 @@ public class FoxAgent extends Agent {
                 if (condition1 || condition2 || condition3 || condition4) {
                     Goal teamGoal = new CatchRabbit(newestMessage.getTargetObject());
                     teamGoal.setPriority(6);
+                    teamGoal.setTeamColor(newestMessage.getTeamColor());
                     return teamGoal;
                 }
             } else if (newestMessage.getMsgType().equals(MessageType.RequestGroupWork)) {
@@ -191,6 +191,7 @@ public class FoxAgent extends Agent {
                     System.out.println("someone nearby needs backup I can go and help");
                     Goal teamGoal = new CatchRabbit(newestMessage.getTargetObject());
                     teamGoal.setPriority(6);
+                    teamGoal.setTeamColor(newestMessage.getTeamColor());
                     return teamGoal;
                 }
             }

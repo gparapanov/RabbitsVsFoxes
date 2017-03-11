@@ -118,6 +118,7 @@ public class Agent extends EnvironmentObject {
         lookAround(radius);
         findGoal();
         if (agenda.getTop() != null) {
+            this.setTeamColor(agenda.getTop().getTeamColor());
             moveTowardsGoal(agenda.getTop());
         } else {
             //System.out.println("Game Over!");
