@@ -44,6 +44,7 @@ public class RabbitAgent extends Agent {
 
     @Override
     public void findGoal() {
+        this.replenishHealth();
         System.out.println("my agenda contains: ");
         for (Goal g : agenda.getTasks()) {
 

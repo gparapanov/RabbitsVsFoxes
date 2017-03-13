@@ -24,7 +24,9 @@ import rabbitsvsfoxes.UnexploredSpace;
 public class Agent extends EnvironmentObject {
 
     private final int radius = 7;
-
+    
+    protected int health=100;
+    
     protected Agenda agenda;
     protected Color myColor;
     protected Color teamColor;
@@ -40,7 +42,7 @@ public class Agent extends EnvironmentObject {
         this.agenda = new Agenda();
         this.objAround = new ArrayList<>();
         this.toExplore = new ArrayList<>();
-        myGroup=mg;
+        this.myGroup=mg;
         discoverExplorationSpaces();
     }
 
@@ -221,16 +223,25 @@ public class Agent extends EnvironmentObject {
             agenda.removeTask(g);
             if (g instanceof CatchRabbit) {
                 //System.out.println("fox ate rabbit");
+                replenishHealth();
             } else if (g instanceof Explore) {
                 this.toExplore.remove(g.getGoalObject());
             }
             env.removeEnvironmentObject(g.getGoalObject());
-
-            //System.out.println("eaten" + agents.toString());
+            
+        }
+        decreaseHealth();
+        if(health<=0){
+            this.setAlive(false);
         }
 
     }
-    
+    public void decreaseHealth(){
+        this.health-=2;
+    }
+    public void replenishHealth(){
+        this.health=100;
+    }
     public boolean checkMove(Direction d){
         switch (d) {
             case UP:
@@ -285,6 +296,14 @@ public class Agent extends EnvironmentObject {
         this.teamColor = teamColor;
     }
 
+    public int getHealth() {
+        return health;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
     public void sendMessage(Agent target, Message msg) {
 
     }
@@ -299,7 +318,7 @@ public class Agent extends EnvironmentObject {
 
     @Override
     public String toString() {
-        return super.toString()+"<br>Agenda:<br>"+agenda; 
+        return super.toString()+"<br>Health: "+getHealth()+"<br>Agenda:<br>"+agenda; 
     }
 
     
