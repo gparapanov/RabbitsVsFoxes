@@ -80,6 +80,7 @@ public class RabbitAgent extends Agent {
             } else {
                 //start exploring
                 //System.out.println("no objects around - exploring");
+                lastLogs.add(0,"There is nothing around me, I will explore!");
                 goal = new Explore(null);
                 if (toExplore.isEmpty()) {
                     discoverExplorationSpaces();
@@ -101,6 +102,7 @@ public class RabbitAgent extends Agent {
             //checks on which sides the enemies are, so that the direction too flee
             //can be determined
             //System.out.println("there is a fox around");
+            lastLogs.add(0,"There is a fox around, I must flee!");
             for (FoxAgent fox : foxesAround) {
                 if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
                         && fox.getY() <= this.getY() + threatRadius
@@ -140,11 +142,13 @@ public class RabbitAgent extends Agent {
                     if (myGroup.checkCarrotClaimed(goal.getGoalObject())) {
                         //if someone has targeted it, then find goal again
                         System.out.println("someone already has targeted this");
+                        lastLogs.add(0,"Found a carrot, but someone already saw it first!");
                         objAround.remove(goal.getGoalObject());
                         findGoal();
                     } else {
                         //no one has targeted it, add this goal to the agenda
                         System.out.println("this carrot seems free");
+                        lastLogs.add(0,"I have found a carrot and I am claiming it!");
                         myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot,goal.getGoalObject()));
                         this.addGoal(goal);
                     }

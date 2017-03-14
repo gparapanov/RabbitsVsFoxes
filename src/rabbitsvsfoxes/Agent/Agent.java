@@ -27,6 +27,7 @@ public class Agent extends EnvironmentObject {
     
     protected int health=100;
     
+    protected ArrayList<String> lastLogs;
     protected Agenda agenda;
     protected Color myColor;
     protected Color teamColor;
@@ -43,6 +44,7 @@ public class Agent extends EnvironmentObject {
         this.objAround = new ArrayList<>();
         this.toExplore = new ArrayList<>();
         this.myGroup=mg;
+        this.lastLogs=new ArrayList<>();
         discoverExplorationSpaces();
     }
 
@@ -234,10 +236,11 @@ public class Agent extends EnvironmentObject {
         if(health<=0){
             this.setAlive(false);
         }
+        if(lastLogs.size()>3)lastLogs.clear();
 
     }
     public void decreaseHealth(){
-        this.health-=2;
+        this.health--;
     }
     public void replenishHealth(){
         this.health=100;
@@ -318,7 +321,14 @@ public class Agent extends EnvironmentObject {
 
     @Override
     public String toString() {
-        return super.toString()+"<br>Health: "+getHealth()+"<br>Agenda:<br>"+agenda; 
+        String logsString="";
+        for(String itemString:lastLogs){
+            logsString+=itemString+"<br>";
+        }
+        String output=super.toString()+"<br>Health: "+getHealth()+
+                "<br>Agenda:<br>"+agenda+"<br>Last action taken:<br>"+
+                logsString;
+        return output; 
     }
 
     
