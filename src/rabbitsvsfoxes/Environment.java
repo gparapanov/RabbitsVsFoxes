@@ -26,6 +26,11 @@ public class Environment {
     private Set<Agent> agents;
     private Set<EnvironmentObject> envObjects;
     private ArrayList<Carrot> carrots;
+    
+    private String[] names={"Donald","Nick","John","Mick","Peter","Albus",
+    "Joe","Francis","Logan","Ryan","Jerry","Jeb","Harry","Chris","Ted","Barry",
+    "Barry","Mason","Ben","Rey","Fin","Luke","Poe","Han","Paul","Vin","Adam",
+    "Jeff","Rick","Bernie","Jimmy","Jesus","Hugh","Bill","Ian","Pip","Ron"};
     private int size;
     private RVFGui gui;
     private final int initialCarrots;
@@ -96,7 +101,9 @@ public class Environment {
     public void removeAgent(Agent a) {
         removeEnvironmentObject(a);
     }
-
+    public String getName(){
+        return names[(int)Math.floor(Math.random()*names.length)];
+    }
     public void addEnvironmentObject(EnvironmentObject eo) {
         envObjects.add(eo);
         if (eo instanceof Agent) {

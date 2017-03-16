@@ -15,6 +15,7 @@ public class Message {
     protected EnvironmentObject targetObject;
     protected Direction directionToTarget;
     protected Color teamColor;
+    protected String senderName;
 
     public Message(MessageType type) {
         this.msgType = type;
@@ -25,9 +26,10 @@ public class Message {
      * @param type 
      * @param obj 
      */
-    public Message(MessageType type, EnvironmentObject obj) {
+    public Message(MessageType type, EnvironmentObject obj, String name) {
         this.msgType = type;
         this.targetObject = obj;
+        this.senderName=name;
     }
     /**
      * 
@@ -35,10 +37,11 @@ public class Message {
      * @param obj
      * @param d The direction in which the target object is moving.
      */
-    public Message(MessageType type, EnvironmentObject obj, Direction d) {
+    public Message(MessageType type, EnvironmentObject obj, Direction d, String name) {
         this.msgType = type;
         this.targetObject=obj;
         this.directionToTarget=d;
+        this.senderName=name;
     }
     public MessageType getMsgType() {
         return msgType;
@@ -53,6 +56,14 @@ public class Message {
 
     public EnvironmentObject getTargetObject() {
         return targetObject;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
     }
 
     public Color getTeamColor() {

@@ -294,6 +294,7 @@ public class RVFGui extends javax.swing.JFrame {
         foxesTeamwork1 = new javax.swing.JCheckBoxMenuItem();
         foxesTeamwork2 = new javax.swing.JCheckBoxMenuItem();
         foxesTeamwork3 = new javax.swing.JCheckBoxMenuItem();
+        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
         speedMenu = new javax.swing.JMenu();
         veryFastRB = new javax.swing.JRadioButtonMenuItem();
         fastRB = new javax.swing.JRadioButtonMenuItem();
@@ -431,6 +432,10 @@ public class RVFGui extends javax.swing.JFrame {
             }
         });
         optionsButton.add(foxesTeamwork3);
+        optionsButton.add(new JSeparator(SwingConstants.HORIZONTAL));
+
+        jCheckBoxMenuItem1.setText("Rabbits - Distraction");
+        optionsButton.add(jCheckBoxMenuItem1);
 
         menuBar.add(optionsButton);
 
@@ -596,6 +601,7 @@ public class RVFGui extends javax.swing.JFrame {
     private javax.swing.JRadioButtonMenuItem goalDrivenOption;
     private javax.swing.JRadioButtonMenuItem hybridOption;
     private javax.swing.JMenu infoMenuButton;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;

@@ -80,7 +80,6 @@ public class RabbitAgent extends Agent {
             } else {
                 //start exploring
                 //System.out.println("no objects around - exploring");
-                lastLogs.add(0,"There is nothing around me, I will explore!");
                 goal = new Explore(null);
                 if (toExplore.isEmpty()) {
                     discoverExplorationSpaces();
@@ -149,30 +148,13 @@ public class RabbitAgent extends Agent {
                         //no one has targeted it, add this goal to the agenda
                         System.out.println("this carrot seems free");
                         lastLogs.add(0,"I have found a carrot and I am claiming it!");
-                        myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot,goal.getGoalObject()));
+                        myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot,goal.getGoalObject(),this.name));
                         this.addGoal(goal);
                     }
-//                } else {
-//                    //agenda top is a carrot, so check if the new one is closer
-//                    if ((manhattanDistance(this, agenda.getTop().getGoalObject())
-//                            > manhattanDistance(this, goal.getGoalObject()))
-//                            && agenda.getTop().getPriority() <= goal.getPriority()) {
-//                        if (myGroup.checkCarrotClaimed(goal.getGoalObject())) {
-//                            //if someone has targeted it, then find goal again
-//                            objAround.remove(goal.getGoalObject());
-//                            findGoal();
-//                        } else {
-//                            System.out.println("changing my goal");
-//                            EnvironmentObject currentTarget = agenda.getTop().getGoalObject();
-//                            agenda.removeTop();
-//                            myGroup.broadcastMessage(new Message(MessageType.UnclaimCarrot,goal.getGoalObject()));
-//
-//                            myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot,goal.getGoalObject()));
-//                            this.agenda.addTask(goal);
-//                        }
-//                    }
-//                }
-            } else {
+            } else if(goal instanceof Explore) {
+                lastLogs.add(0,"There is nothing around me, I will explore!");
+                this.addGoal(goal);
+            }else{
                 this.addGoal(goal);
             }
         }
