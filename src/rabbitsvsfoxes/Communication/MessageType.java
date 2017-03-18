@@ -9,6 +9,7 @@ public enum MessageType {
     RequestBackup,
     RequestAmbush,
     RequestGroupWork,
+    RequestDistraction,
     ClaimCarrot,
     UnclaimCarrot;
 

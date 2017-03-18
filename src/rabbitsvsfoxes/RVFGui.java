@@ -21,7 +21,6 @@ import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
-import javax.swing.border.TitledBorder;
 
 /**
  *
@@ -29,8 +28,8 @@ import javax.swing.border.TitledBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
-    private final int RABBITS = 5;
-    private final int FOXES = 5;
+    private final int RABBITS = 2;
+    private final int FOXES = 0;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
     private final int size = 45;
@@ -61,6 +60,7 @@ public class RVFGui extends javax.swing.JFrame {
     }
 
     private void initialiseVariables() {
+        this.setSize(new java.awt.Dimension(1100, 700));
         labels = new ArrayList<>();
         panel1 = new JPanel(new GridLayout(size, size));
         agentBehaviourGroup = new ButtonGroup();
@@ -176,7 +176,7 @@ public class RVFGui extends javax.swing.JFrame {
                 //show information about objects on hover
                 curLabel.setToolTipText("<html>" + eo.toString() + "</html>");
                 
-                if(eo instanceof FoxAgent ){
+                if(eo instanceof FoxAgent || eo instanceof RabbitAgent){
                     curLabel.setBackground(((Agent)eo).getMyColor());
                     if(((Agent)eo).getTeamColor()!=null){
                         curLabel.setBackground(((Agent)eo).getTeamColor());
@@ -211,6 +211,10 @@ public class RVFGui extends javax.swing.JFrame {
 
     public boolean getFoxesTeamwork3() {
         return foxesTeamwork3.isSelected();
+    }
+    
+    public boolean getRabbitsTeamwork1() {
+        return rabbitsTeamwork1.isSelected();
     }
 
     private void step() {
@@ -294,7 +298,7 @@ public class RVFGui extends javax.swing.JFrame {
         foxesTeamwork1 = new javax.swing.JCheckBoxMenuItem();
         foxesTeamwork2 = new javax.swing.JCheckBoxMenuItem();
         foxesTeamwork3 = new javax.swing.JCheckBoxMenuItem();
-        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
+        rabbitsTeamwork1 = new javax.swing.JCheckBoxMenuItem();
         speedMenu = new javax.swing.JMenu();
         veryFastRB = new javax.swing.JRadioButtonMenuItem();
         fastRB = new javax.swing.JRadioButtonMenuItem();
@@ -375,16 +379,19 @@ public class RVFGui extends javax.swing.JFrame {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 493, Short.MAX_VALUE)
+            .addGap(0, 498, Short.MAX_VALUE)
         );
 
         startMenu.setText("Start");
+        startMenu.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         menuBar.add(startMenu);
 
         stopMenu.setText("Stop");
+        stopMenu.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         menuBar.add(stopMenu);
 
         optionsButton.setText("Options");
+        optionsButton.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
 
         goalDrivenOption.setSelected(true);
         goalDrivenOption.setText("Purely Goal-Driven");
@@ -434,12 +441,13 @@ public class RVFGui extends javax.swing.JFrame {
         optionsButton.add(foxesTeamwork3);
         optionsButton.add(new JSeparator(SwingConstants.HORIZONTAL));
 
-        jCheckBoxMenuItem1.setText("Rabbits - Distraction");
-        optionsButton.add(jCheckBoxMenuItem1);
+        rabbitsTeamwork1.setText("Rabbits - Distraction");
+        optionsButton.add(rabbitsTeamwork1);
 
         menuBar.add(optionsButton);
 
         speedMenu.setText("Speed");
+        speedMenu.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
 
         veryFastRB.setText("Very Fast");
         veryFastRB.addActionListener(new java.awt.event.ActionListener() {
@@ -478,6 +486,7 @@ public class RVFGui extends javax.swing.JFrame {
 
         infoMenuButton.setText("Info");
         infoMenuButton.setToolTipText("");
+        infoMenuButton.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
 
         showStatsButton.setText("Show Statistics");
         showStatsButton.addActionListener(new java.awt.event.ActionListener() {
@@ -499,7 +508,7 @@ public class RVFGui extends javax.swing.JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -601,7 +610,6 @@ public class RVFGui extends javax.swing.JFrame {
     private javax.swing.JRadioButtonMenuItem goalDrivenOption;
     private javax.swing.JRadioButtonMenuItem hybridOption;
     private javax.swing.JMenu infoMenuButton;
-    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
@@ -612,6 +620,7 @@ public class RVFGui extends javax.swing.JFrame {
     private javax.swing.JRadioButtonMenuItem normalRB;
     private javax.swing.JMenu optionsButton;
     private javax.swing.JLabel rabbitsNumber;
+    private javax.swing.JCheckBoxMenuItem rabbitsTeamwork1;
     private javax.swing.JMenuItem showStatsButton;
     private javax.swing.JRadioButtonMenuItem slowRB;
     private javax.swing.JMenu speedMenu;

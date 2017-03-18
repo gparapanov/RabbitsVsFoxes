@@ -17,6 +17,7 @@ import rabbitsvsfoxes.Goals.EatCarrot;
 import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.EnvironmentObject;
 import rabbitsvsfoxes.FleeSpace;
+import rabbitsvsfoxes.Goals.DistractFox;
 import rabbitsvsfoxes.Goals.Explore;
 import rabbitsvsfoxes.Goals.Flee;
 import rabbitsvsfoxes.Goals.Goal;
@@ -29,17 +30,18 @@ import rabbitsvsfoxes.UnexploredSpace;
 public class RabbitAgent extends Agent {
 
     private ArrayList<FoxAgent> foxesAround;
-    private final int threatRadius = 5;
+    private final int threatRadius;
+    private ArrayList<FoxAgent> foxesDistrated=new ArrayList<>();
 
     public RabbitAgent(int x, int y, Environment env, MessageGroup mg) {
         super(x, y, env, mg);
         this.setIcon(new ImageIcon("images/rabbit1.png", "Rabbit icon"));
         foxesAround = new ArrayList<>();
-
+        this.threatRadius = 6;
     }
 
     public RabbitAgent() {
-
+        this.threatRadius = 6;
     }
 
     @Override
@@ -101,7 +103,7 @@ public class RabbitAgent extends Agent {
             //checks on which sides the enemies are, so that the direction too flee
             //can be determined
             //System.out.println("there is a fox around");
-            lastLogs.add(0,"There is a fox around, I must flee!");
+            lastLogs.add(0, "There is a fox around, I must flee!");
             for (FoxAgent fox : foxesAround) {
                 if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
                         && fox.getY() <= this.getY() + threatRadius
@@ -134,63 +136,112 @@ public class RabbitAgent extends Agent {
             goal.setGoalObject(determineFleeDirection(enemyU, enemyD, enemyR, enemyL));
             //System.out.println("running away!");
         }
+
+        //open the postbox to check if there are any messages
+        Goal postGoal = openPostbox();
+        //if there is a valid message there and the goal is not already in the
+        //agenda, then add it and remove other targeted rabbits
+        if (postGoal != null) {
+            if (agenda.getTop() != null && postGoal.getPriority() > agenda.getTop().getPriority()) {
+                //If the agent has something else to - do remove it -
+                //this is done to avoid keeping a reference another rabbit and
+                //making sure that the foxes won't go after it unless it can see it.
+                agenda.removeTop();
+            }
+            if (!agenda.checkExistists(postGoal) && !foxesDistrated.contains(postGoal.getGoalObject())) {
+                this.addGoal(postGoal);
+                foxesDistrated.add((FoxAgent)postGoal.getGoalObject());
+            } 
+        }
+
         if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
             if (goal instanceof EatCarrot) {
                 //if (!(agenda.getTop() instanceof EatCarrot)) {
-                    //agenda top is not eat carrot
-                    if (myGroup.checkCarrotClaimed(goal.getGoalObject())) {
+                //agenda top is not eat carrot
+                if (myGroup.checkCarrotClaimed(goal.getGoalObject())) {
                         //if someone has targeted it, then find goal again
-                        System.out.println("someone already has targeted this");
-                        lastLogs.add(0,"Found a carrot, but someone already saw it first!");
-                        objAround.remove(goal.getGoalObject());
-                        findGoal();
-                    } else {
+                    //System.out.println("someone already has targeted this");
+                    lastLogs.add(0, "Found a carrot, but someone already saw it first!");
+                    objAround.remove(goal.getGoalObject());
+                    findGoal();
+                } else {
                         //no one has targeted it, add this goal to the agenda
-                        System.out.println("this carrot seems free");
-                        lastLogs.add(0,"I have found a carrot and I am claiming it!");
-                        myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot,goal.getGoalObject(),this.name));
-                        this.addGoal(goal);
-                    }
-            } else if(goal instanceof Explore) {
-                lastLogs.add(0,"There is nothing around me, I will explore!");
+                    //System.out.println("this carrot seems free");
+                    lastLogs.add(0, "I have found a carrot and I am claiming it!");
+                    myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot, goal.getGoalObject(), this.name));
+                    this.addGoal(goal);
+                }
+            } else if (goal instanceof Explore && agenda.getTasks().size() == 0) {
+                lastLogs.add(0, "There is nothing around me, I will explore!");
                 this.addGoal(goal);
-            }else{
+            } else if (goal instanceof Flee) {
                 this.addGoal(goal);
+                if (env.getGui().getRabbitsTeamwork1() ) {
+                    Message messageToSend = new Message(MessageType.RequestDistraction, foxesAround.get(0), this.name);
+                    messageToSend.setTeamColor(myColor);
+                    myGroup.broadcastMessage(messageToSend);
+                    lastLogs.add(0, "A fox is chasing me, asking for help!");
+                    
+                }
             }
         }
-        if (agenda.getTop()!=null && !agenda.getTop().getGoalObject().isAlive()) {
+        if (agenda.getTop() != null && !agenda.getTop().getGoalObject().isAlive()) {
             agenda.removeTop();
         }
         //System.out.println("rabbit found carrot with score: " + minDistance); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
+    public Goal openPostbox() {
+        Message newestMessage = myGroup.getMessage(messagesReadIndex);
+        if (newestMessage != null) {
+            if (newestMessage.getMsgType().equals(MessageType.RequestDistraction)
+                    && !newestMessage.getSenderName().equals(name)) {
+                //Condition1 - whether the recipient is close to the sender.
+                if (diagonalDistance(this, newestMessage.getTargetObject()) <= env.getSize() / 3) {
+                    Goal newGoal = new DistractFox(newestMessage.getTargetObject());
+                    newGoal.setTeamColor(newestMessage.getTeamColor());
+                   
+                    lastLogs.add(0, newestMessage.getSenderName() + " nearby needs help, going to distract " + ((Agent) newestMessage.getTargetObject()).getName());
+                    
+                    return newGoal;
+                } else {
+                    lastLogs.add(0, newestMessage.getSenderName() + " needs help, but I am too far away!");
+                }
+
+            }
+
+        }
+        return null;
+    }
+
+    @Override
     public boolean checkMove(Direction d) {
         switch (d) {
             case UP:
-                if (getY() - 1 >= 0 && (env.spaceOccupied(getX(), getY() - 1) == null)){
-                     //   || env.spaceOccupied(getX(), getY() - 1) instanceof Carrot)) {
+                if (getY() - 1 >= 0 && (env.spaceOccupied(getX(), getY() - 1) == null)) {
+                    //   || env.spaceOccupied(getX(), getY() - 1) instanceof Carrot)) {
                     //setY(getY() - 1);
                     return true;
                 }
                 break;
             case DOWN:
-                if (getY() + 1 < env.getSize() && (env.spaceOccupied(getX(), getY() + 1) == null)){
-                       // || env.spaceOccupied(getX(), getY() + 1) instanceof Carrot)) {
+                if (getY() + 1 < env.getSize() && (env.spaceOccupied(getX(), getY() + 1) == null)) {
+                    // || env.spaceOccupied(getX(), getY() + 1) instanceof Carrot)) {
                     //setY(getY() + 1);
                     return true;
                 }
                 break;
             case LEFT:
-                if (getX() - 1 >= 0 && (env.spaceOccupied(getX() - 1, getY()) == null)){
-                      //  || env.spaceOccupied(getX() - 1, getY()) instanceof Carrot)) {
+                if (getX() - 1 >= 0 && (env.spaceOccupied(getX() - 1, getY()) == null)) {
+                    //  || env.spaceOccupied(getX() - 1, getY()) instanceof Carrot)) {
                     //setY(getX() - 1);
                     return true;
                 }
                 break;
             case RIGHT:
-                if (getX() + 1 < env.getSize() && (env.spaceOccupied(getX() + 1, getY()) == null)){
-                      //  || env.spaceOccupied(getX() + 1, getY()) instanceof Carrot)) {
+                if (getX() + 1 < env.getSize() && (env.spaceOccupied(getX() + 1, getY()) == null)) {
+                    //  || env.spaceOccupied(getX() + 1, getY()) instanceof Carrot)) {
                     //setY(getX() + 1);
                     return true;
                 }

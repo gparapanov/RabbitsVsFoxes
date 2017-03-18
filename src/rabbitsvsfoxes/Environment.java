@@ -26,11 +26,17 @@ public class Environment {
     private Set<Agent> agents;
     private Set<EnvironmentObject> envObjects;
     private ArrayList<Carrot> carrots;
-    
-    private String[] names={"Donald","Nick","John","Mick","Peter","Albus",
-    "Joe","Francis","Logan","Ryan","Jerry","Jeb","Harry","Chris","Ted","Barry",
-    "Barry","Mason","Ben","Rey","Fin","Luke","Poe","Han","Paul","Vin","Adam",
-    "Jeff","Rick","Bernie","Jimmy","Jesus","Hugh","Bill","Ian","Pip","Ron"};
+
+    /*
+     This is an array of names and each agent is assigned one.
+     */
+    private String[] names = {"Donald", "Nick", "John", "Mick", "Peter", "Albus",
+        "Joe", "Francis", "Logan", "Ryan", "Jerry", "Jeb", "Harry", "Chris", "Ted", "Barry",
+        "Mason", "Ben", "Rey", "Fin", "Luke", "Poe", "Han", "Paul", "Vin", "Adam","Chad",
+        "Jeff", "Rick", "Bernie", "Jimmy", "Jesus", "Bruce", "Bill", "Ian", "Pip", "Ron"};
+    private int rabbitNameIndex = 0;
+    private int foxNameIndex = names.length - 1;
+
     private int size;
     private RVFGui gui;
     private final int initialCarrots;
@@ -75,10 +81,10 @@ public class Environment {
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
             RabbitAgent rabbit = new RabbitAgent(newX, newY, this, rabbitsGroup);
-            
+
             final float hue = random.nextFloat();
             rabbit.setMyColor(Color.getHSBColor(hue, saturation, luminance));
-            
+
             this.addEnvironmentObject(rabbit);
         }
         for (int i = 0; i < f; i++) {//create foxes
@@ -101,9 +107,27 @@ public class Environment {
     public void removeAgent(Agent a) {
         removeEnvironmentObject(a);
     }
-    public String getName(){
-        return names[(int)Math.floor(Math.random()*names.length)];
+    /**
+     * Method, which gives a name to an agent.
+     * Foxes are assigned names starting from the last name of the array 
+     * of names, whereas rabbits are assigned ones from the beginning.
+     * @param ag The agent that requests a name.
+     * @return Name for that agent.
+     */
+    public String getName(Agent ag) {
+        if (ag instanceof FoxAgent) {
+            if (foxNameIndex < 0) {
+                foxNameIndex = names.length - 1;
+            }
+            return names[foxNameIndex--];
+        } else {
+            if (rabbitNameIndex >= names.length) {
+                rabbitNameIndex = 0;
+            }
+            return names[rabbitNameIndex++];
+        }
     }
+
     public void addEnvironmentObject(EnvironmentObject eo) {
         envObjects.add(eo);
         if (eo instanceof Agent) {

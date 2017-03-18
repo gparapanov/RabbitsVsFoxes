@@ -13,6 +13,7 @@ import rabbitsvsfoxes.Communication.Message;
 import rabbitsvsfoxes.Communication.MessageGroup;
 import rabbitsvsfoxes.Goals.EatCarrot;
 import rabbitsvsfoxes.Environment;
+import rabbitsvsfoxes.Goals.DistractFox;
 import rabbitsvsfoxes.Goals.Explore;
 import rabbitsvsfoxes.Goals.Goal;
 import rabbitsvsfoxes.UnexploredSpace;
@@ -29,7 +30,7 @@ public class Agent extends EnvironmentObject {
     protected ArrayList<EnvironmentObject> objAround;
     protected ArrayList<UnexploredSpace> toExplore;
     
-    protected int health=100;
+    protected double health=100;
     protected String name;
     protected Agenda agenda;
     protected Color myColor;
@@ -37,7 +38,7 @@ public class Agent extends EnvironmentObject {
     protected Environment env;
     
     protected MessageGroup myGroup;
-    protected int messagesReadIndex=0;
+    protected int messagesReadIndex;
 
     public Agent(int x, int y, Environment env,MessageGroup mg) {
         super(x, y);
@@ -47,7 +48,8 @@ public class Agent extends EnvironmentObject {
         this.toExplore = new ArrayList<>();
         this.myGroup=mg;
         this.lastLogs=new ArrayList<>();
-        this.name=env.getName();
+        this.name=env.getName(this);
+        this.messagesReadIndex=0;
         discoverExplorationSpaces();
     }
 
@@ -113,10 +115,11 @@ public class Agent extends EnvironmentObject {
         return manhattanDistance(ag, eo);
     }
 
-    public void findGoal() {
-
+    public void findGoal() {}
+    public Goal openPostbox(){
+        return null;
     }
-
+    
     public void lookAround(int radius) {
 
     }
@@ -125,7 +128,11 @@ public class Agent extends EnvironmentObject {
         lookAround(radius);
         findGoal();
         if (agenda.getTop() != null) {
-            this.setTeamColor(agenda.getTop().getTeamColor());
+            if(agenda.getTop().getTeamColor()==null){
+                this.setTeamColor(myColor);
+            }else{
+                this.setTeamColor(agenda.getTop().getTeamColor());
+            }
             moveTowardsGoal(agenda.getTop());
         } else {
             //System.out.println("Game Over!");
@@ -134,6 +141,8 @@ public class Agent extends EnvironmentObject {
     }
 
     public void moveTowardsGoal(Goal g) {
+        
+        
         int goalX = g.getGoalObject().getX();
         int goalY = g.getGoalObject().getY();
         int differenceX = Math.abs(goalX - getX());
@@ -235,15 +244,22 @@ public class Agent extends EnvironmentObject {
             env.removeEnvironmentObject(g.getGoalObject());
             
         }
+        if(g instanceof DistractFox && manhattanDistance(this, g.getGoalObject()) <= 4){
+            g.setCompleted(true);
+            agenda.removeTask(g);
+        }
         decreaseHealth();
         if(health<=0){
             this.setAlive(false);
         }
-        if(lastLogs.size()>3)lastLogs.remove(lastLogs.size()-1);
+        while(lastLogs.size()>5){
+            lastLogs.remove(lastLogs.size()-1);
+        }
+        //if(lastLogs.size()>3)lastLogs.remove(lastLogs.size()-1);
 
     }
     public void decreaseHealth(){
-        this.health--;
+        this.health-=0.8;
     }
     public void replenishHealth(){
         this.health=100;
@@ -298,11 +314,15 @@ public class Agent extends EnvironmentObject {
         return teamColor;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void setTeamColor(Color teamColor) {
         this.teamColor = teamColor;
     }
 
-    public int getHealth() {
+    public double getHealth() {
         return health;
     }
 

@@ -21,10 +21,11 @@ public class Message {
         this.msgType = type;
     }
     /**
-     * A constructor for a message containing only message type and the target
-     * object.
+     * A constructor for a message containing only message type, the target
+     * object and name of the sender.
      * @param type 
      * @param obj 
+     * @param name Name of the sender.
      */
     public Message(MessageType type, EnvironmentObject obj, String name) {
         this.msgType = type;
@@ -35,7 +36,8 @@ public class Message {
      * 
      * @param type
      * @param obj
-     * @param d The direction in which the target object is moving.
+     * @param d
+     * @param name Name of sender.
      */
     public Message(MessageType type, EnvironmentObject obj, Direction d, String name) {
         this.msgType = type;

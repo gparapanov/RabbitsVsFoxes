@@ -112,16 +112,25 @@
         <Menu class="javax.swing.JMenu" name="startMenu">
           <Properties>
             <Property name="text" type="java.lang.String" value="Start"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Segoe UI" size="14" style="3"/>
+            </Property>
           </Properties>
         </Menu>
         <Menu class="javax.swing.JMenu" name="stopMenu">
           <Properties>
             <Property name="text" type="java.lang.String" value="Stop"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Segoe UI" size="14" style="3"/>
+            </Property>
           </Properties>
         </Menu>
         <Menu class="javax.swing.JMenu" name="optionsButton">
           <Properties>
             <Property name="text" type="java.lang.String" value="Options"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Segoe UI" size="14" style="3"/>
+            </Property>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JRadioButtonMenuItem" name="goalDrivenOption">
@@ -182,7 +191,7 @@
                 <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="optionsButton.add(new JSeparator(SwingConstants.HORIZONTAL));"/>
               </AuxValues>
             </MenuItem>
-            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="jCheckBoxMenuItem1">
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="rabbitsTeamwork1">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Rabbits - Distraction"/>
               </Properties>
@@ -192,6 +201,9 @@
         <Menu class="javax.swing.JMenu" name="speedMenu">
           <Properties>
             <Property name="text" type="java.lang.String" value="Speed"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Segoe UI" size="14" style="3"/>
+            </Property>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JRadioButtonMenuItem" name="veryFastRB">
@@ -233,6 +245,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Info"/>
             <Property name="toolTipText" type="java.lang.String" value=""/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Segoe UI" size="14" style="3"/>
+            </Property>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="showStatsButton">
@@ -271,12 +286,12 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="jPanel1" alignment="0" max="32767" attributes="0"/>
+          <Component id="jPanel1" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="jPanel1" alignment="0" max="32767" attributes="0"/>
+          <Component id="jPanel1" alignment="1" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>
@@ -291,7 +306,7 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="493" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="498" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>

@@ -9,7 +9,7 @@ import rabbitsvsfoxes.EnvironmentObject;
 public class Flee extends Goal {
 
     public Flee(EnvironmentObject eo) {
-        this.setPriority(10);//max priority
+        this.setPriority(8);//max priority
         this.setGoalObject(eo);
     }
     
