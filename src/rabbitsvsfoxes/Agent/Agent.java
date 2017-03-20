@@ -43,7 +43,7 @@ public class Agent extends EnvironmentObject {
     public Agent(int x, int y, Environment env,MessageGroup mg) {
         super(x, y);
         this.env = env;
-        this.agenda = new Agenda();
+        this.agenda = new Agenda(this);
         this.objAround = new ArrayList<>();
         this.toExplore = new ArrayList<>();
         this.myGroup=mg;
@@ -100,7 +100,7 @@ public class Agent extends EnvironmentObject {
         }
     }
 
-    public int manhattanDistance(EnvironmentObject eo1, EnvironmentObject eo2) {
+    public static int manhattanDistance(EnvironmentObject eo1, EnvironmentObject eo2) {
         //calculates manhattan distance between agent and objects nearby
         return Math.abs(eo2.getX() - eo1.getX()) + Math.abs(eo2.getY() - eo1.getY());
     }
