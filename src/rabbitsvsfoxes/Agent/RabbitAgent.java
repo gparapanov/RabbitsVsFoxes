@@ -31,7 +31,7 @@ public class RabbitAgent extends Agent {
 
     private ArrayList<FoxAgent> foxesAround;
     private final int threatRadius;
-    private ArrayList<FoxAgent> foxesDistrated=new ArrayList<>();
+    private ArrayList<FoxAgent> foxesDistrated = new ArrayList<>();
 
     public RabbitAgent(int x, int y, Environment env, MessageGroup mg) {
         super(x, y, env, mg);
@@ -47,16 +47,16 @@ public class RabbitAgent extends Agent {
     @Override
     public void findGoal() {
         this.replenishHealth();
-        System.out.println("my agenda contains: ");
-        for (Goal g : agenda.getTasks()) {
-
-            if (g instanceof EatCarrot) {
-                System.out.println("a carrot with priority: " + g.getPriority());
-            } else if (g instanceof Explore) {
-                System.out.println("exploration ");
-            }
-
-        }
+//        System.out.println("my agenda contains: ");
+//        for (Goal g : agenda.getTasks()) {
+//
+//            if (g instanceof EatCarrot) {
+//                System.out.println("a carrot with priority: " + g.getPriority());
+//            } else if (g instanceof Explore) {
+//                System.out.println("exploration ");
+//            }
+//
+//        }
         Goal goal;
         goal = new EatCarrot(null);
         int minDistance = 10000;
@@ -103,32 +103,23 @@ public class RabbitAgent extends Agent {
             //checks on which sides the enemies are, so that the direction to flee
             //can be determined
             //System.out.println("there is a fox around");
-            lastLogs.add(0, "There is a fox around, I must flee!");
             for (FoxAgent fox : foxesAround) {
-                if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
-                        && fox.getY() <= this.getY() + threatRadius
-                        && fox.getY() >= this.getY()) {
-                    enemyD = true;
-                    //System.out.println("there is a fox down");
-                    //there is an enemy down
-                } else if (fox.getX() <= this.getX() + 1 && fox.getX() >= this.getX() - 1
-                        && fox.getY() >= this.getY() - threatRadius
-                        && fox.getY() <= this.getY()) {
-                    enemyU = true;
-                    //System.out.println("there is a fox up");
-                    //there is an enemy up
-                } else if (fox.getX() <= this.getX() + threatRadius && fox.getX() >= this.getX()
-                        && fox.getY() <= this.getY() + 1
-                        && fox.getY() >= this.getY() - 1) {
-                    enemyR = true;
-                    //System.out.println("there is a fox right");
-                    //enemy on the right
-                } else if (fox.getX() <= this.getX() && fox.getX() >= this.getX() - threatRadius
-                        && fox.getY() <= this.getY() + 1
-                        && fox.getY() >= this.getY() - 1) {
-                    enemyL = true;
-                    //System.out.println("there is a fox left");
-                    //enemy on the left
+                int foxX = fox.getX();
+                int foxY = fox.getY();
+                int differenceX = Math.abs(foxX - getX());
+                int differenceY = Math.abs(foxY - getY());
+                if(differenceX>differenceY){
+                    if(foxX>getX()){
+                        enemyR=true;
+                    }else{
+                        enemyL=true;
+                    }
+                }else{
+                    if(foxY>getY()){
+                        enemyD=true;
+                    }else{
+                        enemyU=true;
+                    }
                 }
             }
             //now figure out in which direction to go to avoid the threat
@@ -148,10 +139,9 @@ public class RabbitAgent extends Agent {
                 //making sure that the foxes won't go after it unless it can see it.
                 agenda.removeTop();
             }
-            if (!agenda.checkExistists(postGoal) && !foxesDistrated.contains(postGoal.getGoalObject())) {
+            if (!agenda.checkExistists(postGoal)) {
                 this.addGoal(postGoal);
-                foxesDistrated.add((FoxAgent)postGoal.getGoalObject());
-            } 
+            }
         }
 
         if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
@@ -161,15 +151,18 @@ public class RabbitAgent extends Agent {
                 if (myGroup.checkCarrotClaimed(goal.getGoalObject())) {
                     //if someone has targeted it, then find goal again
                     //System.out.println("someone already has targeted this");
-                    String claimer=((Carrot)goal.getGoalObject()).getClaimedBy();
-                    lastLogs.add(0, "Found a carrot, but "+claimer+" already saw it first!");
-                    objAround.remove(goal.getGoalObject());
-                    findGoal();
+                    String claimer = ((Carrot) goal.getGoalObject()).getClaimedBy();
+                    if (!claimer.equals(myName)) {
+                        lastLogs.add(0, "Found a carrot, but " + claimer + " already saw it first!");
+                        objAround.remove(goal.getGoalObject());
+                        findGoal();
+                    }
+
                 } else {
-                        //no one has targeted it, add this goal to the agenda
+                    //no one has targeted it, add this goal to the agenda
                     //System.out.println("this carrot seems free");
                     lastLogs.add(0, "I have found a carrot and I am claiming it!");
-                    myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot, goal.getGoalObject(), this.name));
+                    myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot, goal.getGoalObject(), this.myName));
                     this.addGoal(goal);
                 }
             } else if (goal instanceof Explore && agenda.getTasks().size() == 0) {
@@ -177,17 +170,34 @@ public class RabbitAgent extends Agent {
                 this.addGoal(goal);
             } else if (goal instanceof Flee) {
                 this.addGoal(goal);
-                if (env.getGui().getRabbitsTeamwork1() ) {
-                    Message messageToSend = new Message(MessageType.RequestDistraction, foxesAround.get(0), this.name);
-                    messageToSend.setTeamColor(myColor);
-                    myGroup.broadcastMessage(messageToSend);
-                    lastLogs.add(0, "A fox is chasing me, asking for help!");
-                    
+                if (env.getGui().getRabbitsTeamwork1()) {
+                    if (!myGroup.checkFoxBeingDistracted(foxesAround.get(0))
+                            && foxesAround.get(0).getCurrentTarget().equals(myName)) {
+                        Message messageToSend = new Message(MessageType.RequestDistraction, foxesAround.get(0), this.myName);
+                        messageToSend.setTeamColor(myColor);
+                        myGroup.broadcastMessage(messageToSend);
+                        lastLogs.add(0, "A fox is chasing me, asking for help!");
+                    }
+
                 }
+                lastLogs.add(0, "There is a fox around, I must flee!");
             }
         }
         if (agenda.getTop() != null && !agenda.getTop().getGoalObject().isAlive()) {
             agenda.removeTop();
+            findGoal();
+        }
+        /*
+         A check for a special case, when a rabbit has requested backup and it has died.
+         The rabbit going for the backup will see this and do something else instead.
+         This is done by changing the current target string of the fox.
+         */
+        if (agenda.getTop() != null) {
+            if (agenda.getTop() instanceof DistractFox
+                    && ((FoxAgent) agenda.getTop().getGoalObject()).getCurrentTarget().equals("")) {
+                agenda.removeTop();
+                findGoal();
+            }
         }
         //System.out.println("rabbit found carrot with score: " + minDistance); //To change body of generated methods, choose Tools | Templates.
     }
@@ -196,16 +206,19 @@ public class RabbitAgent extends Agent {
     public Goal openPostbox() {
         Message newestMessage = myGroup.getMessage(messagesReadIndex);
         if (newestMessage != null) {
+            messagesReadIndex++;
             if (newestMessage.getMsgType().equals(MessageType.RequestDistraction)
-                    && !newestMessage.getSenderName().equals(name)) {
+                    && !newestMessage.getSenderName().equals(myName)) {
                 //Condition1 - whether the recipient is close to the sender.
-                if (diagonalDistance(this, newestMessage.getTargetObject()) <= env.getSize() / 3) {
+                if (!myGroup.checkFoxBeingDistracted(newestMessage.getTargetObject())
+                        && diagonalDistance(this, newestMessage.getTargetObject()) <= env.getSize() / 4) {
+                    myGroup.broadcastMessage(new Message(MessageType.EngageInDistraction, newestMessage.getTargetObject(), myName));
                     Goal newGoal = new DistractFox(newestMessage.getTargetObject());
                     newGoal.setTeamColor(newestMessage.getTeamColor());
-                   
-                    lastLogs.add(0, newestMessage.getSenderName() + " nearby needs help, going to distract " + ((Agent) newestMessage.getTargetObject()).getName());
-                    
+                    lastLogs.add(0, newestMessage.getSenderName() + " nearby needs help, going to distract " + ((Agent) newestMessage.getTargetObject()).getMyName());
                     return newGoal;
+                } else if (myGroup.checkFoxBeingDistracted(newestMessage.getTargetObject())) {
+                    lastLogs.add(0, newestMessage.getSenderName() + " nearby needs help, but someone is already going there!");
                 } else {
                     lastLogs.add(0, newestMessage.getSenderName() + " needs help, but I am too far away!");
                 }
@@ -254,7 +267,6 @@ public class RabbitAgent extends Agent {
     public FleeSpace determineFleeDirection(boolean enemyU, boolean enemyD, boolean enemyR, boolean enemyL) {
         if (enemyU && enemyD && enemyL && checkMove(Direction.RIGHT)) {
             //enemies up, down, left, therefore go right
-
             return new FleeSpace(getX() + 1, getY());
         } else if (enemyU && enemyD && enemyR && checkMove(Direction.LEFT)) {
             //enemies up, down, right, therefore go left etc....
@@ -304,7 +316,7 @@ public class RabbitAgent extends Agent {
                 return new FleeSpace(getX(), getY() + 1);
             } else if (checkMove(Direction.LEFT)) {
                 return new FleeSpace(getX() - 1, getY());
-            }else if (checkMove(Direction.RIGHT)) {
+            } else if (checkMove(Direction.RIGHT)) {
                 return new FleeSpace(getX() + 1, getY());
             }
         } else if (enemyD) {
@@ -312,7 +324,7 @@ public class RabbitAgent extends Agent {
                 return new FleeSpace(getX(), getY() - 1);
             } else if (checkMove(Direction.RIGHT)) {
                 return new FleeSpace(getX() + 1, getY());
-            }else if (checkMove(Direction.LEFT)) {
+            } else if (checkMove(Direction.LEFT)) {
                 return new FleeSpace(getX() - 1, getY());
             }
         } else if (enemyR) {
@@ -320,16 +332,16 @@ public class RabbitAgent extends Agent {
                 return new FleeSpace(getX() - 1, getY());
             } else if (checkMove(Direction.UP)) {
                 return new FleeSpace(getX(), getY() - 1);
-            }else if (checkMove(Direction.DOWN)) {
-                return new FleeSpace(getX(), getY()+1);
+            } else if (checkMove(Direction.DOWN)) {
+                return new FleeSpace(getX(), getY() + 1);
             }
         } else if (enemyL) {
             if (checkMove(Direction.RIGHT)) {
                 return new FleeSpace(getX() + 1, getY());
             } else if (checkMove(Direction.DOWN)) {
                 return new FleeSpace(getX(), getY() + 1);
-            }else if (checkMove(Direction.UP)) {
-                return new FleeSpace(getX(), getY()-1);
+            } else if (checkMove(Direction.UP)) {
+                return new FleeSpace(getX(), getY() - 1);
             }
         }
         return null;

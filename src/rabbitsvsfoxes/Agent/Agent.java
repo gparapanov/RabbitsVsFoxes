@@ -11,6 +11,7 @@ import rabbitsvsfoxes.Direction;
 import rabbitsvsfoxes.Objects.EnvironmentObject;
 import rabbitsvsfoxes.Communication.Message;
 import rabbitsvsfoxes.Communication.MessageGroup;
+import rabbitsvsfoxes.Communication.MessageType;
 import rabbitsvsfoxes.Goals.EatCarrot;
 import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.Goals.DistractFox;
@@ -31,7 +32,7 @@ public class Agent extends EnvironmentObject {
     protected ArrayList<UnexploredSpace> toExplore;
     
     protected double health=100;
-    protected String name;
+    protected String myName;
     protected Agenda agenda;
     protected Color myColor;
     protected Color teamColor;
@@ -48,7 +49,7 @@ public class Agent extends EnvironmentObject {
         this.toExplore = new ArrayList<>();
         this.myGroup=mg;
         this.lastLogs=new ArrayList<>();
-        this.name=env.getName(this);
+        this.myName=env.getName(this);
         this.messagesReadIndex=0;
         discoverExplorationSpaces();
     }
@@ -247,10 +248,12 @@ public class Agent extends EnvironmentObject {
         if(g instanceof DistractFox && manhattanDistance(this, g.getGoalObject()) <= 4){
             g.setCompleted(true);
             agenda.removeTask(g);
+            myGroup.broadcastMessage(new Message(MessageType.DisengageInDistraction,g.getGoalObject(), myName));
         }
         decreaseHealth();
         if(health<=0){
             this.setAlive(false);
+            env.removeEnvironmentObject(this);
         }
         while(lastLogs.size()>5){
             lastLogs.remove(lastLogs.size()-1);
@@ -259,7 +262,7 @@ public class Agent extends EnvironmentObject {
 
     }
     public void decreaseHealth(){
-        this.health-=0.8;
+        this.health-=0.5;
     }
     public void replenishHealth(){
         this.health=100;
@@ -314,8 +317,8 @@ public class Agent extends EnvironmentObject {
         return teamColor;
     }
 
-    public String getName() {
-        return name;
+    public String getMyName() {
+        return myName;
     }
 
     public void setTeamColor(Color teamColor) {
@@ -348,7 +351,7 @@ public class Agent extends EnvironmentObject {
         for(String itemString:lastLogs){
             logsString+=itemString+"<br>";
         }
-        String output=super.toString()+"<br>Name: "+this.name+"<br>Health: "+getHealth()+
+        String output=super.toString()+"<br>Name: "+this.myName+"<br>Health: "+getHealth()+
                 "<br>Agenda:<br>"+agenda+"<br>Last action taken:<br>"+
                 logsString;
         return output; 
