@@ -1,7 +1,7 @@
 package rabbitsvsfoxes.Goals;
 
 import java.awt.Color;
-import rabbitsvsfoxes.EnvironmentObject;
+import rabbitsvsfoxes.Objects.EnvironmentObject;
 
 /**
  *

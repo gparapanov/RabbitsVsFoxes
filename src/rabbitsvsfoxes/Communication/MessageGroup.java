@@ -3,8 +3,8 @@ package rabbitsvsfoxes.Communication;
 import java.util.ArrayList;
 import java.util.Iterator;
 import rabbitsvsfoxes.Agent.Agent;
-import rabbitsvsfoxes.Carrot;
-import rabbitsvsfoxes.EnvironmentObject;
+import rabbitsvsfoxes.Objects.Carrot;
+import rabbitsvsfoxes.Objects.EnvironmentObject;
 
 /**
  *

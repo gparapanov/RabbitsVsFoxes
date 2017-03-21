@@ -5,6 +5,9 @@
  */
 package rabbitsvsfoxes;
 
+import rabbitsvsfoxes.Objects.EnvironmentObject;
+import rabbitsvsfoxes.Objects.Carrot;
+import rabbitsvsfoxes.Objects.Bomb;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;

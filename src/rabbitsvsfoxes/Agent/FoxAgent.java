@@ -7,14 +7,14 @@ package rabbitsvsfoxes.Agent;
 
 import rabbitsvsfoxes.Agent.Agent;
 import javax.swing.ImageIcon;
-import rabbitsvsfoxes.Carrot;
+import rabbitsvsfoxes.Objects.Carrot;
 import rabbitsvsfoxes.Communication.Message;
 import rabbitsvsfoxes.Communication.MessageGroup;
 import rabbitsvsfoxes.Communication.MessageType;
 import rabbitsvsfoxes.Direction;
 import rabbitsvsfoxes.Goals.CatchRabbit;
 import rabbitsvsfoxes.Environment;
-import rabbitsvsfoxes.EnvironmentObject;
+import rabbitsvsfoxes.Objects.EnvironmentObject;
 import rabbitsvsfoxes.Goals.Explore;
 import rabbitsvsfoxes.Goals.Goal;
 import rabbitsvsfoxes.UnexploredSpace;

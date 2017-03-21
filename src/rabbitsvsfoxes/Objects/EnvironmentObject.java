@@ -1,4 +1,4 @@
-package rabbitsvsfoxes;
+package rabbitsvsfoxes.Objects;
 
 import javax.swing.ImageIcon;
 

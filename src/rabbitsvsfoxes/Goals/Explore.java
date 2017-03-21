@@ -1,6 +1,6 @@
 package rabbitsvsfoxes.Goals;
 
-import rabbitsvsfoxes.EnvironmentObject;
+import rabbitsvsfoxes.Objects.EnvironmentObject;
 import rabbitsvsfoxes.Goals.Goal;
 
 /**

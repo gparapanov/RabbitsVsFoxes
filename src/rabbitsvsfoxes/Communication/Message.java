@@ -3,7 +3,7 @@ package rabbitsvsfoxes.Communication;
 import java.awt.Color;
 import rabbitsvsfoxes.Agent.RabbitAgent;
 import rabbitsvsfoxes.Direction;
-import rabbitsvsfoxes.EnvironmentObject;
+import rabbitsvsfoxes.Objects.EnvironmentObject;
 import rabbitsvsfoxes.Goals.Goal;
 
 /**

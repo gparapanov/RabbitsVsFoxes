@@ -1,5 +1,7 @@
 package rabbitsvsfoxes;
 
+import rabbitsvsfoxes.Objects.EnvironmentObject;
+import rabbitsvsfoxes.Objects.Carrot;
 import rabbitsvsfoxes.Agent.*;
 import java.awt.Color;
 import java.awt.GridLayout;

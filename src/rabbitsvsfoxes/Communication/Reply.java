@@ -9,7 +9,7 @@ import rabbitsvsfoxes.Communication.Message;
 import rabbitsvsfoxes.Communication.MessageType;
 import rabbitsvsfoxes.Agent.Agent;
 import java.util.List;
-import rabbitsvsfoxes.EnvironmentObject;
+import rabbitsvsfoxes.Objects.EnvironmentObject;
 
 /**
  *

@@ -1,5 +1,7 @@
 package rabbitsvsfoxes;
 
+import rabbitsvsfoxes.Objects.EnvironmentObject;
+
 /**
  *
  * @author Georgi
