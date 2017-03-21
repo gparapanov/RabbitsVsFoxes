@@ -170,6 +170,7 @@ public class RabbitAgent extends Agent {
                 this.addGoal(goal);
             } else if (goal instanceof Flee) {
                 this.addGoal(goal);
+                lastLogs.add(0, "There is a fox around, I must flee!");
                 if (env.getGui().getRabbitsTeamwork1()) {
                     if (!myGroup.checkFoxBeingDistracted(foxesAround.get(0))
                             && foxesAround.get(0).getCurrentTarget().equals(myName)) {
@@ -178,14 +179,13 @@ public class RabbitAgent extends Agent {
                         myGroup.broadcastMessage(messageToSend);
                         lastLogs.add(0, "A fox is chasing me, asking for help!");
                     }
-
                 }
-                lastLogs.add(0, "There is a fox around, I must flee!");
+                
             }
         }
         if (agenda.getTop() != null && !agenda.getTop().getGoalObject().isAlive()) {
             agenda.removeTop();
-            findGoal();
+            //findGoal();
         }
         /*
          A check for a special case, when a rabbit has requested backup and it has died.
@@ -196,7 +196,7 @@ public class RabbitAgent extends Agent {
             if (agenda.getTop() instanceof DistractFox
                     && ((FoxAgent) agenda.getTop().getGoalObject()).getCurrentTarget().equals("")) {
                 agenda.removeTop();
-                findGoal();
+                //findGoal();
             }
         }
         //System.out.println("rabbit found carrot with score: " + minDistance); //To change body of generated methods, choose Tools | Templates.

@@ -8,6 +8,8 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -132,6 +134,59 @@ public class RVFGui extends javax.swing.JFrame {
             }
         });
 
+        this.addKeyListener(new KeyListener() {
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    System.out.println("space pressed");
+                    if (displayTimer.isRunning()) {
+                        displayTimer.stop();
+                    } else {
+                        displayTimer.start();
+                    }
+                } else if (e.getKeyCode() == KeyEvent.VK_UP) {
+                    switch(displayTimer.getDelay()){
+                        case 700:
+                            displayTimer.setDelay(500);
+                            normalRB.setSelected(true);
+                            break;
+                        case 500:
+                            displayTimer.setDelay(300);
+                            fastRB.setSelected(true);
+                            break;
+                        case 300:
+                            displayTimer.setDelay(100);
+                            veryFastRB.setSelected(true);
+                            break;
+                    }
+                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    switch(displayTimer.getDelay()){
+                        case 100:
+                            displayTimer.setDelay(300);
+                            fastRB.setSelected(true);
+                            break;
+                        case 500:
+                            displayTimer.setDelay(700);
+                            slowRB.setSelected(true);
+                            break;
+                        case 300:
+                            displayTimer.setDelay(500);
+                            normalRB.setSelected(true);
+                            break;
+                    }
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+            }
+        });
     }
 
     private void drawField() {
@@ -170,29 +225,29 @@ public class RVFGui extends javax.swing.JFrame {
             if (eo.isAlive()) {
                 curLabel = this.getLabel(eo.getX(), eo.getY());
                 //curLabel.setIcon(eo.getIcon());
-                
+
                 Image image = eo.getIcon().getImage(); // transform it 
                 Image newimg = image.getScaledInstance(curLabel.getSize().width, curLabel.getSize().height, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
                 curLabel.setIcon(new ImageIcon(newimg));  // transform it back
-                
+
                 //show information about objects on hover
                 curLabel.setToolTipText("<html>" + eo.toString() + "</html>");
-                
-                if(eo instanceof FoxAgent || eo instanceof RabbitAgent){
-                    curLabel.setBackground(((Agent)eo).getMyColor());
-                    if(((Agent)eo).getTeamColor()!=null){
-                        curLabel.setBackground(((Agent)eo).getTeamColor());
+
+                if (eo instanceof FoxAgent || eo instanceof RabbitAgent) {
+                    curLabel.setBackground(((Agent) eo).getMyColor());
+                    if (((Agent) eo).getTeamColor() != null) {
+                        curLabel.setBackground(((Agent) eo).getTeamColor());
                     }
                 }
             }
 
         }
     }
-    
-    public boolean isInBoundaries(int x, int y){
-        return (x>=0 && x<size) && (y>=0 && y<size);
+
+    public boolean isInBoundaries(int x, int y) {
+        return (x >= 0 && x < size) && (y >= 0 && y < size);
     }
-    
+
     public JLabel getLabel(int x, int y) {
         int index = y * size + x;
         return labels.get(index);
@@ -214,7 +269,7 @@ public class RVFGui extends javax.swing.JFrame {
     public boolean getFoxesTeamwork3() {
         return foxesTeamwork3.isSelected();
     }
-    
+
     public boolean getRabbitsTeamwork1() {
         return rabbitsTeamwork1.isSelected();
     }
