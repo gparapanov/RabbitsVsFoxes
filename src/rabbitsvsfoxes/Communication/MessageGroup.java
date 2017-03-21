@@ -27,7 +27,9 @@ public class MessageGroup {
     
     public void broadcastMessage(Message m){
         if(m.getMsgType()==MessageType.ClaimCarrot){
-            claimedCarrots.add(m.getTargetObject());
+            Carrot toClaim=(Carrot)(m.getTargetObject());
+            claimedCarrots.add(toClaim);
+            toClaim.claim(m.getSenderName());
         }else if(m.getMsgType()==MessageType.UnclaimCarrot){
             claimedCarrots.remove(m.getTargetObject());
         }else{

@@ -100,7 +100,7 @@ public class RabbitAgent extends Agent {
         } else {
             //foxes around .i.e flee
             boolean enemyL = false, enemyR = false, enemyU = false, enemyD = false;
-            //checks on which sides the enemies are, so that the direction too flee
+            //checks on which sides the enemies are, so that the direction to flee
             //can be determined
             //System.out.println("there is a fox around");
             lastLogs.add(0, "There is a fox around, I must flee!");
@@ -159,9 +159,10 @@ public class RabbitAgent extends Agent {
                 //if (!(agenda.getTop() instanceof EatCarrot)) {
                 //agenda top is not eat carrot
                 if (myGroup.checkCarrotClaimed(goal.getGoalObject())) {
-                        //if someone has targeted it, then find goal again
+                    //if someone has targeted it, then find goal again
                     //System.out.println("someone already has targeted this");
-                    lastLogs.add(0, "Found a carrot, but someone already saw it first!");
+                    String claimer=((Carrot)goal.getGoalObject()).getClaimedBy();
+                    lastLogs.add(0, "Found a carrot, but "+claimer+" already saw it first!");
                     objAround.remove(goal.getGoalObject());
                     findGoal();
                 } else {
@@ -303,24 +304,32 @@ public class RabbitAgent extends Agent {
                 return new FleeSpace(getX(), getY() + 1);
             } else if (checkMove(Direction.LEFT)) {
                 return new FleeSpace(getX() - 1, getY());
+            }else if (checkMove(Direction.RIGHT)) {
+                return new FleeSpace(getX() + 1, getY());
             }
         } else if (enemyD) {
             if (checkMove(Direction.UP)) {
                 return new FleeSpace(getX(), getY() - 1);
             } else if (checkMove(Direction.RIGHT)) {
                 return new FleeSpace(getX() + 1, getY());
+            }else if (checkMove(Direction.LEFT)) {
+                return new FleeSpace(getX() - 1, getY());
             }
         } else if (enemyR) {
             if (checkMove(Direction.LEFT)) {
                 return new FleeSpace(getX() - 1, getY());
             } else if (checkMove(Direction.UP)) {
                 return new FleeSpace(getX(), getY() - 1);
+            }else if (checkMove(Direction.DOWN)) {
+                return new FleeSpace(getX(), getY()+1);
             }
         } else if (enemyL) {
             if (checkMove(Direction.RIGHT)) {
                 return new FleeSpace(getX() + 1, getY());
             } else if (checkMove(Direction.DOWN)) {
                 return new FleeSpace(getX(), getY() + 1);
+            }else if (checkMove(Direction.UP)) {
+                return new FleeSpace(getX(), getY()-1);
             }
         }
         return null;
