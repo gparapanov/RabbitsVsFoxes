@@ -49,8 +49,7 @@ public class RabbitAgent extends Agent {
         this.replenishHealth();
         Goal goal;
         goal = new EatCarrot(null);
-        double maxUtility = 0;
-        double utility = 0;
+        double maxUtility = 0, utility = 0;
         if (foxesAround.isEmpty()) {//no dangerous foxes; flee ON
             //if (true) {//flee OFF
             if (!objAround.isEmpty()) {//there are carrots nearby
@@ -137,11 +136,11 @@ public class RabbitAgent extends Agent {
 //                    this.addGoal(postGoal);
 //                }
                 if(postGoal.getUtility()>goal.getUtility()){
-                    lastLogs.add(0, lastMessageRead.getSender().getName()+" is asking for help, it's better to go and help him!");
+                    lastLogs.add(0, lastMessageRead.getSender().getName()+" is asking for help, I will go and distract "+((Agent)lastMessageRead.getTargetObject()).getName()+"!");
                     goal=postGoal;
                     myGroup.broadcastMessage(new Message(MessageType.EngageInDistraction, goal.getGoalObject(), this));
                 }else{
-                    lastLogs.add(0, lastMessageRead.getSender().getName()+" is asking for help, but I prefer to do something else!");
+                    lastLogs.add(0, lastMessageRead.getSender().getName()+" is asking for help, but I prefer to work on my own!");
                 }
             }
         }
@@ -411,22 +410,9 @@ public class RabbitAgent extends Agent {
         return foxes;
     }
 
-    public ArrayList<RabbitAgent> rabbitsAtArea(int x, int y, int r) {
-        ArrayList<RabbitAgent> rabbits = new ArrayList<>();
-        for (EnvironmentObject ag : env.getAgents()) {
-            if (ag instanceof RabbitAgent) {
-                if (ag.getX() < x + r && ag.getX() > x - r && ag.getY() < y + r
-                        && ag.getY() > y - r) {//means a fox is a threat
-                    rabbits.add((RabbitAgent) ag);
-                }
-            }
-        }
-        return rabbits;
-    }
-
     public double evaluationFunctionFleeAndExplore(Agent ag, EnvironmentObject eo) {
         double distanceMultiplier,
-                characterMultiplier = (agentCharacter < 8) ? 0.7 : 1.3;
+                characterMultiplier = (agentCharacter < characterSeparator) ? 0.7 : 1.3;
         if (manhattanDistance(ag, eo) <= 3) {
             distanceMultiplier = 10;
         } else if (manhattanDistance(ag, eo) <= 4) {
@@ -446,7 +432,7 @@ public class RabbitAgent extends Agent {
     public double evaluationFunctionTeamwork(Agent ag, Agent requester, Agent target) {
         double rabbitsMultiplier,
                 distanceMultiplier,
-                characterMultiplier = (agentCharacter < 8) ? 1.3 : 0.7;//i.e. is more inclined to eating carrots
+                characterMultiplier = (agentCharacter < characterSeparator) ? 1.3 : 0.7;//i.e. is more inclined to eating carrots
 
         int radius = diagonalDistance(ag, requester);
         //assign rabbits number multiplier
@@ -481,7 +467,7 @@ public class RabbitAgent extends Agent {
         int radius = (diagonalDistance(ag, eo) == 1 ? 2 : diagonalDistance(ag, eo));
         double foxesMultiplier,
                 distanceMultiplier,
-                characterMultiplier = (agentCharacter < 8) ? 0.7 : 1.3;//i.e. is more inclined to eating carrots
+                characterMultiplier = (agentCharacter < characterSeparator) ? 0.7 : 1.3;//i.e. is more inclined to eating carrots
 
         //assign foxes number multiplier
         ArrayList<FoxAgent> closeFoxes = foxesAtArea(eo.getX(), eo.getY(), radius);

@@ -172,41 +172,72 @@ public class RVFGui extends javax.swing.JFrame {
                         case 700:
                             displayTimer.setDelay(500);
                             normalRB.setSelected(true);
-                            
+
                             break;
                         case 500:
                             displayTimer.setDelay(300);
                             fastRB.setSelected(true);
-                           
+
                             break;
                         case 300:
                             displayTimer.setDelay(100);
                             veryFastRB.setSelected(true);
-                            
+
                             break;
                     }
-                    
+
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    
+
                     switch (displayTimer.getDelay()) {
                         case 100:
                             displayTimer.setDelay(300);
                             fastRB.setSelected(true);
-                            
+
                             break;
                         case 500:
                             displayTimer.setDelay(700);
                             slowRB.setSelected(true);
-                            
+
                             break;
                         case 300:
                             displayTimer.setDelay(500);
                             normalRB.setSelected(true);
-                            
+
                             break;
+                    }
+                } else if (e.getKeyCode() == KeyEvent.VK_S) {
+                    if (statisticsDialog.isVisible()) {
+                        statisticsDialog.setVisible(false);
+                    } else {
+                        statisticsDialog.setVisible(true);
+                        statisticsDialog.setLocationRelativeTo(null);
                     }
                 }
             }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+            }
+        });
+        statisticsDialog.addKeyListener(new KeyListener() {
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_S) {
+                    if (statisticsDialog.isVisible()) {
+                        statisticsDialog.setVisible(false);
+                    } else {
+                        statisticsDialog.setVisible(true);
+                        statisticsDialog.setLocationRelativeTo(null);
+                    }
+                }
+            }
+
             @Override
             public void keyReleased(KeyEvent e) {
             }

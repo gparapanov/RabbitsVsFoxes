@@ -27,39 +27,40 @@ public class Agent extends EnvironmentObject {
 
     private final int radius = 7;
     /*
-    Agent character is a random value 1-10,
-    if the value is <8 the agent is team-working,
-    >=8 it is more self interested.
-    This is only used when a decision has to be made between helping a friend,
-    or doing more individually beneficial things.
-    */
-    protected final int agentCharacter=(int)(Math.random() * (10)) + 1;
-    
+     Agent character is a random value 1-10,
+     if the value is <8 the agent is team-working,
+     >=8 it is more self interested.
+     This is only used when a decision has to be made between helping a friend,
+     or doing more individually beneficial things.
+     */
+    protected final int agentCharacter = (int) (Math.random() * (10)) + 1;
+    protected final int characterSeparator = 8;
+
     protected ArrayList<String> lastLogs;
     protected ArrayList<EnvironmentObject> objAround;
     protected ArrayList<UnexploredSpace> toExplore;
-    
-    protected double health=100;
+
+    protected double health = 100;
     protected String myName;
     protected Agenda agenda;
     protected Color myColor;
     protected Color teamColor;
     protected Environment env;
-    
+
     protected MessageGroup myGroup;
     protected int messagesReadIndex;
     protected Message lastMessageRead;
 
-    public Agent(int x, int y, Environment env,MessageGroup mg) {
+    public Agent(int x, int y, Environment env, MessageGroup mg) {
         super(x, y);
         this.env = env;
         this.agenda = new Agenda(this);
         this.objAround = new ArrayList<>();
         this.toExplore = new ArrayList<>();
-        this.myGroup=mg;
-        this.lastLogs=new ArrayList<>();
-        this.myName=env.getName(this);
-        this.messagesReadIndex=0;
+        this.myGroup = mg;
+        this.lastLogs = new ArrayList<>();
+        this.myName = env.getName(this);
+        this.messagesReadIndex = 0;
         discoverExplorationSpaces();
     }
 
@@ -121,12 +122,13 @@ public class Agent extends EnvironmentObject {
         return Math.max(xRad, yRad);
     }
 
+    public void findGoal() {
+    }
 
-    public void findGoal() {}
-    public Goal openPostbox(){
+    public Goal openPostbox() {
         return null;
     }
-    
+
     public void lookAround(int radius) {
 
     }
@@ -135,9 +137,9 @@ public class Agent extends EnvironmentObject {
         lookAround(radius);
         findGoal();
         if (agenda.getTop() != null) {
-            if(agenda.getTop().getTeamColor()==null){
+            if (agenda.getTop().getTeamColor() == null) {
                 this.setTeamColor(myColor);
-            }else{
+            } else {
                 this.setTeamColor(agenda.getTop().getTeamColor());
             }
             moveTowardsGoal(agenda.getTop());
@@ -148,8 +150,6 @@ public class Agent extends EnvironmentObject {
     }
 
     public void moveTowardsGoal(Goal g) {
-        
-        
         int goalX = g.getGoalObject().getX();
         int goalY = g.getGoalObject().getY();
         int differenceX = Math.abs(goalX - getX());
@@ -249,53 +249,76 @@ public class Agent extends EnvironmentObject {
                 this.toExplore.remove(g.getGoalObject());
             }
             env.removeEnvironmentObject(g.getGoalObject());
-            
+
         }
-        if(g instanceof DistractFox && manhattanDistance(this, g.getGoalObject()) <= 4){
+        if (g instanceof DistractFox && manhattanDistance(this, g.getGoalObject()) <= 4) {
             g.setCompleted(true);
             agenda.removeTask(g);
-            myGroup.broadcastMessage(new Message(MessageType.DisengageInDistraction,g.getGoalObject(), this));
+            myGroup.broadcastMessage(new Message(MessageType.DisengageInDistraction, g.getGoalObject(), this));
             lastLogs.add(0, "I have distracted the fox, running away!");
         }
         decreaseHealth();
-        if(health<=0){
+        if (health <= 0) {
             this.setAlive(false);
             env.removeEnvironmentObject(this);
         }
-        while(lastLogs.size()>5){
-            lastLogs.remove(lastLogs.size()-1);
+        while (lastLogs.size() > 5) {
+            lastLogs.remove(lastLogs.size() - 1);
         }
         //if(lastLogs.size()>3)lastLogs.remove(lastLogs.size()-1);
 
     }
-    public void decreaseHealth(){
-        this.health-=0.5;
+
+    public boolean compareObjects(EnvironmentObject eo1, EnvironmentObject eo2){
+        if(eo1.getX()==eo2.getX() && eo1.getY()==eo2.getY()){
+            return true;
+        }
+        return false;
     }
-    public void replenishHealth(){
-        this.health=100;
+    
+    public ArrayList<RabbitAgent> rabbitsAtArea(int x, int y, int r) {
+        ArrayList<RabbitAgent> rabbits = new ArrayList<>();
+        for (EnvironmentObject ag : env.getAgents()) {
+            if (ag instanceof RabbitAgent) {
+                if (ag.getX() < x + r && ag.getX() > x - r && ag.getY() < y + r
+                        && ag.getY() > y - r) {//means a fox is a threat
+                    rabbits.add((RabbitAgent) ag);
+                }
+            }
+        }
+        return rabbits;
     }
-    public boolean checkMove(Direction d){
+
+    public void decreaseHealth() {
+        this.health -= 0.5;
+    }
+
+    public void replenishHealth() {
+        this.health = 100;
+    }
+
+    public boolean checkMove(Direction d) {
         switch (d) {
             case UP:
-                if(getY()-1>=0 && env.spaceOccupied(getX(), getY()-1)==null){
+                if (getY() - 1 >= 0 && env.spaceOccupied(getX(), getY() - 1) == null) {
                     //setY(getY() - 1);
                     return true;
                 }
                 break;
             case DOWN:
-                if(getY()+1<env.getSize() && env.spaceOccupied(getX(), getY()+1)==null){
+                if (getY() + 1 < env.getSize() && env.spaceOccupied(getX(), getY() + 1) == null) {
                     //setY(getY() + 1);
                     return true;
                 }
                 break;
             case LEFT:
-                if(getX()-1>=0 && env.spaceOccupied(getX()-1, getY())==null){
+                if (getX() - 1 >= 0 && env.spaceOccupied(getX() - 1, getY()) == null) {
                     //setY(getX() - 1);
                     return true;
                 }
                 break;
             case RIGHT:
-                if(getX()+1<env.getSize() && env.spaceOccupied(getX()+1, getY())==null){
+                if (getX() + 1 < env.getSize() && env.spaceOccupied(getX() + 1, getY()) == null) {
                     //setY(getX() + 1);
                     return true;
                 }
@@ -303,7 +326,7 @@ public class Agent extends EnvironmentObject {
         }
         return false;
     }
-    
+
     public void addGoal(Goal g) {
         this.agenda.addTask(g);
     }
@@ -354,17 +377,15 @@ public class Agent extends EnvironmentObject {
 
     @Override
     public String toString() {
-        String logsString="";
-        for(String itemString:lastLogs){
-            logsString+=itemString+"<br>";
+        String logsString = "";
+        for (String itemString : lastLogs) {
+            logsString += itemString + "<br>";
         }
-        String output=super.toString()+"<br>Name: "+this.myName+"<br>Health: "+getHealth()+
-                "<br>Character: "+(agentCharacter<8?"Community-helper":"Self-oriented")
-                +"<br>Agenda:<br>"+agenda+"<br>Last action taken:<br>"+
-                logsString;
-        return output; 
+        String output = super.toString() + "<br>Name: " + this.myName + "<br>Health: " + getHealth()
+                + "<br>Character: " + (agentCharacter < 8 ? "Community-helper" : "Self-oriented")
+                + "<br>Agenda:<br>" + agenda + "<br>Last action taken:<br>"
+                + logsString;
+        return output;
     }
-
-    
 
 }
