@@ -112,7 +112,7 @@ public class FoxAgent extends Agent {
                     //this is teamwork type 1 in which all foxes go after the same  rabbit
                     goal.setPriority(6);
                     goal.setTeamColor(myColor);
-                    Message messageToSend = new Message(MessageType.RequestBackup, goal.getGoalObject(), this.myName);
+                    Message messageToSend = new Message(MessageType.RequestBackup, goal.getGoalObject(), this);
                     messageToSend.setTeamColor(goal.getTeamColor());
                     myGroup.broadcastMessage(messageToSend);
                     //System.out.println("asking for help");
@@ -124,7 +124,7 @@ public class FoxAgent extends Agent {
                     RabbitAgent targetAgent = (RabbitAgent) goal.getGoalObject();
                     Direction d = directionToObject(targetAgent);
 
-                    Message messageToSend = new Message(MessageType.RequestAmbush, goal.getGoalObject(), d, this.myName);
+                    Message messageToSend = new Message(MessageType.RequestAmbush, goal.getGoalObject(), d, this);
                     messageToSend.setTeamColor(goal.getTeamColor());
                     myGroup.broadcastMessage(messageToSend);
                     //System.out.println("asking for ambush");
@@ -132,7 +132,7 @@ public class FoxAgent extends Agent {
                 } else if (env.getGui().getFoxesTeamwork3()) {
                     //this is teamwork type 3 in which all foxes help their nearby foxes
                     goal.setPriority(6);
-                    Message messageToSend = new Message(MessageType.RequestGroupWork, goal.getGoalObject(), this.myName);
+                    Message messageToSend = new Message(MessageType.RequestGroupWork, goal.getGoalObject(), this);
                     messageToSend.setTeamColor(goal.getTeamColor());
                     myGroup.broadcastMessage(messageToSend);
                     //System.out.println("asking for group work");
@@ -150,7 +150,7 @@ public class FoxAgent extends Agent {
 //        }
         
         if(agenda.getTop() instanceof CatchRabbit){
-            currentTarget=((RabbitAgent)agenda.getTop().getGoalObject()).getMyName();
+            currentTarget=((RabbitAgent)agenda.getTop().getGoalObject()).getName();
         }else{
             currentTarget="";
         }
@@ -168,8 +168,8 @@ public class FoxAgent extends Agent {
                 CatchRabbit teamGoal = new CatchRabbit(newestMessage.getTargetObject());
                 teamGoal.setTeamColor(newestMessage.getTeamColor());
                 teamGoal.setPriority(6);
-                if (!newestMessage.getSenderName().equals(myName)) {
-                    lastLogs.add(0, newestMessage.getSenderName() + " wants backup, going for help!");
+                if (!newestMessage.getSender().getName().equals(myName)) {
+                    lastLogs.add(0, newestMessage.getSender().getName() + " wants backup, going for help!");
                 }
 
                 return teamGoal;
@@ -195,19 +195,19 @@ public class FoxAgent extends Agent {
                     Goal teamGoal = new CatchRabbit(newestMessage.getTargetObject());
                     teamGoal.setPriority(6);
                     teamGoal.setTeamColor(newestMessage.getTeamColor());
-                    if (!newestMessage.getSenderName().equals(myName)) {
-                        lastLogs.add(0, newestMessage.getSenderName() + " requested ambush, going for help!");
+                    if (!newestMessage.getSender().getName().equals(myName)) {
+                        lastLogs.add(0, newestMessage.getSender().getName() + " requested ambush, going for help!");
                     }
 
                     return teamGoal;
                 } else {
-                    lastLogs.add(0, newestMessage.getSenderName() + " requested ambush, but I'm not suitable for that!");
+                    lastLogs.add(0, newestMessage.getSender().getName() + " requested ambush, but I'm not suitable for that!");
                 }
             } else if (newestMessage.getMsgType().equals(MessageType.RequestGroupWork)) {
                 if (diagonalDistance(this, newestMessage.getTargetObject()) <= env.getSize() / 5) {
                     // System.out.println("someone nearby needs backup I can go and help");
-                    if (!newestMessage.getSenderName().equals(myName)) {
-                        lastLogs.add(0, newestMessage.getSenderName() + " nearby needs help, I'm going there!");
+                    if (!newestMessage.getSender().getName().equals(myName)) {
+                        lastLogs.add(0, newestMessage.getSender().getName() + " nearby needs help, I'm going there!");
                     }
 
                     Goal teamGoal = new CatchRabbit(newestMessage.getTargetObject());
@@ -216,7 +216,7 @@ public class FoxAgent extends Agent {
 
                     return teamGoal;
                 } else {
-                    lastLogs.add(0, newestMessage.getSenderName() + " needs help, but I am too far away!");
+                    lastLogs.add(0, newestMessage.getSender().getName() + " needs help, but I am too far away!");
                 }
             }
         }
@@ -269,6 +269,13 @@ public class FoxAgent extends Agent {
                 objAround.add(envObj);
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        String output="Target: "+(currentTarget.equals("")?"---":currentTarget)
+                +"<br>"+super.toString();
+        return output;  
     }
 
 }

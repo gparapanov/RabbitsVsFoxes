@@ -1,6 +1,7 @@
 package rabbitsvsfoxes.Communication;
 
 import java.awt.Color;
+import rabbitsvsfoxes.Agent.Agent;
 import rabbitsvsfoxes.Agent.RabbitAgent;
 import rabbitsvsfoxes.Direction;
 import rabbitsvsfoxes.Objects.EnvironmentObject;
@@ -15,7 +16,7 @@ public class Message {
     protected EnvironmentObject targetObject;
     protected Direction directionToTarget;
     protected Color teamColor;
-    protected String senderName;
+    protected Agent sender;
 
     public Message(MessageType type) {
         this.msgType = type;
@@ -25,25 +26,25 @@ public class Message {
      * object and name of the sender.
      * @param type 
      * @param obj 
-     * @param name Name of the sender.
+     * @param sender Sender agent.
      */
-    public Message(MessageType type, EnvironmentObject obj, String name) {
+    public Message(MessageType type, EnvironmentObject obj, Agent sender) {
         this.msgType = type;
         this.targetObject = obj;
-        this.senderName=name;
+        this.sender=sender;
     }
     /**
      * 
      * @param type
      * @param obj
      * @param d
-     * @param name Name of sender.
+     * @param sender Sender.
      */
-    public Message(MessageType type, EnvironmentObject obj, Direction d, String name) {
+    public Message(MessageType type, EnvironmentObject obj, Direction d, Agent sender) {
         this.msgType = type;
         this.targetObject=obj;
         this.directionToTarget=d;
-        this.senderName=name;
+        this.sender=sender;
     }
     public MessageType getMsgType() {
         return msgType;
@@ -60,12 +61,12 @@ public class Message {
         return targetObject;
     }
 
-    public String getSenderName() {
-        return senderName;
+    public Agent getSender() {
+        return sender;
     }
 
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
+    public void setSender(Agent sender) {
+        this.sender = sender;
     }
 
     public Color getTeamColor() {

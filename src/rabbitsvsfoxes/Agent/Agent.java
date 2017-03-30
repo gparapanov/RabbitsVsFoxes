@@ -26,6 +26,14 @@ import rabbitsvsfoxes.UnexploredSpace;
 public class Agent extends EnvironmentObject {
 
     private final int radius = 7;
+    /*
+    Agent character is a random value 1-10,
+    if the value is <8 the agent is team-working,
+    >=8 it is more self interested.
+    This is only used when a decision has to be made between helping a friend,
+    or doing more individually beneficial things.
+    */
+    protected final int agentCharacter=(int)(Math.random() * (10)) + 1;
     
     protected ArrayList<String> lastLogs;
     protected ArrayList<EnvironmentObject> objAround;
@@ -40,6 +48,7 @@ public class Agent extends EnvironmentObject {
     
     protected MessageGroup myGroup;
     protected int messagesReadIndex;
+    protected Message lastMessageRead;
 
     public Agent(int x, int y, Environment env,MessageGroup mg) {
         super(x, y);
@@ -112,9 +121,6 @@ public class Agent extends EnvironmentObject {
         return Math.max(xRad, yRad);
     }
 
-    public int evaluationFunction(Agent ag, EnvironmentObject eo) {
-        return manhattanDistance(ag, eo);
-    }
 
     public void findGoal() {}
     public Goal openPostbox(){
@@ -248,7 +254,8 @@ public class Agent extends EnvironmentObject {
         if(g instanceof DistractFox && manhattanDistance(this, g.getGoalObject()) <= 4){
             g.setCompleted(true);
             agenda.removeTask(g);
-            myGroup.broadcastMessage(new Message(MessageType.DisengageInDistraction,g.getGoalObject(), myName));
+            myGroup.broadcastMessage(new Message(MessageType.DisengageInDistraction,g.getGoalObject(), this));
+            lastLogs.add(0, "I have distracted the fox, running away!");
         }
         decreaseHealth();
         if(health<=0){
@@ -317,7 +324,7 @@ public class Agent extends EnvironmentObject {
         return teamColor;
     }
 
-    public String getMyName() {
+    public String getName() {
         return myName;
     }
 
@@ -352,7 +359,8 @@ public class Agent extends EnvironmentObject {
             logsString+=itemString+"<br>";
         }
         String output=super.toString()+"<br>Name: "+this.myName+"<br>Health: "+getHealth()+
-                "<br>Agenda:<br>"+agenda+"<br>Last action taken:<br>"+
+                "<br>Character: "+(agentCharacter<8?"Community-helper":"Self-oriented")
+                +"<br>Agenda:<br>"+agenda+"<br>Last action taken:<br>"+
                 logsString;
         return output; 
     }

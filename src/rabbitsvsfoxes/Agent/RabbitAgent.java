@@ -7,6 +7,7 @@ package rabbitsvsfoxes.Agent;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import javax.swing.ImageIcon;
 import rabbitsvsfoxes.Objects.Carrot;
 import rabbitsvsfoxes.Communication.Message;
@@ -31,7 +32,6 @@ public class RabbitAgent extends Agent {
 
     private ArrayList<FoxAgent> foxesAround;
     private final int threatRadius;
-    private ArrayList<FoxAgent> foxesDistrated = new ArrayList<>();
 
     public RabbitAgent(int x, int y, Environment env, MessageGroup mg) {
         super(x, y, env, mg);
@@ -47,35 +47,27 @@ public class RabbitAgent extends Agent {
     @Override
     public void findGoal() {
         this.replenishHealth();
-//        System.out.println("my agenda contains: ");
-//        for (Goal g : agenda.getTasks()) {
-//
-//            if (g instanceof EatCarrot) {
-//                System.out.println("a carrot with priority: " + g.getPriority());
-//            } else if (g instanceof Explore) {
-//                System.out.println("exploration ");
-//            }
-//
-//        }
         Goal goal;
         goal = new EatCarrot(null);
-        int minDistance = 10000;
-        int distance = 0;
+        double maxUtility = 0;
+        double utility = 0;
         if (foxesAround.isEmpty()) {//no dangerous foxes; flee ON
             //if (true) {//flee OFF
             if (!objAround.isEmpty()) {//there are carrots nearby
                 //System.out.println("no foxes around, so i'm gonna eat that carrot");
                 for (EnvironmentObject eo : objAround) {
                     if (env.getGui().getBehaviour() == 1) {
-                        distance = manhattanDistance(this, eo);
+                        utility = manhattanDistance(this, eo);
                         //System.out.println("goal drive  ");
                     } else {
-                        distance = evaluationFunction(this, eo);
+                        utility = evaluationFunctionCarrot(this, eo);
                         //System.out.println("hybrid ");
                     }
-                    if (minDistance > distance) {
-                        minDistance = distance;
+                    
+                    if (maxUtility < utility) {
+                        maxUtility = utility;
                         goal.setGoalObject(eo);
+                        goal.setUtility(maxUtility);
                         //System.out.println("found a carrot");
                     }
                 }
@@ -88,12 +80,12 @@ public class RabbitAgent extends Agent {
                 }
                 for (UnexploredSpace us : toExplore) {
                     //System.out.println("looking for spaces");
-                    distance = manhattanDistance(this, us);
-                    if (distance < minDistance) {
-                        minDistance = distance;
+                    utility = evaluationFunctionFleeAndExplore(this, us);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
                         goal.setGoalObject(us);
-                        goal.setPriority(4);
-                        //System.out.println("better space found:"+distance);
+                        goal.setUtility(maxUtility);
+                        goal.setPriority(4);//lower utility for exploration
                     }
                 }
             }
@@ -108,17 +100,17 @@ public class RabbitAgent extends Agent {
                 int foxY = fox.getY();
                 int differenceX = Math.abs(foxX - getX());
                 int differenceY = Math.abs(foxY - getY());
-                if(differenceX>differenceY){
-                    if(foxX>getX()){
-                        enemyR=true;
-                    }else{
-                        enemyL=true;
+                if (differenceX > differenceY) {
+                    if (foxX > getX()) {
+                        enemyR = true;
+                    } else {
+                        enemyL = true;
                     }
-                }else{
-                    if(foxY>getY()){
-                        enemyD=true;
-                    }else{
-                        enemyU=true;
+                } else {
+                    if (foxY > getY()) {
+                        enemyD = true;
+                    } else {
+                        enemyU = true;
                     }
                 }
             }
@@ -128,19 +120,29 @@ public class RabbitAgent extends Agent {
             //System.out.println("running away!");
         }
 
-        //open the postbox to check if there are any messages
-        Goal postGoal = openPostbox();
-        //if there is a valid message there and the goal is not already in the
-        //agenda, then add it and remove other targeted rabbits
-        if (postGoal != null) {
-            if (agenda.getTop() != null && postGoal.getPriority() > agenda.getTop().getPriority()) {
-                //If the agent has something else to - do remove it -
-                //this is done to avoid keeping a reference another rabbit and
-                //making sure that the foxes won't go after it unless it can see it.
-                agenda.removeTop();
-            }
-            if (!agenda.checkExistists(postGoal)) {
-                this.addGoal(postGoal);
+        //if the communication is enabled
+        if (env.getGui().getRabbitsTeamwork1()) {
+            //open the postbox to check if there are any messages
+            Goal postGoal = openPostbox();
+            //if there is a valid message there and the goal is not already in the
+            //agenda, then add it and remove other targeted rabbits
+            if (postGoal != null) {
+//                if (agenda.getTop() != null && postGoal.getPriority() > agenda.getTop().getPriority()) {
+//                //If the agent has something else to - do remove it -
+//                    //this is done to avoid keeping a reference another rabbit and
+//                    //making sure that the foxes won't go after it unless it can see it.
+//                    agenda.removeTop();
+//                }
+//                if (!agenda.checkExistists(postGoal)) {
+//                    this.addGoal(postGoal);
+//                }
+                if(postGoal.getUtility()>goal.getUtility()){
+                    lastLogs.add(0, lastMessageRead.getSender().getName()+" is asking for help, it's better to go and help him!");
+                    goal=postGoal;
+                    myGroup.broadcastMessage(new Message(MessageType.EngageInDistraction, goal.getGoalObject(), this));
+                }else{
+                    lastLogs.add(0, lastMessageRead.getSender().getName()+" is asking for help, but I prefer to do something else!");
+                }
             }
         }
 
@@ -162,25 +164,42 @@ public class RabbitAgent extends Agent {
                     //no one has targeted it, add this goal to the agenda
                     //System.out.println("this carrot seems free");
                     lastLogs.add(0, "I have found a carrot and I am claiming it!");
-                    myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot, goal.getGoalObject(), this.myName));
+                    myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot, goal.getGoalObject(), this));
                     this.addGoal(goal);
                 }
             } else if (goal instanceof Explore && agenda.getTasks().size() == 0) {
                 lastLogs.add(0, "There is nothing around me, I will explore!");
                 this.addGoal(goal);
             } else if (goal instanceof Flee) {
-                this.addGoal(goal);
+                if(!(agenda.getTop() instanceof DistractFox)){
+                    this.addGoal(goal);
+                }
+                
                 lastLogs.add(0, "There is a fox around, I must flee!");
                 if (env.getGui().getRabbitsTeamwork1()) {
-                    if (!myGroup.checkFoxBeingDistracted(foxesAround.get(0))
-                            && foxesAround.get(0).getCurrentTarget().equals(myName)) {
-                        Message messageToSend = new Message(MessageType.RequestDistraction, foxesAround.get(0), this.myName);
+                    //finding the nearest fox, so that a request broadcast message 
+                    //can be send for someone to distract it
+                    FoxAgent nearestFox=foxesAround.get(0);
+                    int distance=0,minDistance=1000;
+                    for(FoxAgent foxAgent:foxesAround){
+                        distance=manhattanDistance(this, foxAgent);
+                        if(distance<minDistance){
+                            minDistance=distance;
+                            nearestFox=foxAgent;
+                        }
+                    }
+                    
+                    if (!myGroup.checkFoxBeingDistracted(nearestFox)
+                            && nearestFox.getCurrentTarget().equals(myName)) {
+                        Message messageToSend = new Message(MessageType.RequestDistraction, foxesAround.get(0), this);
                         messageToSend.setTeamColor(myColor);
                         myGroup.broadcastMessage(messageToSend);
                         lastLogs.add(0, "A fox is chasing me, asking for help!");
                     }
                 }
-                
+
+            }else if(goal instanceof DistractFox){
+                this.addGoal(goal);
             }
         }
         if (agenda.getTop() != null && !agenda.getTop().getGoalObject().isAlive()) {
@@ -194,9 +213,10 @@ public class RabbitAgent extends Agent {
          */
         if (agenda.getTop() != null) {
             if (agenda.getTop() instanceof DistractFox
-                    && ((FoxAgent) agenda.getTop().getGoalObject()).getCurrentTarget().equals("")) {
+                    && (((FoxAgent) agenda.getTop().getGoalObject()).getCurrentTarget().equals("")
+                    || ((FoxAgent) agenda.getTop().getGoalObject()).getCurrentTarget().equals(myName))) {
                 agenda.removeTop();
-                //findGoal();
+                findGoal();
             }
         }
         //System.out.println("rabbit found carrot with score: " + minDistance); //To change body of generated methods, choose Tools | Templates.
@@ -206,21 +226,24 @@ public class RabbitAgent extends Agent {
     public Goal openPostbox() {
         Message newestMessage = myGroup.getMessage(messagesReadIndex);
         if (newestMessage != null) {
+            lastMessageRead=newestMessage;
             messagesReadIndex++;
             if (newestMessage.getMsgType().equals(MessageType.RequestDistraction)
-                    && !newestMessage.getSenderName().equals(myName)) {
-                //Condition1 - whether the recipient is close to the sender.
+                    && !newestMessage.getSender().getName().equals(myName)) {
+                //Condition 1 - whether the recipient is close to the sender.
+                //Condition 2 whether the fox is not already distracted by someone else
                 if (!myGroup.checkFoxBeingDistracted(newestMessage.getTargetObject())
                         && diagonalDistance(this, newestMessage.getTargetObject()) <= env.getSize() / 4) {
-                    myGroup.broadcastMessage(new Message(MessageType.EngageInDistraction, newestMessage.getTargetObject(), myName));
+                    //myGroup.broadcastMessage(new Message(MessageType.EngageInDistraction, newestMessage.getTargetObject(), this));
                     Goal newGoal = new DistractFox(newestMessage.getTargetObject());
                     newGoal.setTeamColor(newestMessage.getTeamColor());
-                    lastLogs.add(0, newestMessage.getSenderName() + " nearby needs help, going to distract " + ((Agent) newestMessage.getTargetObject()).getMyName());
+                    newGoal.setUtility(evaluationFunctionTeamwork(this, newestMessage.getSender(), (Agent)newestMessage.getTargetObject()));
+                    //lastLogs.add(0, newestMessage.getSender().getName() + " nearby needs help, going to distract " + ((Agent) newestMessage.getTargetObject()).getName());
                     return newGoal;
                 } else if (myGroup.checkFoxBeingDistracted(newestMessage.getTargetObject())) {
-                    lastLogs.add(0, newestMessage.getSenderName() + " nearby needs help, but someone is already going there!");
+                    lastLogs.add(0, newestMessage.getSender().getName() + " nearby needs help, but someone is already going there!");
                 } else {
-                    lastLogs.add(0, newestMessage.getSenderName() + " needs help, but I am too far away!");
+                    lastLogs.add(0, newestMessage.getSender().getName() + " needs help, but I am too far away!");
                 }
 
             }
@@ -388,36 +411,109 @@ public class RabbitAgent extends Agent {
         return foxes;
     }
 
-    @Override
-    public int evaluationFunction(Agent ag, EnvironmentObject eo) {
-        int result = 0, radius = (diagonalDistance(ag, eo) == 1 ? 2 : diagonalDistance(ag, eo));
-        ArrayList<FoxAgent> closeFoxes = foxesAtArea(eo.getX(), eo.getY(), radius);
-        if (!closeFoxes.isEmpty()) {
-            for (Agent f : closeFoxes) {
-                int dist = diagonalDistance(ag, f);
-                switch (dist) {
-                    case 1:
-                        result += 55;
-                        break;
-                    case 2:
-                        result += 40;
-                        break;
-                    case 3:
-                        result += 30;
-                        break;
-                    case 4:
-                        result += 15;
-                        break;
-                    default:
-                        result += dist;
-                        break;
+    public ArrayList<RabbitAgent> rabbitsAtArea(int x, int y, int r) {
+        ArrayList<RabbitAgent> rabbits = new ArrayList<>();
+        for (EnvironmentObject ag : env.getAgents()) {
+            if (ag instanceof RabbitAgent) {
+                if (ag.getX() < x + r && ag.getX() > x - r && ag.getY() < y + r
+                        && ag.getY() > y - r) {//means a fox is a threat
+                    rabbits.add((RabbitAgent) ag);
                 }
             }
         }
-        if (result > 0) {
-            return result * manhattanDistance(ag, eo);
+        return rabbits;
+    }
+
+    public double evaluationFunctionFleeAndExplore(Agent ag, EnvironmentObject eo) {
+        double distanceMultiplier,
+                characterMultiplier = (agentCharacter < 8) ? 0.7 : 1.3;
+        if (manhattanDistance(ag, eo) <= 3) {
+            distanceMultiplier = 10;
+        } else if (manhattanDistance(ag, eo) <= 4) {
+            distanceMultiplier = 9;
+        } else if (manhattanDistance(ag, eo) <= 5) {
+            distanceMultiplier = 8;
+        } else if (manhattanDistance(ag, eo) <= 6) {
+            distanceMultiplier = 7;
+        } else if (manhattanDistance(ag, eo) <= 7) {
+            distanceMultiplier = 6;
         } else {
-            return manhattanDistance(ag, eo);
+            distanceMultiplier = 5;
         }
+        return distanceMultiplier * characterMultiplier;
+    }
+
+    public double evaluationFunctionTeamwork(Agent ag, Agent requester, Agent target) {
+        double rabbitsMultiplier,
+                distanceMultiplier,
+                characterMultiplier = (agentCharacter < 8) ? 1.3 : 0.7;//i.e. is more inclined to eating carrots
+
+        int radius = diagonalDistance(ag, requester);
+        //assign rabbits number multiplier
+        //influenced by the number of rabbits between requester and me
+        ArrayList<RabbitAgent> rabbitsAround = rabbitsAtArea(requester.getX(), requester.getY(), radius);
+        if (!rabbitsAround.isEmpty()) {
+            rabbitsMultiplier = rabbitsAround.size();
+        } else {
+            rabbitsMultiplier = 1;
+        }
+
+        //assign distance multiplier
+        if (manhattanDistance(ag, target) <= 5) {
+            distanceMultiplier = 10;
+        } else if (manhattanDistance(ag, target) <= 8) {
+            distanceMultiplier = 9;
+        } else if (manhattanDistance(ag, target) <= 11) {
+            distanceMultiplier = 8;
+        } else if (manhattanDistance(ag, target) <= 14) {
+            distanceMultiplier = 7;
+        } else if (manhattanDistance(ag, target) <= 17) {
+            distanceMultiplier = 6;
+        } else {
+            distanceMultiplier = 5;
+        }
+
+        return rabbitsMultiplier * distanceMultiplier * characterMultiplier;
+    }
+
+    //evaluation function for carrots
+    public double evaluationFunctionCarrot(Agent ag, EnvironmentObject eo) {
+        int radius = (diagonalDistance(ag, eo) == 1 ? 2 : diagonalDistance(ag, eo));
+        double foxesMultiplier,
+                distanceMultiplier,
+                characterMultiplier = (agentCharacter < 8) ? 0.7 : 1.3;//i.e. is more inclined to eating carrots
+
+        //assign foxes number multiplier
+        ArrayList<FoxAgent> closeFoxes = foxesAtArea(eo.getX(), eo.getY(), radius);
+        if (closeFoxes.isEmpty()) {
+            foxesMultiplier = 2;
+        } else {
+            switch (closeFoxes.size()) {
+                case 1:
+                    foxesMultiplier = 1;
+                    break;
+                default:
+                    foxesMultiplier = 0.5;
+                    break;
+            }
+            foxesMultiplier = 2;
+        }
+
+        //assign distance multiplier
+        if (manhattanDistance(ag, eo) <= 3) {
+            distanceMultiplier = 10;
+        } else if (manhattanDistance(ag, eo) <= 4) {
+            distanceMultiplier = 9;
+        } else if (manhattanDistance(ag, eo) <= 5) {
+            distanceMultiplier = 8;
+        } else if (manhattanDistance(ag, eo) <= 6) {
+            distanceMultiplier = 7;
+        } else if (manhattanDistance(ag, eo) <= 7) {
+            distanceMultiplier = 6;
+        } else {
+            distanceMultiplier = 5;
+        }
+
+        return foxesMultiplier * distanceMultiplier * characterMultiplier;
     }
 }

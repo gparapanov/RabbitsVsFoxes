@@ -33,7 +33,7 @@ public class MessageGroup {
         if (m.getMsgType() == MessageType.ClaimCarrot) {
             Carrot toClaim = (Carrot) (m.getTargetObject());
             claimedCarrots.add(toClaim);
-            toClaim.claim(m.getSenderName());
+            toClaim.claim(m.getSender().getName());
         } else if (m.getMsgType() == MessageType.UnclaimCarrot) {
             claimedCarrots.remove(m.getTargetObject());
         } else if (m.getMsgType() == MessageType.EngageInDistraction) {

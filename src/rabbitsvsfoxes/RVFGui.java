@@ -19,6 +19,8 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -32,13 +34,14 @@ import javax.swing.border.BevelBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
-    private final int RABBITS = 5;
-    private final int FOXES = 1;
+    private final int RABBITS = 7;
+    private final int FOXES = 3;
     private final int CARROTS = 20;
     private final int BOMBS = 20;
     private final int size = 45;
 
     private JPanel panel1;
+    private final JFrame thisFrame = this;
 
     private List<JLabel> labels;
 
@@ -144,45 +147,66 @@ public class RVFGui extends javax.swing.JFrame {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    System.out.println("space pressed");
+                    JDialog dialog = new JDialog(thisFrame, true);
+                    dialog.setLocationRelativeTo(thisFrame);
                     if (displayTimer.isRunning()) {
                         displayTimer.stop();
+                        dialog.setTitle("Stopped!");
+
                     } else {
                         displayTimer.start();
+                        dialog.setTitle("Started!");
                     }
+                    Timer timer = new Timer(800, new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            dialog.setVisible(false);
+                            dialog.dispose();
+                        }
+                    });
+                    timer.setRepeats(false);
+                    timer.start();
+                    dialog.setModal(false);
+                    dialog.setVisible(true);
                 } else if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    switch(displayTimer.getDelay()){
+                    switch (displayTimer.getDelay()) {
                         case 700:
                             displayTimer.setDelay(500);
                             normalRB.setSelected(true);
+                            
                             break;
                         case 500:
                             displayTimer.setDelay(300);
                             fastRB.setSelected(true);
+                           
                             break;
                         case 300:
                             displayTimer.setDelay(100);
                             veryFastRB.setSelected(true);
+                            
                             break;
                     }
+                    
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    switch(displayTimer.getDelay()){
+                    
+                    switch (displayTimer.getDelay()) {
                         case 100:
                             displayTimer.setDelay(300);
                             fastRB.setSelected(true);
+                            
                             break;
                         case 500:
                             displayTimer.setDelay(700);
                             slowRB.setSelected(true);
+                            
                             break;
                         case 300:
                             displayTimer.setDelay(500);
                             normalRB.setSelected(true);
+                            
                             break;
                     }
                 }
             }
-
             @Override
             public void keyReleased(KeyEvent e) {
             }
@@ -450,7 +474,6 @@ public class RVFGui extends javax.swing.JFrame {
         optionsButton.setText("Options");
         optionsButton.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
 
-        goalDrivenOption.setSelected(true);
         goalDrivenOption.setText("Purely Goal-Driven");
         goalDrivenOption.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -459,6 +482,7 @@ public class RVFGui extends javax.swing.JFrame {
         });
         optionsButton.add(goalDrivenOption);
 
+        hybridOption.setSelected(true);
         hybridOption.setText("Hybrid");
         hybridOption.setToolTipText("");
         hybridOption.addActionListener(new java.awt.event.ActionListener() {
@@ -469,6 +493,7 @@ public class RVFGui extends javax.swing.JFrame {
         optionsButton.add(hybridOption);
         optionsButton.add(new JSeparator(SwingConstants.HORIZONTAL));
 
+        carrotsRegenCheck.setSelected(true);
         carrotsRegenCheck.setText("Carrots Regeneration");
         optionsButton.add(carrotsRegenCheck);
         optionsButton.add(new JSeparator(SwingConstants.HORIZONTAL));

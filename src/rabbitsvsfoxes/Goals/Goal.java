@@ -12,6 +12,7 @@ public class Goal {
     private boolean completed;
     protected Color teamColor=null;
     private int priority;//1<<<<<10  5 is default
+    private double utility;
 
     public Goal() {
         this.priority=5;
@@ -54,6 +55,14 @@ public class Goal {
 
     public void setTeamColor(Color teamColor) {
         this.teamColor = teamColor;
+    }
+
+    public double getUtility() {
+        return utility;
+    }
+
+    public void setUtility(double utility) {
+        this.utility = utility;
     }
     
     
