@@ -22,7 +22,7 @@ public class MessageGroup {
         this.members = new ArrayList<>();
         this.groupMessages = new ArrayList<>();
         this.claimedCarrots = new ArrayList<>();
-        this.foxesBeingDistracted=new ArrayList<>();
+        this.foxesBeingDistracted = new ArrayList<>();
     }
 
     public void addMember(Agent a) {
@@ -37,9 +37,18 @@ public class MessageGroup {
         } else if (m.getMsgType() == MessageType.UnclaimCarrot) {
             claimedCarrots.remove(m.getTargetObject());
         } else if (m.getMsgType() == MessageType.EngageInDistraction) {
-            foxesBeingDistracted.add((FoxAgent)m.getTargetObject());
+            foxesBeingDistracted.add((FoxAgent) m.getTargetObject());
         } else if (m.getMsgType() == MessageType.DisengageInDistraction) {
-            foxesBeingDistracted.remove((FoxAgent)m.getTargetObject());
+            foxesBeingDistracted.remove((FoxAgent) m.getTargetObject());
+        } else if (m.getMsgType() == MessageType.UnclaimAllCarrots) {
+            Iterator<EnvironmentObject> iter = claimedCarrots.iterator();
+            while (iter.hasNext()) {
+                Carrot ca = (Carrot)iter.next();
+                if (ca.getClaimedBy().equals(m.getSender().getName())) {
+                    ca.unClaim();
+                    iter.remove();
+                }
+            }
         } else {
             groupMessages.add(m);
         }
@@ -63,9 +72,9 @@ public class MessageGroup {
     public boolean checkCarrotClaimed(EnvironmentObject eo) {
         return this.claimedCarrots.contains(eo);
     }
-    
+
     public boolean checkFoxBeingDistracted(EnvironmentObject eo) {
-        return this.foxesBeingDistracted.contains((FoxAgent)eo);
+        return this.foxesBeingDistracted.contains((FoxAgent) eo);
     }
 
     public void removeEatenCarrots() {

@@ -7,7 +7,9 @@ import javax.swing.ImageIcon;
  * @author Georgi
  */
 public abstract class EnvironmentObject {
-
+    /*
+    x - column, y - row
+    */
     private int x, y;
     private ImageIcon icon = null;
     private boolean alive;

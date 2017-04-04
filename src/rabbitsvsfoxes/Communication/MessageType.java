@@ -13,6 +13,7 @@ public enum MessageType {
     EngageInDistraction,
     DisengageInDistraction,
     ClaimCarrot,
-    UnclaimCarrot;
+    UnclaimCarrot,
+    UnclaimAllCarrots;
 
 }

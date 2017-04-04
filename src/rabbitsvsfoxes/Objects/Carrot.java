@@ -23,7 +23,9 @@ public class Carrot extends EnvironmentObject {
         this.claimed=true;
         this.claimedBy=name;
     }
-
+    public void unClaim(){
+        this.claimed=false;
+    }
     public String getClaimedBy() {
         return claimedBy;
     }

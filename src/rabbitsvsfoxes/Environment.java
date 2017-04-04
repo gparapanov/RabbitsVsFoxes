@@ -29,13 +29,14 @@ public class Environment {
     private Set<Agent> agents;
     private Set<EnvironmentObject> envObjects;
     private ArrayList<Carrot> carrots;
+    private ArrayList<Bomb> bombs;
 
     /*
      This is an array of names and each agent is assigned one.
      */
     private String[] names = {"Donald", "Nick", "John", "Mick", "Peter", "Albus",
         "Joe", "Francis", "Logan", "Ryan", "Jerry", "Jeb", "Harry", "Chris", "Ted", "Barry",
-        "Mason", "Ben", "Rey", "Fin", "Luke", "Poe", "Han", "Paul", "Vin", "Adam","Chad",
+        "Mason", "Ben", "Rey", "Fin", "Luke", "Poe", "Han", "Paul", "Vin", "Adam", "Chad",
         "Jeff", "Rick", "Bernie", "Jimmy", "Jesus", "Bruce", "Bill", "Ian", "Pip", "Ron"};
     private int rabbitNameIndex = 0;
     private int foxNameIndex = names.length - 1;
@@ -45,6 +46,7 @@ public class Environment {
     private final int initialCarrots;
     private MessageGroup foxesGroup;
     private MessageGroup rabbitsGroup;
+    private char[][] world;
 
     public Environment(int size, int r, int f, int c, int b, RVFGui gui) {
         this.size = size;
@@ -55,21 +57,30 @@ public class Environment {
         this.initialCarrots = c;
         this.foxesGroup = new MessageGroup();
         this.rabbitsGroup = new MessageGroup();
+        this.world = new char[size][size];
 
         populateMap(r, f, c, b);//creates agents, carrots, bombs in the env
     }
 
     private void populateMap(int r, int f, int c, int b) {
+        for (int y = 0; y < world.length; y++) {
+            for (int x = 0; x < world[0].length; x++) {
+                world[y][x] = '0';
+            }
+        }
+        
         int newX, newY;
         Random random = new Random();
         final float saturation = 0.9f;//1.0 for brilliant, 0.0 for dull
         final float luminance = 1.0f; //1.0 for brighter, 0.0 for black
+        
         for (int i = 0; i < c; i++) {//create carrots
             do {
                 newX = randomRange(0, size - 1);
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
             this.addEnvironmentObject(new Carrot(newX, newY));
+            world[newY][newX] = 'C';
         }
         for (int i = 0; i < b; i++) {//create bombs
             do {
@@ -77,6 +88,7 @@ public class Environment {
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
             this.addEnvironmentObject(new Bomb(newX, newY));
+            world[newY][newX] = 'B';
         }
         for (int i = 0; i < r; i++) {//create rabbits
             do {
@@ -89,6 +101,7 @@ public class Environment {
             rabbit.setMyColor(Color.getHSBColor(hue, saturation, luminance));
 
             this.addEnvironmentObject(rabbit);
+            world[newY][newX] = 'R';
         }
         for (int i = 0; i < f; i++) {//create foxes
             do {
@@ -99,8 +112,27 @@ public class Environment {
             final float hue = random.nextFloat();
             fox.setMyColor(Color.getHSBColor(hue, saturation, luminance));
             this.addEnvironmentObject(fox);
+            world[newY][newX] = 'F';
         }
         System.out.println(envObjects.toString());
+    }
+    public void refreshArrayMap(){
+        for (int y = 0; y < world.length; y++) {
+            for (int x = 0; x < world[0].length; x++) {
+                world[y][x] = '0';
+            }
+        }
+        for(EnvironmentObject eo:envObjects){
+            if(eo instanceof RabbitAgent){
+                world[eo.getY()][eo.getX()]='R';
+            }else if(eo instanceof FoxAgent){
+                world[eo.getY()][eo.getX()]='F';
+            }else if(eo instanceof Carrot){
+                world[eo.getY()][eo.getX()]='C';
+            }else if(eo instanceof Bomb){
+                world[eo.getY()][eo.getX()]='B';
+            }
+        }
     }
 
     public void addAgent(Agent a) {
@@ -110,10 +142,12 @@ public class Environment {
     public void removeAgent(Agent a) {
         removeEnvironmentObject(a);
     }
+
     /**
-     * Method, which gives a name to an agent.
-     * Foxes are assigned names starting from the last name of the array 
-     * of names, whereas rabbits are assigned ones from the beginning.
+     * Method, which gives a name to an agent. Foxes are assigned names starting
+     * from the last name of the array of names, whereas rabbits are assigned
+     * ones from the beginning.
+     *
      * @param ag The agent that requests a name.
      * @return Name for that agent.
      */
@@ -160,11 +194,13 @@ public class Environment {
     public void step() {
         for (Agent a : getAgents()) {
             a.makeAStep();
+            refreshArrayMap();
         }
         if (this.getGui().getCarrotsRegenCheck()) {
             regenerateCarrots();
         }
         cleanup();
+        
     }
 
     private void regenerateCarrots() {
@@ -208,6 +244,10 @@ public class Environment {
         return gui;
     }
 
+    public char[][] getWorld() {
+        return world;
+    }
+
     public int getSize() {
         return size;
     }
@@ -228,4 +268,20 @@ public class Environment {
         return carrots;
     }
 
+    @Override
+    public String toString() {
+        String result = "";
+
+        for (int y = 0; y < this.world.length; y++) //loop through the rows
+        {
+            for (int x = 0; x < this.world[y].length; x++) //loop through the columns in each row
+            {
+
+                result += this.world[y][x];		//barrier is an X
+
+            }
+            result += "\n";				//add a newline at the end of each row
+        }
+        return result;
+    }
 }

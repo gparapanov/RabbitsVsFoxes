@@ -34,15 +34,14 @@ import javax.swing.border.BevelBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
-    private final int RABBITS = 7;
-    private final int FOXES = 3;
+    private final int RABBITS = 1;
+    private final int FOXES = 0;
     private final int CARROTS = 20;
-    private final int BOMBS = 20;
+    private final int BOMBS = 100;
     private final int size = 45;
 
     private JPanel panel1;
     private final JFrame thisFrame = this;
-
     private List<JLabel> labels;
 
     private final Color backgroundC = Color.decode("#169B08");
@@ -50,15 +49,18 @@ public class RVFGui extends javax.swing.JFrame {
     private ButtonGroup agentBehaviourGroup;
     private ButtonGroup speedButtonGroup;
     private Environment environment;
+    private int numberOfRuns=0;
 
     public RVFGui() {
         initComponents();//generated method
         environment = new Environment(size, RABBITS, FOXES, CARROTS, BOMBS, this);
         initialiseVariables();
         drawField();
+        System.out.println(environment);
 
         ActionListener listener = (ActionEvent event) -> {
             step();
+            numberOfRuns++;
         };
         displayTimer = new Timer(500, listener);
 
@@ -374,11 +376,12 @@ public class RVFGui extends javax.swing.JFrame {
         rabbitsNumber.setText("" + rabbits);
         foxesNumber.setText("" + foxes);
         carrotsNumber.setText("" + carrotsF);
+        runsNumber.setText(""+numberOfRuns);
         //if(rabbits==0)displayTimer.stop();
     }
 
-    public void visualise() {
-
+    public void writeLogToGui(String st){
+        logsArea.setText(logsArea.getText()+"\n"+st);
     }
 
     /**
@@ -389,6 +392,7 @@ public class RVFGui extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         statisticsDialog = new javax.swing.JDialog();
         jLabel1 = new javax.swing.JLabel();
@@ -398,6 +402,9 @@ public class RVFGui extends javax.swing.JFrame {
         foxesNumber = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         carrotsNumber = new javax.swing.JLabel();
+        runsNumber = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        logsArea = new javax.swing.JTextArea();
         jMenuItem1 = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
         menuBar = new javax.swing.JMenuBar();
@@ -420,9 +427,9 @@ public class RVFGui extends javax.swing.JFrame {
         showStatsButton = new javax.swing.JMenuItem();
 
         statisticsDialog.setTitle("Statistics");
-        statisticsDialog.setSize(new java.awt.Dimension(165, 175));
+        statisticsDialog.setSize(new java.awt.Dimension(380, 451));
 
-        jLabel1.setText("Objects on the field:");
+        jLabel1.setText("Number of runs:");
 
         jLabel2.setText("Rabbits:");
 
@@ -436,47 +443,54 @@ public class RVFGui extends javax.swing.JFrame {
 
         carrotsNumber.setText("0");
 
+        runsNumber.setText("0");
+
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, jLabel1, org.jdesktop.beansbinding.ObjectProperty.create(), runsNumber, org.jdesktop.beansbinding.BeanProperty.create("labelFor"));
+        bindingGroup.addBinding(binding);
+
+        logsArea.setEditable(false);
+        logsArea.setColumns(20);
+        logsArea.setRows(5);
+        jScrollPane1.setViewportView(logsArea);
+
         javax.swing.GroupLayout statisticsDialogLayout = new javax.swing.GroupLayout(statisticsDialog.getContentPane());
         statisticsDialog.getContentPane().setLayout(statisticsDialogLayout);
         statisticsDialogLayout.setHorizontalGroup(
             statisticsDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(statisticsDialogLayout.createSequentialGroup()
-                .addGap(26, 26, 26)
-                .addGroup(statisticsDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addGroup(statisticsDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(statisticsDialogLayout.createSequentialGroup()
-                            .addComponent(jLabel6)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(carrotsNumber))
-                        .addGroup(statisticsDialogLayout.createSequentialGroup()
-                            .addComponent(jLabel4)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(foxesNumber))
-                        .addGroup(statisticsDialogLayout.createSequentialGroup()
-                            .addComponent(jLabel2)
-                            .addGap(30, 30, 30)
-                            .addComponent(rabbitsNumber))))
-                .addContainerGap(27, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(rabbitsNumber)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(foxesNumber)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(carrotsNumber)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(runsNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(jScrollPane1)
         );
         statisticsDialogLayout.setVerticalGroup(
             statisticsDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(statisticsDialogLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addGap(18, 18, 18)
+                .addGap(6, 6, 6)
                 .addGroup(statisticsDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(rabbitsNumber))
-                .addGap(18, 18, 18)
-                .addGroup(statisticsDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(rabbitsNumber)
                     .addComponent(jLabel4)
-                    .addComponent(foxesNumber))
-                .addGap(18, 18, 18)
-                .addGroup(statisticsDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(foxesNumber)
                     .addComponent(jLabel6)
-                    .addComponent(carrotsNumber))
-                .addContainerGap(50, Short.MAX_VALUE))
+                    .addComponent(carrotsNumber)
+                    .addComponent(jLabel1)
+                    .addComponent(runsNumber))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE))
         );
 
         jMenuItem1.setText("jMenuItem1");
@@ -624,6 +638,8 @@ public class RVFGui extends javax.swing.JFrame {
             .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
+        bindingGroup.bind();
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -729,11 +745,14 @@ public class RVFGui extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea logsArea;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JRadioButtonMenuItem normalRB;
     private javax.swing.JMenu optionsButton;
     private javax.swing.JLabel rabbitsNumber;
     private javax.swing.JCheckBoxMenuItem rabbitsTeamwork1;
+    private javax.swing.JLabel runsNumber;
     private javax.swing.JMenuItem showStatsButton;
     private javax.swing.JRadioButtonMenuItem slowRB;
     private javax.swing.JMenu speedMenu;
@@ -741,5 +760,6 @@ public class RVFGui extends javax.swing.JFrame {
     private javax.swing.JDialog statisticsDialog;
     private javax.swing.JMenu stopMenu;
     private javax.swing.JRadioButtonMenuItem veryFastRB;
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 }

@@ -17,6 +17,7 @@ import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.Goals.DistractFox;
 import rabbitsvsfoxes.Goals.Explore;
 import rabbitsvsfoxes.Goals.Goal;
+import rabbitsvsfoxes.Search.*;
 import rabbitsvsfoxes.UnexploredSpace;
 
 /**
@@ -25,7 +26,9 @@ import rabbitsvsfoxes.UnexploredSpace;
  */
 public class Agent extends EnvironmentObject {
 
-    private final int radius = 7;
+    protected int radius = 7;
+    protected int rabbitRadius = 10;
+    protected int foxRadius = 7;
     /*
      Agent character is a random value 1-10,
      if the value is <8 the agent is team-working,
@@ -61,6 +64,7 @@ public class Agent extends EnvironmentObject {
         this.lastLogs = new ArrayList<>();
         this.myName = env.getName(this);
         this.messagesReadIndex = 0;
+        radius = (this instanceof RabbitAgent) ? rabbitRadius : foxRadius;
         discoverExplorationSpaces();
     }
 
@@ -69,8 +73,8 @@ public class Agent extends EnvironmentObject {
     }
 
     protected void discoverExplorationSpaces() {
-        for (int i = radius; i < env.getSize(); i += (radius * 2) + 1) {
-            for (int j = radius; j < env.getSize(); j += (radius * 2) + 1) {
+        for (int i = radius; i < env.getSize(); i += radius) {
+            for (int j = radius; j < env.getSize(); j += radius) {
                 toExplore.add(new UnexploredSpace(i, j));
                 //System.out.println("will explore x:"+i+",y:"+j);
             }
@@ -133,20 +137,57 @@ public class Agent extends EnvironmentObject {
 
     }
 
+    public AgentState convertAgentToState() {
+        return new AgentState(this, getX(), getY(), env.getWorld());
+    }
+
+    public AgentState convertAgentToGoalState() {
+        return new AgentState(this, agenda.getTop().getGoalObject().getX(), agenda.getTop().getGoalObject().getY(), env.getWorld());
+    }
+
     public void makeAStep() {
         lookAround(radius);
         findGoal();
         if (agenda.getTop() != null) {
-            if (agenda.getTop().getTeamColor() == null) {
+            Goal goal=agenda.getTop();
+            if (goal.getTeamColor() == null) {
                 this.setTeamColor(myColor);
             } else {
                 this.setTeamColor(agenda.getTop().getTeamColor());
             }
-            moveTowardsGoal(agenda.getTop());
+            //moveTowardsGoal(agenda.getTop());
+            SearchProblem problem = new AgentRoutingAStar(convertAgentToState(), convertAgentToGoalState(), env.getWorld());
+            System.out.println("Searching...");		//print some message
+            Path path = problem.search();				//perform search, get result
+            System.out.println("Done!");			//print some message
+            if (path == null) //if it is null, no solution
+            {
+                System.out.println("No solution");
+            } else {
+                //path.print();							//otherwise print path
+                move(((AgentAction) path.get(0).action).movement);
+                System.out.println("Nodes visited: " + problem.nodeVisited);
+                System.out.println("Cost: " + path.cost + "\n");
+                if (goal.getGoalObject().getX() == getX() && goal.getGoalObject().getY() == getY()) {//if on goal
+                    goal.getGoalObject().setAlive(false);
+                    goal.setCompleted(true);
+                    agenda.removeTask(goal);
+                    if (goal instanceof CatchRabbit) {
+                        //System.out.println("fox ate rabbit");
+                        replenishHealth();
+                        ((RabbitAgent) goal.getGoalObject()).unclaimAllCarrots();
+                    } else if (goal instanceof Explore) {
+                        this.toExplore.remove(goal.getGoalObject());
+                    }
+                    env.removeEnvironmentObject(goal.getGoalObject());
+                }
+            }
         } else {
             //System.out.println("Game Over!");
         }
-
+        while (lastLogs.size() > 5) {
+            lastLogs.remove(lastLogs.size() - 1);
+        }
     }
 
     public void moveTowardsGoal(Goal g) {
@@ -245,6 +286,7 @@ public class Agent extends EnvironmentObject {
             if (g instanceof CatchRabbit) {
                 //System.out.println("fox ate rabbit");
                 replenishHealth();
+                ((RabbitAgent) g.getGoalObject()).unclaimAllCarrots();
             } else if (g instanceof Explore) {
                 this.toExplore.remove(g.getGoalObject());
             }
@@ -254,6 +296,7 @@ public class Agent extends EnvironmentObject {
         if (g instanceof DistractFox && manhattanDistance(this, g.getGoalObject()) <= 4) {
             g.setCompleted(true);
             agenda.removeTask(g);
+            System.out.println("i have distracted the fox");
             myGroup.broadcastMessage(new Message(MessageType.DisengageInDistraction, g.getGoalObject(), this));
             lastLogs.add(0, "I have distracted the fox, running away!");
         }
@@ -269,13 +312,13 @@ public class Agent extends EnvironmentObject {
 
     }
 
-    public boolean compareObjects(EnvironmentObject eo1, EnvironmentObject eo2){
-        if(eo1.getX()==eo2.getX() && eo1.getY()==eo2.getY()){
+    public boolean compareObjects(EnvironmentObject eo1, EnvironmentObject eo2) {
+        if (eo1.getX() == eo2.getX() && eo1.getY() == eo2.getY()) {
             return true;
         }
         return false;
     }
-    
+
     public ArrayList<RabbitAgent> rabbitsAtArea(int x, int y, int r) {
         ArrayList<RabbitAgent> rabbits = new ArrayList<>();
         for (EnvironmentObject ag : env.getAgents()) {
