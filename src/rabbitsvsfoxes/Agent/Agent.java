@@ -16,6 +16,7 @@ import rabbitsvsfoxes.Goals.EatCarrot;
 import rabbitsvsfoxes.Environment;
 import rabbitsvsfoxes.Goals.DistractFox;
 import rabbitsvsfoxes.Goals.Explore;
+import rabbitsvsfoxes.Goals.Flee;
 import rabbitsvsfoxes.Goals.Goal;
 import rabbitsvsfoxes.Search.*;
 import rabbitsvsfoxes.UnexploredSpace;
@@ -121,9 +122,7 @@ public class Agent extends EnvironmentObject {
     }
 
     public int diagonalDistance(EnvironmentObject eo1, EnvironmentObject eo2) {
-        int xRad = Math.abs(eo1.getX() - eo2.getX());
-        int yRad = Math.abs(eo1.getY() - eo2.getY());
-        return Math.max(xRad, yRad);
+        return Math.max(Math.abs(eo1.getX() - eo2.getX()), Math.abs(eo1.getY() - eo2.getY()));
     }
 
     public void findGoal() {
@@ -149,41 +148,67 @@ public class Agent extends EnvironmentObject {
         lookAround(radius);
         findGoal();
         if (agenda.getTop() != null) {
-            Goal goal=agenda.getTop();
-            if (goal.getTeamColor() == null) {
-                this.setTeamColor(myColor);
-            } else {
-                this.setTeamColor(agenda.getTop().getTeamColor());
-            }
-            //moveTowardsGoal(agenda.getTop());
-            SearchProblem problem = new AgentRoutingAStar(convertAgentToState(), convertAgentToGoalState(), env.getWorld());
-            System.out.println("Searching...");		//print some message
-            Path path = problem.search();				//perform search, get result
-            System.out.println("Done!");			//print some message
-            if (path == null) //if it is null, no solution
-            {
-                System.out.println("No solution");
-            } else {
-                //path.print();							//otherwise print path
-                move(((AgentAction) path.get(0).action).movement);
-                System.out.println("Nodes visited: " + problem.nodeVisited);
-                System.out.println("Cost: " + path.cost + "\n");
-                if (goal.getGoalObject().getX() == getX() && goal.getGoalObject().getY() == getY()) {//if on goal
-                    goal.getGoalObject().setAlive(false);
-                    goal.setCompleted(true);
-                    agenda.removeTask(goal);
-                    if (goal instanceof CatchRabbit) {
-                        //System.out.println("fox ate rabbit");
-                        replenishHealth();
-                        ((RabbitAgent) goal.getGoalObject()).unclaimAllCarrots();
-                    } else if (goal instanceof Explore) {
-                        this.toExplore.remove(goal.getGoalObject());
-                    }
-                    env.removeEnvironmentObject(goal.getGoalObject());
-                }
-            }
+            moveTowardsGoal();
         } else {
             //System.out.println("Game Over!");
+        }
+
+    }
+
+    public void moveTowardsGoal() {
+        Goal goal = agenda.getTop();
+        int differenceX = Math.abs(goal.getGoalObject().getX() - getX());
+        int differenceY = Math.abs(goal.getGoalObject().getY() - getY());
+        if (goal.getTeamColor() == null) {
+            this.setTeamColor(myColor);
+        } else {
+            this.setTeamColor(agenda.getTop().getTeamColor());
+        }
+        //moveTowardsGoal(agenda.getTop());
+        SearchProblem problem = new AgentRoutingAStar(convertAgentToState(), convertAgentToGoalState(), env.getWorld());
+        Path path = problem.search();//perform search, get result
+        if (path != null) {
+            if (path.size() > 0) {
+                move(((AgentAction) path.get(0).action).movement);
+            } else {
+                System.out.println("at x"+getX()+" y"+getY() +"going to x"+goal.getGoalObject().getX()+" y"+goal.getGoalObject().getY()+" no path found");
+//                if (differenceX <= 1 && differenceY <= 1 && goal instanceof Flee) {
+//                    this.setX(goal.getGoalObject().getX());
+//                    this.setY(goal.getGoalObject().getY());
+//                }
+            }
+
+            if (differenceX == 1 && differenceY == 1
+                    && (goal instanceof EatCarrot
+                    || goal instanceof CatchRabbit)) {
+                this.setX(goal.getGoalObject().getX());
+                this.setY(goal.getGoalObject().getY());
+            }
+
+            if (goal.getGoalObject().getX() == getX() && goal.getGoalObject().getY() == getY()) {//if on goal
+                goal.getGoalObject().setAlive(false);
+                goal.setCompleted(true);
+                agenda.removeTask(goal);
+                if (goal instanceof CatchRabbit) {
+                    //System.out.println("fox ate rabbit");
+                    replenishHealth();
+                    ((RabbitAgent) goal.getGoalObject()).unclaimAllCarrots();
+                    env.getGui().writeLogToGui("Rabbit: " + ((RabbitAgent) goal.getGoalObject()).getName() + " is about to get eaten, unclaiming all of his carrots.");
+                    env.getGui().writeLogToGui("Fox: " + myName + " has eaten " + ((RabbitAgent) goal.getGoalObject()).getName());
+                } else if (goal instanceof Explore) {
+                    this.toExplore.remove(goal.getGoalObject());
+                } else if (goal instanceof EatCarrot) {
+                    env.getGui().writeLogToGui("Rabbit: " + getName() + " has eaten carrot at x:" + goal.getGoalObject().getX() + " y:" + goal.getGoalObject().getY());
+                }
+                env.removeEnvironmentObject(goal.getGoalObject());
+            }
+            if (goal instanceof DistractFox && manhattanDistance(this, goal.getGoalObject()) <= 4) {
+                goal.setCompleted(true);
+                agenda.removeTask(goal);
+                System.out.println("i have distracted the fox");
+                myGroup.broadcastMessage(new Message(MessageType.DisengageInDistraction, goal.getGoalObject(), this));
+                lastLogs.add(0, "I have distracted the fox, running away!");
+            }
         }
         while (lastLogs.size() > 5) {
             lastLogs.remove(lastLogs.size() - 1);

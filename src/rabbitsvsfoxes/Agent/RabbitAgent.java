@@ -48,8 +48,9 @@ public class RabbitAgent extends Agent {
         Goal goal;
         goal = new EatCarrot(null);
         double maxUtility = 0, utility = 0;
+
         if (foxesAround.isEmpty()) {//no dangerous foxes; flee ON
-            //if (true) {//flee OFF
+            //   if (true) {//flee OFF
             if (!objAround.isEmpty()) {//there are carrots nearby
                 //System.out.println("no foxes around, so i'm gonna eat that carrot");
                 for (EnvironmentObject eo : objAround) {
@@ -91,7 +92,6 @@ public class RabbitAgent extends Agent {
             boolean enemyL = false, enemyR = false, enemyU = false, enemyD = false;
             //checks on which sides the enemies are, so that the direction to flee
             //can be determined
-
             for (FoxAgent fox : foxesAround) {
                 int foxX = fox.getX();
                 int foxY = fox.getY();
@@ -105,7 +105,7 @@ public class RabbitAgent extends Agent {
                         enemyL = true;
                         System.out.println("there is a fox on the left");
                     }
-                } else if (differenceX < differenceY) {
+                } else  if (differenceX < differenceY){
                     if (foxY > getY()) {
                         enemyD = true;
                         System.out.println("there is a fox down");
@@ -113,7 +113,8 @@ public class RabbitAgent extends Agent {
                         enemyU = true;
                         System.out.println("there is a fox up");
                     }
-                } else {
+                }
+                else {
                     if (foxY > getY() && foxX > getX()) {
                         //enemy is diagonally down right
                         System.out.println("there is a fox down right");
@@ -172,6 +173,10 @@ public class RabbitAgent extends Agent {
         }
 
         if (goal.getGoalObject() != null && !agenda.checkExistists(goal)) {
+            if (agenda.getTop() instanceof Flee && 
+                    (foxesAround.isEmpty()  || foxesAround.size()>1)) {
+                agenda.removeTop();
+            }
             if (goal instanceof EatCarrot) {
                 //if (!(agenda.getTop() instanceof EatCarrot)) {
                 //agenda top is not eat carrot
@@ -181,14 +186,15 @@ public class RabbitAgent extends Agent {
                     String claimer = ((Carrot) goal.getGoalObject()).getClaimedBy();
                     if (!claimer.equals(myName)) {
                         lastLogs.add(0, "Found a carrot, but " + claimer + " already saw it first!");
+                        env.getGui().writeLogToGui("Rabbit: "+myName + " saw a carrot at x:"+goal.getGoalObject().getX()+" y:"+goal.getGoalObject().getY()+" but it's already claimed by "+claimer);
                         objAround.remove(goal.getGoalObject());
                         findGoal();
                     }
-
                 } else {
                     //no one has targeted it, add this goal to the agenda
                     //System.out.println("this carrot seems free");
                     lastLogs.add(0, "I have found a carrot and I am claiming it!");
+                    env.getGui().writeLogToGui("Rabbit: "+myName + " saw a carrot at x:"+goal.getGoalObject().getX()+" y:"+goal.getGoalObject().getY()+" and claims it.");
                     myGroup.broadcastMessage(new Message(MessageType.ClaimCarrot, goal.getGoalObject(), this));
                     this.addGoal(goal);
                 }
@@ -196,9 +202,10 @@ public class RabbitAgent extends Agent {
                 lastLogs.add(0, "There is nothing around me, I will explore!");
                 this.addGoal(goal);
             } else if (goal instanceof Flee) {
-                if (!(agenda.getTop() instanceof DistractFox)) {
+                if (!(agenda.getTop() instanceof DistractFox) && !(agenda.getTop() instanceof Flee)) {
                     this.addGoal(goal);
                     lastLogs.add(0, "There is a fox around, I must flee!");
+                    env.getGui().writeLogToGui("Rabbit: "+myName + " saw a fox and is fleeing to x:"+goal.getGoalObject().getX()+" y:"+goal.getGoalObject().getY());
                 }
 
                 if (env.getGui().getRabbitsTeamwork1()) {
@@ -213,7 +220,6 @@ public class RabbitAgent extends Agent {
                             nearestFox = foxAgent;
                         }
                     }
-
                     if (!myGroup.checkFoxBeingDistracted(nearestFox)
                             && nearestFox.getCurrentTarget().equals(myName)) {
                         Message messageToSend = new Message(MessageType.RequestDistraction, nearestFox, this);
@@ -248,7 +254,6 @@ public class RabbitAgent extends Agent {
         }
         //System.out.println("rabbit found carrot with score: " + minDistance); //To change body of generated methods, choose Tools | Templates.
     }
-
     @Override
     public Goal openPostbox() {
         Message newestMessage = myGroup.getMessage(messagesReadIndex);
@@ -327,227 +332,309 @@ public class RabbitAgent extends Agent {
      * @return
      */
     public FleeSpace determineFleeDirection(boolean enemyU, boolean enemyD, boolean enemyR, boolean enemyL) {
-        int distToEndX = env.getSize() - getX(), distToEndY = env.getSize() - getY();
-        if (enemyU && enemyD && enemyL && checkMove(Direction.RIGHT)) {
+        int fleeX = getX(), fleeY = getY(), maxX = getX(), maxY = getY(), maxUtility = 0;
+        if (enemyU && enemyD && enemyL) {
             //enemies up, down, left, therefore go right
-            return new FleeSpace(getX() + 1, getY());
-        } else if (enemyU && enemyD && enemyR && checkMove(Direction.LEFT)) {
-            //enemies up, down, right, therefore go left etc....
-            return new FleeSpace(getX() - 1, getY());
-        } else if (enemyU && enemyR && enemyL && checkMove(Direction.DOWN)) {
-            return new FleeSpace(getX(), getY() + 1);
-        } else if (enemyD && enemyR && enemyL && checkMove(Direction.UP)) {
-            return new FleeSpace(getX(), getY() - 1);
-        } else if (enemyU && enemyD) {
-            if (checkMove(Direction.LEFT) && checkMove(Direction.RIGHT)) {
-                if (distToEndX <= getY()) {//go left
-                    return new FleeSpace(getX() - 1, getY());
-                } else {//go right
-                    return new FleeSpace(getX() + 1, getY());
+            while (fleeX <= getX() + radius && fleeX < env.getSize()) {
+                if (env.spaceOccupied(fleeX, fleeY) == null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+                    } else if (utility == 0) {
+                        return new FleeSpace(maxX, maxY);
+                    }
                 }
-            } else if (checkMove(Direction.RIGHT)) {
-                return new FleeSpace(getX() + 1, getY());
-            } else if (checkMove(Direction.LEFT)) {
-                return new FleeSpace(getX() - 1, getY());
+                fleeX++;
+            }
+        } else if (enemyU && enemyD && enemyR) {
+            //enemies up, down, right, therefore go left etc....
+            while (fleeX >= getX() - radius && fleeX >= 0) {
+                if (env.spaceOccupied(fleeX, fleeY) == null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+                    } else if (utility == 0) {
+                        return new FleeSpace(maxX, maxY);
+                    }
+                }
+                fleeX--;
+            }
+        } else if (enemyU && enemyR && enemyL) {
+            //enemies up, right, left therefore go down
+            while (fleeY <= getY() + radius && fleeY < env.getSize()) {
+                if (env.spaceOccupied(fleeX, fleeY) == null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+                    } else if (utility == 0) {
+                        return new FleeSpace(maxX, maxY);
+                    }
+                }
+                fleeY++;
+            }
+        } else if (enemyD && enemyR && enemyL) {
+            //enemies down right left - go up
+            while (fleeY >= getY() - radius && fleeY >= 0) {
+                if (env.spaceOccupied(fleeX, fleeY) != null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+                    } else if (utility == 0) {
+                        return new FleeSpace(maxX, maxY);
+                    }
+                }
+                fleeY--;
+            }
+        } else if (enemyU && enemyD) {
+            //enemies up and down
+            while (fleeX >= getX() - radius && fleeX >= 0) {
+                if (env.spaceOccupied(fleeX, fleeY) != null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+                    } else if (utility == 0) {
+                        return new FleeSpace(maxX, maxY);
+                    }
+                }
+                fleeX--;
+            }
+            fleeX = getX();
+            while (fleeX <= getX() + radius && fleeX < env.getSize()) {
+                if (env.spaceOccupied(fleeX, fleeY) == null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+                    } else if (utility == 0) {
+                        return new FleeSpace(maxX, maxY);
+                    }
+                }
+                fleeX++;
             }
         } else if (enemyU && enemyR) {
-            if (checkMove(Direction.DOWN) && checkMove(Direction.LEFT)) {
-                if (getX() <= distToEndY) {//go down
-                    return new FleeSpace(getX(), getY() + 1);
-                } else {//go left
-                    return new FleeSpace(getX() - 1, getY());
+            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--) {
+                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++) {
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.LEFT)) {
-                return new FleeSpace(getX() - 1, getY());
-            } else if (checkMove(Direction.DOWN)) {
-                return new FleeSpace(getX(), getY() + 1);
             }
         } else if (enemyU && enemyL) {
-            if (checkMove(Direction.DOWN) && checkMove(Direction.RIGHT)) {
-                if (distToEndX <= distToEndY) {//go down
-                    return new FleeSpace(getX(), getY() + 1);
-                } else {//go right
-                    return new FleeSpace(getX() + 1, getY());
+            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++) {
+                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++) {
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.RIGHT)) {
-                return new FleeSpace(getX() + 1, getY());
-            } else if (checkMove(Direction.DOWN)) {
-                return new FleeSpace(getX(), getY() + 1);
             }
         } else if (enemyR && enemyL) {
-            if (checkMove(Direction.DOWN) && checkMove(Direction.UP)) {
-                if (getY() <= distToEndY) {//go down
-                    return new FleeSpace(getX(), getY() + 1);
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
+            while (fleeY <= getY() + radius && fleeY < env.getSize()) {
+                if (env.spaceOccupied(fleeX, fleeY) == null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+                    } else if (utility == 0) {
+                        return new FleeSpace(maxX, maxY);
+                    }
                 }
-            } else if (checkMove(Direction.UP)) {
-                return new FleeSpace(getX(), getY() - 1);
-            } else if (checkMove(Direction.DOWN)) {
-                return new FleeSpace(getX(), getY() + 1);
-            }
+                fleeY++;
+            }//check for spaces down
+            fleeY = getY();
+            while (fleeY >= getY() - radius && fleeY >= 0) {
+                if (env.spaceOccupied(fleeX, fleeY) == null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+                    } else if (utility == 0) {
+                        return new FleeSpace(maxX, maxY);
+                    }
+                }
+                fleeY--;
+            }//check for spaces up
         } else if (enemyD && enemyL) {
-            if (checkMove(Direction.RIGHT) && checkMove(Direction.UP)) {
-                if (distToEndX >= getY()) {//go right
-                    return new FleeSpace(getX() + 1, getY());
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
+            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++) {
+                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--) {
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.UP)) {
-                return new FleeSpace(getX(), getY() - 1);
-            } else if (checkMove(Direction.RIGHT)) {
-                return new FleeSpace(getX() + 1, getY());
             }
         } else if (enemyD && enemyR) {
-            if (checkMove(Direction.LEFT) && checkMove(Direction.UP)) {
-                if (getX() >= getY()) {//go left
-                    return new FleeSpace(getX() - 1, getY());
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
+            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--) {
+                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--) {
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.UP)) {
-                return new FleeSpace(getX(), getY() - 1);
-            } else if (checkMove(Direction.LEFT)) {
-                return new FleeSpace(getX() - 1, getY());
             }
         } else if (enemyU) {
-            if (checkMove(Direction.LEFT) && checkMove(Direction.RIGHT) && checkMove(Direction.DOWN)) {
-                if (distToEndX <= getX() || getX() >= distToEndY) {//go left
-                    return new FleeSpace(getX() - 1, getY());
-                } else if (distToEndY <= distToEndX || getX() <= distToEndX) {//go right
-                    return new FleeSpace(getX() + 1, getY());
-                } else {//go down
-                    return new FleeSpace(getX(), getY() + 1);
+            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++) {
+                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++) {
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.LEFT) && checkMove(Direction.DOWN)) {
-                if (getX() >= distToEndY) {//go left
-                    return new FleeSpace(getX() - 1, getY());
-                } else {//go down
-                    return new FleeSpace(getX(), getY() + 1);
+            }//enemy is up left
+            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--) {
+                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++) {
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.DOWN) && checkMove(Direction.RIGHT)) {
-                if (distToEndY <= distToEndX) {//go right
-                    return new FleeSpace(getX() + 1, getY());
-                } else {//go down
-                    return new FleeSpace(getX(), getY() + 1);
-                }
-            } else if (checkMove(Direction.LEFT) && checkMove(Direction.RIGHT)) {
-                if (getX() <= distToEndX) {//go right
-                    return new FleeSpace(getX() + 1, getY());
-                } else {//go left
-                    return new FleeSpace(getX() - 1, getY());
-                }
-            } else if (checkMove(Direction.DOWN)) {
-                return new FleeSpace(getX(), getY() + 1);
-            } else if (checkMove(Direction.LEFT)) {
-                return new FleeSpace(getX() - 1, getY());
-            } else if (checkMove(Direction.RIGHT)) {
-                return new FleeSpace(getX() + 1, getY());
-            }
+            }//enemy is up right
         } else if (enemyD) {
-            if (checkMove(Direction.LEFT) && checkMove(Direction.RIGHT) && checkMove(Direction.UP)) {
-                if (getY() <= getX() || getX() >= distToEndX) {//go left
-                    return new FleeSpace(getX() - 1, getY());
-                } else if (getY() <= distToEndX || getX() <= distToEndX) {//go right
-                    return new FleeSpace(getX() + 1, getY());
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
+            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++) {
+                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--) {
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.LEFT) && checkMove(Direction.UP)) {
-                if (getX() >= getY()) {//go left
-                    return new FleeSpace(getX() - 1, getY());
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
+            }//enemy down left
+            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--) {
+                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--) {
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.UP) && checkMove(Direction.RIGHT)) {
-                if (getY() <= distToEndX) {//go right
-                    return new FleeSpace(getX() + 1, getY());
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
-                }
-            } else if (checkMove(Direction.LEFT) && checkMove(Direction.RIGHT)) {
-                if (getX() <= distToEndX) {//go right
-                    return new FleeSpace(getX() + 1, getY());
-                } else {//go left
-                    return new FleeSpace(getX() - 1, getY());
-                }
-            } else if (checkMove(Direction.UP)) {
-                return new FleeSpace(getX(), getY() - 1);
-            } else if (checkMove(Direction.LEFT)) {
-                return new FleeSpace(getX() - 1, getY());
-            } else if (checkMove(Direction.RIGHT)) {
-                return new FleeSpace(getX() + 1, getY());
-            }
+            }//enemy down right
         } else if (enemyR) {
-            if (checkMove(Direction.LEFT) && checkMove(Direction.DOWN) && checkMove(Direction.UP)) {
-                if ((getY() <= getX() || getX() >= distToEndY)) {//go left
-                    return new FleeSpace(getX() - 1, getY());
-                } else if ((getY() <= distToEndY || getX() <= distToEndY)) {//go down
-                    return new FleeSpace(getX(), getY() + 1);
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
+            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--){
+                for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--) {
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.LEFT) && checkMove(Direction.DOWN)) {
-                if (getX() <= distToEndY) {//go down
-                    return new FleeSpace(getX(), getY() + 1);
-                } else {//go left
-                    return new FleeSpace(getX() - 1, getY());
+            }//enemy down right
+             for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++){
+                for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--){
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.LEFT) && checkMove(Direction.UP)) {
-                if (getX() >= getY()) {//go left
-                    return new FleeSpace(getX() - 1, getY());
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
-                }
-            } else if (checkMove(Direction.UP) && checkMove(Direction.DOWN)) {
-                if (getY() <= distToEndY) {//go down
-                    return new FleeSpace(getX(), getY() + 1);
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
-                }
-            } else if (checkMove(Direction.LEFT)) {
-                return new FleeSpace(getX() - 1, getY());
-            } else if (checkMove(Direction.UP)) {
-                return new FleeSpace(getX(), getY() - 1);
-            } else if (checkMove(Direction.DOWN)) {
-                return new FleeSpace(getX(), getY() + 1);
-            }
+            }//up right
         } else if (enemyL) {
-            if (checkMove(Direction.RIGHT) && checkMove(Direction.DOWN) && checkMove(Direction.UP)) {
-                if (getY() <= distToEndX || distToEndX >= distToEndY) {//go right
-                    return new FleeSpace(getX() + 1, getY());
-                } else if (getY() <= distToEndY || distToEndX <= distToEndY) {//go down
-                    return new FleeSpace(getX(), getY() + 1);
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
+            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--)  {
+                for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++) {
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.RIGHT) && checkMove(Direction.DOWN)) {
-                if (distToEndX <= distToEndY) {//go down
-                    return new FleeSpace(getX(), getY() + 1);
-                } else {//go right
-                    return new FleeSpace(getX() + 1, getY());
+            }//enemy is down left
+            for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++) {
+                for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++){
+                    if (env.spaceOccupied(fleeX, fleeY) == null) {
+                        
+                        int utility = safetyUtility(fleeX, fleeY, radius);
+                        if (utility > maxUtility) {
+                            maxUtility = utility;
+                            maxX = fleeX;
+                            maxY = fleeY;
+                        } else if (utility == 0) {
+                            return new FleeSpace(maxX, maxY);
+                        }
+                    }
                 }
-            } else if (checkMove(Direction.RIGHT) && checkMove(Direction.UP)) {
-                if (distToEndX >= getY()) {//go right
-                    return new FleeSpace(getX() + 1, getY());
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
-                }
-            } else if (checkMove(Direction.UP) && checkMove(Direction.DOWN)) {
-                if (getY() <= distToEndY) {//go down
-                    return new FleeSpace(getX(), getY() + 1);
-                } else {//go up
-                    return new FleeSpace(getX(), getY() - 1);
-                }
-            } else if (checkMove(Direction.RIGHT)) {
-                return new FleeSpace(getX() + 1, getY());
-            } else if (checkMove(Direction.UP)) {
-                return new FleeSpace(getX(), getY() - 1);
-            } else if (checkMove(Direction.DOWN)) {
-                return new FleeSpace(getX(), getY() + 1);
-            }
+            }//enemy is up left
         }
-        return null;
+        System.out.println("running to " + maxX + " " + maxY);
+        return new FleeSpace(maxX, maxY);
     }
 
     public Carrot findCarrotAt(int x, int y) {
@@ -578,6 +665,19 @@ public class RabbitAgent extends Agent {
         //foxesAround = foxesAtArea(this.getX(), this.getY(), threatRadius);
     }
 
+    public int safetyUtility(int x, int y, int radius) {
+        int result = 0,count=0;
+        for (FoxAgent fox : foxesAround) {
+            result += Math.abs(x - fox.getX()) + Math.abs(y - fox.getY());
+            if (Math.max(Math.abs(x - fox.getX()), Math.abs(y - fox.getY())) > radius+1) {
+                //System.out.println("utility is 0 at " + x + " " + y);
+                count++;
+            }
+        }
+        if(count==foxesAround.size())return 0;
+        return result;
+    }
+
     public ArrayList<FoxAgent> foxesAtArea(int x, int y, int r) {
         ArrayList<FoxAgent> foxes = new ArrayList<>();
         for (EnvironmentObject ag : env.getAgents()) {
@@ -591,29 +691,45 @@ public class RabbitAgent extends Agent {
         return foxes;
     }
 
-    public void unclaimAllCarrots(){
-        myGroup.broadcastMessage(new Message(MessageType.UnclaimAllCarrots,null,this));
+    public void unclaimAllCarrots() {
+        myGroup.broadcastMessage(new Message(MessageType.UnclaimAllCarrots, null, this));
     }
-    
+
+    /**
+     * A function that gives a utility to a goal of type Flee or Explore. The
+     * utility is calculated based on the distance to the object. (E.g. distance
+     * between me and fox, me and exploration space etc.)
+     *
+     * @param ag
+     * @param eo
+     * @return
+     */
     public double evaluationFunctionFleeAndExplore(Agent ag, EnvironmentObject eo) {
         double distanceMultiplier,
                 characterMultiplier = (agentCharacter < characterSeparator) ? 0.7 : 1.3;
-        if (manhattanDistance(ag, eo) <= 3) {
-            distanceMultiplier = 10;
-        } else if (manhattanDistance(ag, eo) <= 4) {
-            distanceMultiplier = 9;
-        } else if (manhattanDistance(ag, eo) <= 5) {
-            distanceMultiplier = 8;
-        } else if (manhattanDistance(ag, eo) <= 6) {
-            distanceMultiplier = 7;
-        } else if (manhattanDistance(ag, eo) <= 7) {
-            distanceMultiplier = 6;
-        } else {
-            distanceMultiplier = 5;
-        }
-        return distanceMultiplier * characterMultiplier;
+//        if (manhattanDistance(ag, eo) <= 3) {
+//            distanceMultiplier = 10;
+//        } else if (manhattanDistance(ag, eo) <= 4) {
+//            distanceMultiplier = 9;
+//        } else if (manhattanDistance(ag, eo) <= 5) {
+//            distanceMultiplier = 8;
+//        } else if (manhattanDistance(ag, eo) <= 6) {
+//            distanceMultiplier = 7;
+//        } else if (manhattanDistance(ag, eo) <= 7) {
+//            distanceMultiplier = 6;
+//        } else {
+//            distanceMultiplier = 5;
+//        }
+        return manhattanDistance(ag, eo) * characterMultiplier;
     }
 
+    /**
+     *
+     * @param ag
+     * @param requester
+     * @param target
+     * @return
+     */
     public double evaluationFunctionTeamwork(Agent ag, Agent requester, Agent target) {
         double rabbitsMultiplier,
                 distanceMultiplier,
@@ -647,7 +763,12 @@ public class RabbitAgent extends Agent {
         return rabbitsMultiplier * distanceMultiplier * characterMultiplier;
     }
 
-    //evaluation function for carrots
+    /**
+     *
+     * @param ag
+     * @param eo
+     * @return
+     */
     public double evaluationFunctionCarrot(Agent ag, EnvironmentObject eo) {
         int radius = (diagonalDistance(ag, eo) == 1 ? 2 : diagonalDistance(ag, eo));
         double foxesMultiplier,

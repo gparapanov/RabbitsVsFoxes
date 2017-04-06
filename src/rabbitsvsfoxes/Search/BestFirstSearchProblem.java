@@ -59,10 +59,10 @@ public abstract class BestFirstSearchProblem extends rabbitsvsfoxes.Search.Searc
         fringe.add(rootNode);										//add root node into fringe
         visitedNodes.put(rootNode.state, rootNode);					//seen root node and state
         this.nodeVisited++;											//increment node count
-        if (nodeVisited % 1000 == 0) //print message every 1000 nodes
-        {
-            System.out.println("No. of nodes explored: " + nodeVisited);
-        }
+//        if (nodeVisited % 1000 == 0) //print message every 1000 nodes
+//        {
+//            System.out.println("No. of nodes explored: " + nodeVisited);
+//        }
 
         while (true) {
             if (fringe.isEmpty()) //no more node to expand
@@ -77,10 +77,10 @@ public abstract class BestFirstSearchProblem extends rabbitsvsfoxes.Search.Searc
             Object[] childrenNodes = node.state.successor().toArray();
             for (int i = 0; i < childrenNodes.length; i++) {
                 this.nodeVisited++;										//increment node count
-                if (nodeVisited % 1000 == 0) //print message every 1000 nodes
-                {
-                    System.out.println("No. of nodes explored: " + nodeVisited);
-                }
+//                if (nodeVisited % 1000 == 0) //print message every 1000 nodes
+//                {
+//                    System.out.println("No. of nodes explored: " + nodeVisited);
+//                }
                 ActionStatePair child = (ActionStatePair) childrenNodes[i];
                 Action action = child.action;
                 State nextState = child.state;

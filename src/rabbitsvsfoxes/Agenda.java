@@ -79,7 +79,9 @@ public class Agenda {
     public String toString() {
         String outputString = "";
         for (Goal g : tasks) {
-            outputString += g.getClass().getSimpleName() + " Priority: " + g.getPriority() + "<br>";
+            outputString += g.getClass().getSimpleName() +" x:"+g.getGoalObject().getX()+
+                    " y:"+g.getGoalObject().getY()+ " Priority: " + g.getPriority() + "<br>"
+                    ;
         }
         return outputString;
     }

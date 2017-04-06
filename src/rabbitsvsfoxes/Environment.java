@@ -46,7 +46,7 @@ public class Environment {
     private final int initialCarrots;
     private MessageGroup foxesGroup;
     private MessageGroup rabbitsGroup;
-    private char[][] world;
+    public char[][] world;
 
     public Environment(int size, int r, int f, int c, int b, RVFGui gui) {
         this.size = size;
@@ -114,7 +114,7 @@ public class Environment {
             this.addEnvironmentObject(fox);
             world[newY][newX] = 'F';
         }
-        System.out.println(envObjects.toString());
+        //System.out.println(envObjects.toString());
     }
     public void refreshArrayMap(){
         for (int y = 0; y < world.length; y++) {
