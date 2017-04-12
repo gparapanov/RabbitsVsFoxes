@@ -84,6 +84,7 @@ public class FoxAgent extends Agent {
             if (postGoal.getUtility() > goal.getUtility()
                     || compareObjects(postGoal.getGoalObject(), goal.getGoalObject())) {
                 goal = postGoal;
+                env.getGui().writeLogToGui("Fox: "+myName+ " going to help its teammate "+lastMessageRead.getSender().getName() + " catch the rabbit " + ((Agent) lastMessageRead.getTargetObject()).getName() + "!");
                 lastLogs.add(0, lastMessageRead.getSender().getName() + " wants backup, going to help him catch " + ((Agent) lastMessageRead.getTargetObject()).getName() + "!");
             } else {
                 lastLogs.add(0, lastMessageRead.getSender().getName() + " is asking for help, but I prefer to work on my own!");
@@ -110,16 +111,17 @@ public class FoxAgent extends Agent {
             //about the rabbit's location
             if (goal instanceof CatchRabbit) {
                 lastLogs.add(0, "Saw " + ((Agent) goal.getGoalObject()).getName() + ", going after it!");
+                env.getGui().writeLogToGui("Fox: "+myName + " just spotted the rabbit "+((RabbitAgent)goal.getGoalObject()).getName()+ " at x:"+goal.getGoalObject().getX()+" y:"+goal.getGoalObject().getY());
                 this.addGoal(goal);
                 // CatchRabbit teamGoal=new CatchRabbit(goal.getGoalObject());
                 if (env.getGui().getFoxesTeamwork1()) {
                     //this is teamwork type 1 in which all foxes go after the same  rabbit
                     goal.setPriority(6);
-                    goal.setTeamColor(myColor);
                     Message messageToSend = new Message(MessageType.RequestBackup, goal.getGoalObject(), this);
                     messageToSend.setTeamColor(goal.getTeamColor());
                     myGroup.broadcastMessage(messageToSend);
                     //System.out.println("asking for help");
+                    env.getGui().writeLogToGui("Fox: "+myName + " is asking for help from all foxes to catch "+((RabbitAgent)goal.getGoalObject()).getName()+"at x:"+goal.getGoalObject().getX()+" y:"+goal.getGoalObject().getY());
                     lastLogs.add(0, "Asking for help from all my friends!");
                 } else if (env.getGui().getFoxesTeamwork2()) {
                     //this is teamwork type 2, in which a fox asks for an ambush 
@@ -133,6 +135,7 @@ public class FoxAgent extends Agent {
                     myGroup.broadcastMessage(messageToSend);
                     //System.out.println("asking for ambush");
                     lastLogs.add(0, "Asking for ambush!");
+                    env.getGui().writeLogToGui("Fox: "+myName + " is asking for ambush to catch "+((RabbitAgent)goal.getGoalObject()).getName()+"at x:"+goal.getGoalObject().getX()+" y:"+goal.getGoalObject().getY());
                 } else if (env.getGui().getFoxesTeamwork3()) {
                     //this is teamwork type 3 in which all foxes help their nearby foxes
                     // if (agenda.getTop().getPriority() != 6) {
@@ -142,6 +145,7 @@ public class FoxAgent extends Agent {
                     myGroup.broadcastMessage(messageToSend);
                     //System.out.println("asking for group work");
                     lastLogs.add(0, "Requesting help for " + ((Agent) goal.getGoalObject()).getName() + " from foxes nearby!");
+                    env.getGui().writeLogToGui("Fox: "+myName + " is asking for help from foxes nearby to catch "+((RabbitAgent)goal.getGoalObject()).getName()+"at x:"+goal.getGoalObject().getX()+" y:"+goal.getGoalObject().getY());
                     //}
 
                 }

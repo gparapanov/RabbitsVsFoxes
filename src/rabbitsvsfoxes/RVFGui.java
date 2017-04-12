@@ -34,14 +34,14 @@ import javax.swing.border.BevelBorder;
  */
 public class RVFGui extends javax.swing.JFrame {
 
-    private final int RABBITS = 1;
-    private final int FOXES = 3;
+    private final int RABBITS = 5;
+    private final int FOXES = 1;
     private final int CARROTS = 20;
     private final int BOMBS = 100;
     private final int size = 45;
 
     private JPanel panel1;
-    private final JFrame thisFrame = this;
+    private final RVFGui thisFrame = this;
     private List<JLabel> labels;
 
     private final Color backgroundC = Color.decode("#169B08");
@@ -49,16 +49,17 @@ public class RVFGui extends javax.swing.JFrame {
     private ButtonGroup agentBehaviourGroup;
     private ButtonGroup speedButtonGroup;
     private Environment environment;
-    private int numberOfRuns=0;
+    private int numberOfRuns = 0;
 
     public RVFGui() {
         initComponents();//generated method
-        environment = new Environment(size, RABBITS, FOXES, CARROTS, BOMBS, this);
+        environment = new Environment(size, RABBITS, FOXES, CARROTS, BOMBS, thisFrame);
         initialiseVariables();
         drawField();
         System.out.println(environment);
 
         ActionListener listener = (ActionEvent event) -> {
+            writeLogToGui("Run: " + numberOfRuns);
             step();
             numberOfRuns++;
         };
@@ -138,6 +139,33 @@ public class RVFGui extends javax.swing.JFrame {
 
             }
         });
+        resetMenu.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                resetGame();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
 
         this.addKeyListener(new KeyListener() {
 
@@ -189,7 +217,6 @@ public class RVFGui extends javax.swing.JFrame {
                     }
 
                 } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-
                     switch (displayTimer.getDelay()) {
                         case 100:
                             displayTimer.setDelay(300);
@@ -214,6 +241,8 @@ public class RVFGui extends javax.swing.JFrame {
                         statisticsDialog.setVisible(true);
                         statisticsDialog.setLocationRelativeTo(null);
                     }
+                } else if (e.getKeyCode() == KeyEvent.VK_R) {
+                    resetGame();
                 }
             }
 
@@ -301,6 +330,15 @@ public class RVFGui extends javax.swing.JFrame {
         }
     }
 
+    public void resetGame() {
+        displayTimer.stop();
+        environment = new Environment(size, RABBITS, FOXES, CARROTS, BOMBS, thisFrame);
+        numberOfRuns = 0;
+        logsArea.setText("");
+        redrawField();
+        System.out.println("Resetting game!");
+    }
+
     public boolean isInBoundaries(int x, int y) {
         return (x >= 0 && x < size) && (y >= 0 && y < size);
     }
@@ -376,12 +414,12 @@ public class RVFGui extends javax.swing.JFrame {
         rabbitsNumber.setText("" + rabbits);
         foxesNumber.setText("" + foxes);
         carrotsNumber.setText("" + carrotsF);
-        runsNumber.setText(""+numberOfRuns);
+        runsNumber.setText("" + numberOfRuns);
         //if(rabbits==0)displayTimer.stop();
     }
 
-    public void writeLogToGui(String st){
-        logsArea.setText(logsArea.getText()+"\n"+st);
+    public void writeLogToGui(String st) {
+        logsArea.setText(logsArea.getText() + "\n" + st);
     }
 
     /**
@@ -410,6 +448,7 @@ public class RVFGui extends javax.swing.JFrame {
         menuBar = new javax.swing.JMenuBar();
         startMenu = new javax.swing.JMenu();
         stopMenu = new javax.swing.JMenu();
+        resetMenu = new javax.swing.JMenu();
         optionsButton = new javax.swing.JMenu();
         goalDrivenOption = new javax.swing.JRadioButtonMenuItem();
         hybridOption = new javax.swing.JRadioButtonMenuItem();
@@ -450,7 +489,9 @@ public class RVFGui extends javax.swing.JFrame {
 
         logsArea.setEditable(false);
         logsArea.setColumns(20);
+        logsArea.setLineWrap(true);
         logsArea.setRows(5);
+        logsArea.setWrapStyleWord(true);
         jScrollPane1.setViewportView(logsArea);
 
         javax.swing.GroupLayout statisticsDialogLayout = new javax.swing.GroupLayout(statisticsDialog.getContentPane());
@@ -515,6 +556,10 @@ public class RVFGui extends javax.swing.JFrame {
         stopMenu.setText("Stop");
         stopMenu.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
         menuBar.add(stopMenu);
+
+        resetMenu.setText("Reset");
+        resetMenu.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
+        menuBar.add(resetMenu);
 
         optionsButton.setText("Options");
         optionsButton.setFont(new java.awt.Font("Segoe UI", 3, 14)); // NOI18N
@@ -752,6 +797,7 @@ public class RVFGui extends javax.swing.JFrame {
     private javax.swing.JMenu optionsButton;
     private javax.swing.JLabel rabbitsNumber;
     private javax.swing.JCheckBoxMenuItem rabbitsTeamwork1;
+    private javax.swing.JMenu resetMenu;
     private javax.swing.JLabel runsNumber;
     private javax.swing.JMenuItem showStatsButton;
     private javax.swing.JRadioButtonMenuItem slowRB;

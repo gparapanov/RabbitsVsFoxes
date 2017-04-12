@@ -28,7 +28,7 @@ import rabbitsvsfoxes.UnexploredSpace;
 public class Agent extends EnvironmentObject {
 
     protected int radius = 7;
-    protected int rabbitRadius = 10;
+    protected int rabbitRadius = 11;
     protected int foxRadius = 7;
     /*
      Agent character is a random value 1-10,
@@ -198,17 +198,18 @@ public class Agent extends EnvironmentObject {
                 } else if (goal instanceof Explore) {
                     this.toExplore.remove(goal.getGoalObject());
                 } else if (goal instanceof EatCarrot) {
+                    replenishHealth();
                     env.getGui().writeLogToGui("Rabbit: " + getName() + " has eaten carrot at x:" + goal.getGoalObject().getX() + " y:" + goal.getGoalObject().getY());
                 }
                 env.removeEnvironmentObject(goal.getGoalObject());
             }
-            if (goal instanceof DistractFox && manhattanDistance(this, goal.getGoalObject()) <= 4) {
-                goal.setCompleted(true);
-                agenda.removeTask(goal);
-                System.out.println("i have distracted the fox");
-                myGroup.broadcastMessage(new Message(MessageType.DisengageInDistraction, goal.getGoalObject(), this));
-                lastLogs.add(0, "I have distracted the fox, running away!");
-            }
+           
+        }
+        //decreaseHealth();
+        if (health <= 0) {
+            env.getGui().writeLogToGui(myName +" HAS DIED OUT OF STARVATION!");
+            this.setAlive(false);
+            env.removeEnvironmentObject(this);
         }
         while (lastLogs.size() > 5) {
             lastLogs.remove(lastLogs.size() - 1);
@@ -327,13 +328,13 @@ public class Agent extends EnvironmentObject {
         }
         decreaseHealth();
         if (health <= 0) {
+            env.getGui().writeLogToGui(myName +" has died out of starvation.");
             this.setAlive(false);
             env.removeEnvironmentObject(this);
         }
         while (lastLogs.size() > 5) {
             lastLogs.remove(lastLogs.size() - 1);
         }
-        //if(lastLogs.size()>3)lastLogs.remove(lastLogs.size()-1);
 
     }
 
@@ -358,7 +359,7 @@ public class Agent extends EnvironmentObject {
     }
 
     public void decreaseHealth() {
-        this.health -= 0.5;
+        this.health -= 0.7;
     }
 
     public void replenishHealth() {
@@ -449,7 +450,7 @@ public class Agent extends EnvironmentObject {
         for (String itemString : lastLogs) {
             logsString += itemString + "<br>";
         }
-        String output = super.toString() + "<br>Name: " + this.myName + "<br>Health: " + getHealth()
+        String output = super.toString() + "<br>Name: " + this.myName + "<br>Health: " + Double.toString(getHealth()).substring(0, 2)
                 + "<br>Character: " + (agentCharacter < 8 ? "Community-helper" : "Self-oriented")
                 + "<br>Agenda:<br>" + agenda + "<br>Last action taken:<br>"
                 + logsString;

@@ -40,6 +40,7 @@ public class MessageGroup {
             foxesBeingDistracted.add((FoxAgent) m.getTargetObject());
         } else if (m.getMsgType() == MessageType.DisengageInDistraction) {
             foxesBeingDistracted.remove((FoxAgent) m.getTargetObject());
+            System.out.println(foxesBeingDistracted);
         } else if (m.getMsgType() == MessageType.UnclaimAllCarrots) {
             Iterator<EnvironmentObject> iter = claimedCarrots.iterator();
             while (iter.hasNext()) {
