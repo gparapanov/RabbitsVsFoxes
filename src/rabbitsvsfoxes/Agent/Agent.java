@@ -28,8 +28,8 @@ import rabbitsvsfoxes.UnexploredSpace;
 public class Agent extends EnvironmentObject {
 
     protected int radius = 7;
-    protected int rabbitRadius = 11;
-    protected int foxRadius = 7;
+    private final int rabbitRadius = 11;
+    private final int foxRadius = 7;
     /*
      Agent character is a random value 1-10,
      if the value is <8 the agent is team-working,
@@ -205,7 +205,7 @@ public class Agent extends EnvironmentObject {
             }
            
         }
-        //decreaseHealth();
+        decreaseHealth();
         if (health <= 0) {
             env.getGui().writeLogToGui(myName +" HAS DIED OUT OF STARVATION!");
             this.setAlive(false);
@@ -328,6 +328,9 @@ public class Agent extends EnvironmentObject {
         }
         decreaseHealth();
         if (health <= 0) {
+            if(this instanceof RabbitAgent){
+                ((RabbitAgent)this).unclaimAllCarrots();
+            }
             env.getGui().writeLogToGui(myName +" has died out of starvation.");
             this.setAlive(false);
             env.removeEnvironmentObject(this);

@@ -255,7 +255,9 @@ public class Environment {
     public void setSize(int size) {
         this.size = size;
     }
-
+    public int getNumberOfRuns(){
+        return getGui().getNumberOfRuns();
+    }
     public Set<Agent> getAgents() {
         return agents;
     }

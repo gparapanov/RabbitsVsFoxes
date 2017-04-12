@@ -369,6 +369,10 @@ public class RVFGui extends javax.swing.JFrame {
         return rabbitsTeamwork1.isSelected();
     }
 
+    public int getNumberOfRuns() {
+        return numberOfRuns;
+    }
+
     private void step() {
         environment.step();
         redrawField();

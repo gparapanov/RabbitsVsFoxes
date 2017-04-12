@@ -31,6 +31,8 @@ import rabbitsvsfoxes.UnexploredSpace;
 public class RabbitAgent extends Agent {
 
     private ArrayList<FoxAgent> foxesAround;
+    private ArrayList<FoxAgent> foxesMemory;
+    private ArrayList<Goal>postponedGoals=new ArrayList<>();
     private final int distractionTimeout = 12;
     private final int threatRadius = 8;
     private int helpTimeout = 0;
@@ -39,6 +41,7 @@ public class RabbitAgent extends Agent {
         super(x, y, env, mg);
         this.setIcon(new ImageIcon("images/rabbit1.png", "Rabbit icon"));
         foxesAround = new ArrayList<>();
+        foxesMemory = new ArrayList<>();
     }
 
     public RabbitAgent() {
@@ -94,6 +97,7 @@ public class RabbitAgent extends Agent {
             //checks on which sides the enemies are, so that the direction to flee
             //can be determined
             for (FoxAgent fox : foxesAround) {
+
                 int foxX = fox.getX();
                 int foxY = fox.getY();
                 int differenceX = Math.abs(foxX - getX());
@@ -172,8 +176,7 @@ public class RabbitAgent extends Agent {
             if (goal instanceof EatCarrot) {
                 //if (!(agenda.getTop() instanceof EatCarrot)) {
                 //agenda top is not eat carrot
-                if (myGroup.checkCarrotClaimed(goal.getGoalObject())
-                        ) {
+                if (myGroup.checkCarrotClaimed(goal.getGoalObject())) {
                     //if someone has targeted it, then find goal again
                     String claimer = ((Carrot) goal.getGoalObject()).getClaimedBy();
                     if (!claimer.equals(myName)) {
@@ -181,7 +184,7 @@ public class RabbitAgent extends Agent {
                         env.getGui().writeLogToGui("Rabbit: " + myName + " saw a carrot at x:" + goal.getGoalObject().getX() + " y:" + goal.getGoalObject().getY() + " but it's already claimed by " + claimer);
                         objAround.remove(goal.getGoalObject());
                         findGoal();
-                    }else{
+                    } else {
                         //claimed by me, but it is not in the agenda
                         this.addGoal(goal);
                     }
@@ -264,6 +267,16 @@ public class RabbitAgent extends Agent {
                     env.getGui().writeLogToGui(myName + " has distracted " + ((FoxAgent) agenda.getTop().getGoalObject()).getName() + " and is running away!");
                     agenda.removeTop();
                 }
+            }else if(agenda.getTop()instanceof EatCarrot || agenda.getTop() instanceof Explore){
+                //check to see if the last known location of a fox is near the current top goal
+                //if so, remove the goal and insert it later
+                if (checkIfDangerous(goal.getGoalObject())) {
+                    postponedGoals.add(goal);
+                    agenda.removeTop();
+                    objAround.remove(goal.getGoalObject());
+                    toExplore.remove(goal.getGoalObject());
+                    findGoal();
+                } 
             }
         }
         if (helpTimeout > 0) {
@@ -301,6 +314,39 @@ public class RabbitAgent extends Agent {
 
         }
         return null;
+    }
+
+    /**
+     * This method checks if an object is safe i.e. checks if it is close
+     * distance of any of the foxes that the rabbit has seen. E.g. the method
+     * will be called when a rabbit is safe and proceeds to its goal, but when
+     * it moves closer to the goal there may be a fox close by. (checks against
+     * last known location of the foxes it has seen)
+     *
+     * @param eo
+     * @return
+     */
+    private boolean checkIfDangerous(EnvironmentObject eo) {
+        for (FoxAgent foxAgent : foxesMemory) {
+            if (diagonalDistance(eo, foxAgent) <= radius) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void addOrUpdateFoxMemory(FoxAgent fox) {
+        boolean found = false;
+        for (FoxAgent curFoxAgent : foxesMemory) {
+            if (curFoxAgent.getName().equals(fox.getName())) {
+                curFoxAgent.setX(fox.getX());
+                curFoxAgent.setY(fox.getY());
+                found = false;
+            }
+        }
+        if (!found) {
+            foxesMemory.add(fox);
+        }
     }
 
     @Override
@@ -715,7 +761,7 @@ public class RabbitAgent extends Agent {
             }//enemy is up left
         }
         System.out.println("running to " + maxX + " " + maxY);
-        int randIndex=(int)(Math.random()*bestSpaces.size());
+        int randIndex = (int) (Math.random() * bestSpaces.size());
         //return bestSpaces.get(randIndex);
         return new FleeSpace(maxX, maxY);
     }
@@ -731,6 +777,15 @@ public class RabbitAgent extends Agent {
 
     @Override
     public void lookAround(int radius) {
+        if (env.getNumberOfRuns() % 10 == 0) {//every 10 runs, flush the memory
+            foxesMemory.clear();
+            for(Goal g:postponedGoals){
+                if(!agenda.checkExistists(g)){
+                    agenda.addTask(g);
+                }
+            }
+            postponedGoals.clear();
+        }
         objAround.clear();
         for (Carrot envObj : env.getCarrots()) {
             if (envObj.getX() >= (this.getX() - radius) && envObj.getX() <= (this.getX() + radius)
@@ -743,6 +798,7 @@ public class RabbitAgent extends Agent {
             if (envObj instanceof FoxAgent && envObj.getX() >= (this.getX() - radius) && envObj.getX() <= (this.getX() + radius)
                     && envObj.getY() >= (this.getY() - radius) && envObj.getY() <= (this.getY() + radius)) {
                 foxesAround.add((FoxAgent) envObj);
+                addOrUpdateFoxMemory((FoxAgent) envObj);
             }
         }
         //foxesAround = foxesAtArea(this.getX(), this.getY(), threatRadius);
@@ -797,20 +853,20 @@ public class RabbitAgent extends Agent {
     public double evaluationFunctionFleeAndExplore(Agent ag, EnvironmentObject eo) {
         double distanceMultiplier,
                 characterMultiplier = (agentCharacter < characterSeparator) ? 0.7 : 1.3;
-//        if (manhattanDistance(ag, eo) <= 3) {
-//            distanceMultiplier = 10;
-//        } else if (manhattanDistance(ag, eo) <= 4) {
-//            distanceMultiplier = 9;
-//        } else if (manhattanDistance(ag, eo) <= 5) {
-//            distanceMultiplier = 8;
-//        } else if (manhattanDistance(ag, eo) <= 6) {
-//            distanceMultiplier = 7;
-//        } else if (manhattanDistance(ag, eo) <= 7) {
-//            distanceMultiplier = 6;
-//        } else {
-//            distanceMultiplier = 5;
-//        }
-        return manhattanDistance(ag, eo) * characterMultiplier;
+        if (manhattanDistance(ag, eo) <= 3) {
+            distanceMultiplier = 10;
+        } else if (manhattanDistance(ag, eo) <= 4) {
+            distanceMultiplier = 9;
+        } else if (manhattanDistance(ag, eo) <= 5) {
+            distanceMultiplier = 8;
+        } else if (manhattanDistance(ag, eo) <= 6) {
+            distanceMultiplier = 7;
+        } else if (manhattanDistance(ag, eo) <= 7) {
+            distanceMultiplier = 6;
+        } else {
+            distanceMultiplier = 5;
+        }
+        return distanceMultiplier * characterMultiplier;
     }
 
     /**

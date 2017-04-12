@@ -33,6 +33,19 @@ public class FoxAgent extends Agent {
         super(x, y, env, mg);
         this.setIcon(new ImageIcon("images/fox2.png", "Fox icon"));
     }
+    
+    /**
+     * A constructor for agents with limited functionality. This constructor is
+     * only for dummy foxes that represent the last seen location of a real fox.
+     * @param x
+     * @param y
+     * @param name 
+     */
+    public FoxAgent(int x, int y, String name) {
+        this.setX(x);
+        this.setY(y);
+        this.myName=name;
+    }
 
     @Override
     public void findGoal() {
