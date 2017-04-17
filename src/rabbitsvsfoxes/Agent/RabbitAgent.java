@@ -32,9 +32,10 @@ public class RabbitAgent extends Agent {
 
     private ArrayList<FoxAgent> foxesAround;
     private ArrayList<FoxAgent> foxesMemory;
-    private ArrayList<Goal>postponedGoals=new ArrayList<>();
+    private ArrayList<Goal> postponedGoals = new ArrayList<>();
     private final int distractionTimeout = 12;
     private final int threatRadius = 8;
+    private final int fleeSafetyDistance=radius/2;
     private int helpTimeout = 0;
 
     public RabbitAgent(int x, int y, Environment env, MessageGroup mg) {
@@ -102,6 +103,7 @@ public class RabbitAgent extends Agent {
                 int foxY = fox.getY();
                 int differenceX = Math.abs(foxX - getX());
                 int differenceY = Math.abs(foxY - getY());
+                System.out.print(myName + " ");
                 if (differenceX > differenceY) {
                     if (foxX > getX()) {
                         enemyR = true;
@@ -198,6 +200,7 @@ public class RabbitAgent extends Agent {
                 }
             } else if (goal instanceof Explore && agenda.getTasks().size() == 0) {
                 lastLogs.add(0, "There is nothing around me, I will explore!");
+                env.getGui().writeLogToGui("Rabbit: " + getName() + " does not detect anything around..... going to explore!");
                 this.addGoal(goal);
             } else if (goal instanceof Flee) {
                 if (!(agenda.getTop() instanceof DistractFox) && !(agenda.getTop() instanceof Flee)) {
@@ -267,7 +270,7 @@ public class RabbitAgent extends Agent {
                     env.getGui().writeLogToGui(myName + " has distracted " + ((FoxAgent) agenda.getTop().getGoalObject()).getName() + " and is running away!");
                     agenda.removeTop();
                 }
-            }else if(agenda.getTop()instanceof EatCarrot || agenda.getTop() instanceof Explore){
+            } else if (agenda.getTop() instanceof EatCarrot || agenda.getTop() instanceof Explore) {
                 //check to see if the last known location of a fox is near the current top goal
                 //if so, remove the goal and insert it later
                 if (checkIfDangerous(goal.getGoalObject())) {
@@ -276,7 +279,7 @@ public class RabbitAgent extends Agent {
                     objAround.remove(goal.getGoalObject());
                     toExplore.remove(goal.getGoalObject());
                     findGoal();
-                } 
+                }
             }
         }
         if (helpTimeout > 0) {
@@ -328,7 +331,7 @@ public class RabbitAgent extends Agent {
      */
     private boolean checkIfDangerous(EnvironmentObject eo) {
         for (FoxAgent foxAgent : foxesMemory) {
-            if (diagonalDistance(eo, foxAgent) <= radius) {
+            if (diagonalDistance(eo, foxAgent) < radius) {
                 return true;
             }
         }
@@ -384,6 +387,61 @@ public class RabbitAgent extends Agent {
         return false;
     }
 
+    public FleeSpace determineFleeDirection1(boolean enemyU, boolean enemyD, boolean enemyR, boolean enemyL) {
+        int fleeX = getX(), fleeY = getY(), maxX = getX(), maxY = getY(), maxUtility = 0;
+        for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
+            for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
+                if (env.spaceOccupied(fleeX, fleeY) == null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+
+                    }
+                }
+            }
+        }//going d l
+        for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
+            for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
+                if (env.spaceOccupied(fleeX, fleeY) == null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+                    }
+                }
+            }
+        }//going d r
+        for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
+            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
+                if (env.spaceOccupied(fleeX, fleeY) == null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+
+                    }
+                }
+            }
+        }//going u r
+        for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
+            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
+                if (env.spaceOccupied(fleeX, fleeY) == null) {
+                    int utility = safetyUtility(fleeX, fleeY, radius);
+                    if (utility > maxUtility) {
+                        maxUtility = utility;
+                        maxX = fleeX;
+                        maxY = fleeY;
+                    } 
+                }
+            }
+        }//going u l
+        return new FleeSpace(maxX, maxY);
+    }
+
     /**
      * This method returns a space to which the agent has to flee. It takes 4
      * parameters, each of them is true if there are enemies on that side. E.g.
@@ -398,10 +456,9 @@ public class RabbitAgent extends Agent {
      */
     public FleeSpace determineFleeDirection(boolean enemyU, boolean enemyD, boolean enemyR, boolean enemyL) {
         int fleeX = getX(), fleeY = getY(), maxX = getX(), maxY = getY(), maxUtility = 0;
-        ArrayList<FleeSpace> bestSpaces = new ArrayList<>();
         if (enemyU && enemyD && enemyL) {
             //enemies up, down, left, therefore go right
-            while (fleeX <= getX() + radius && fleeX < env.getSize()) {
+            while (fleeX <= getX() + fleeSafetyDistance && fleeX < env.getSize()) {
                 if (env.spaceOccupied(fleeX, fleeY) == null) {
                     int utility = safetyUtility(fleeX, fleeY, radius);
                     if (utility > maxUtility) {
@@ -416,7 +473,7 @@ public class RabbitAgent extends Agent {
             }
         } else if (enemyU && enemyD && enemyR) {
             //enemies up, down, right, therefore go left etc....
-            while (fleeX >= getX() - radius && fleeX >= 0) {
+            while (fleeX >= getX() - fleeSafetyDistance && fleeX >= 0) {
                 if (env.spaceOccupied(fleeX, fleeY) == null) {
                     int utility = safetyUtility(fleeX, fleeY, radius);
                     if (utility > maxUtility) {
@@ -431,7 +488,7 @@ public class RabbitAgent extends Agent {
             }
         } else if (enemyU && enemyR && enemyL) {
             //enemies up, right, left therefore go down
-            while (fleeY <= getY() + radius && fleeY < env.getSize()) {
+            while (fleeY <= getY() + fleeSafetyDistance && fleeY < env.getSize()) {
                 if (env.spaceOccupied(fleeX, fleeY) == null) {
                     int utility = safetyUtility(fleeX, fleeY, radius);
                     if (utility > maxUtility) {
@@ -446,7 +503,7 @@ public class RabbitAgent extends Agent {
             }
         } else if (enemyD && enemyR && enemyL) {
             //enemies down right left - go up
-            while (fleeY >= getY() - radius && fleeY >= 0) {
+            while (fleeY >= getY() - fleeSafetyDistance && fleeY >= 0) {
                 if (env.spaceOccupied(fleeX, fleeY) != null) {
                     int utility = safetyUtility(fleeX, fleeY, radius);
                     if (utility > maxUtility) {
@@ -461,17 +518,13 @@ public class RabbitAgent extends Agent {
             }
         } else if (enemyU && enemyD) {
             //enemies up and down
-            while (fleeX >= getX() - radius && fleeX >= 0) {
+            while (fleeX >= getX() - fleeSafetyDistance && fleeX >= 0) {
                 if (env.spaceOccupied(fleeX, fleeY) != null) {
                     int utility = safetyUtility(fleeX, fleeY, radius);
                     if (utility > maxUtility) {
                         maxUtility = utility;
                         maxX = fleeX;
                         maxY = fleeY;
-                        bestSpaces.clear();
-                        bestSpaces.add(new FleeSpace(maxX, maxY));
-                    } else if (utility == maxUtility) {
-                        bestSpaces.add(new FleeSpace(maxX, maxY));
                     } else if (utility == 0) {
                         return new FleeSpace(maxX, maxY);
                     }
@@ -479,17 +532,14 @@ public class RabbitAgent extends Agent {
                 fleeX--;
             }
             fleeX = getX();
-            while (fleeX <= getX() + radius && fleeX < env.getSize()) {
+            while (fleeX <= getX() + fleeSafetyDistance && fleeX < env.getSize()) {
                 if (env.spaceOccupied(fleeX, fleeY) == null) {
                     int utility = safetyUtility(fleeX, fleeY, radius);
                     if (utility > maxUtility) {
                         maxUtility = utility;
                         maxX = fleeX;
                         maxY = fleeY;
-                        bestSpaces.clear();
-                        bestSpaces.add(new FleeSpace(maxX, maxY));
-                    } else if (utility == maxUtility) {
-                        bestSpaces.add(new FleeSpace(maxX, maxY));
+                        
                     } else if (utility == 0) {
                         return new FleeSpace(maxX, maxY);
                     }
@@ -497,18 +547,15 @@ public class RabbitAgent extends Agent {
                 fleeX++;
             }
         } else if (enemyU && enemyR) {
-            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--) {
-                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++) {
+            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
+                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                            
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
@@ -516,18 +563,15 @@ public class RabbitAgent extends Agent {
                 }
             }
         } else if (enemyU && enemyL) {
-            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++) {
-                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++) {
+            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
+                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                            
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
@@ -535,17 +579,14 @@ public class RabbitAgent extends Agent {
                 }
             }
         } else if (enemyR && enemyL) {
-            while (fleeY <= getY() + radius && fleeY < env.getSize()) {
+            while (fleeY <= getY() + fleeSafetyDistance && fleeY < env.getSize()) {
                 if (env.spaceOccupied(fleeX, fleeY) == null) {
                     int utility = safetyUtility(fleeX, fleeY, radius);
                     if (utility > maxUtility) {
                         maxUtility = utility;
                         maxX = fleeX;
                         maxY = fleeY;
-                        bestSpaces.clear();
-                        bestSpaces.add(new FleeSpace(maxX, maxY));
-                    } else if (utility == maxUtility) {
-                        bestSpaces.add(new FleeSpace(maxX, maxY));
+                       
                     } else if (utility == 0) {
                         return new FleeSpace(maxX, maxY);
                     }
@@ -553,17 +594,14 @@ public class RabbitAgent extends Agent {
                 fleeY++;
             }//check for spaces down
             fleeY = getY();
-            while (fleeY >= getY() - radius && fleeY >= 0) {
+            while (fleeY >= getY() - fleeSafetyDistance && fleeY >= 0) {
                 if (env.spaceOccupied(fleeX, fleeY) == null) {
                     int utility = safetyUtility(fleeX, fleeY, radius);
                     if (utility > maxUtility) {
                         maxUtility = utility;
                         maxX = fleeX;
                         maxY = fleeY;
-                        bestSpaces.clear();
-                        bestSpaces.add(new FleeSpace(maxX, maxY));
-                    } else if (utility == maxUtility) {
-                        bestSpaces.add(new FleeSpace(maxX, maxY));
+                        
                     } else if (utility == 0) {
                         return new FleeSpace(maxX, maxY);
                     }
@@ -571,18 +609,15 @@ public class RabbitAgent extends Agent {
                 fleeY--;
             }//check for spaces up
         } else if (enemyD && enemyL) {
-            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++) {
-                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--) {
+            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
+                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                           
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
@@ -590,18 +625,15 @@ public class RabbitAgent extends Agent {
                 }
             }
         } else if (enemyD && enemyR) {
-            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--) {
-                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--) {
+            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
+                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                            
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
@@ -609,36 +641,30 @@ public class RabbitAgent extends Agent {
                 }
             }
         } else if (enemyU) {
-            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++) {
-                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++) {
+            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
+                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                           
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
                     }
                 }
             }//enemy is up left
-            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--) {
-                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++) {
+            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
+                for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                           
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
@@ -646,37 +672,30 @@ public class RabbitAgent extends Agent {
                 }
             }//enemy is up right
         } else if (enemyD) {
-            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++) {
-                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--) {
+            for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
+                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                            
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
                     }
                 }
             }//enemy down left
-            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--) {
-                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--) {
+            for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
+                for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
-
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                           
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
@@ -684,36 +703,30 @@ public class RabbitAgent extends Agent {
                 }
             }//enemy down right
         } else if (enemyR) {
-            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--) {
-                for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--) {
+            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
+                for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                            
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
                     }
                 }
             }//enemy down right
-            for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++) {
-                for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - radius; fleeX--) {
+            for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
+                for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                            
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
@@ -721,38 +734,30 @@ public class RabbitAgent extends Agent {
                 }
             }//up right
         } else if (enemyL) {
-            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - radius; fleeY--) {
-                for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++) {
+            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
+                for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
-
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                           
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
                     }
                 }
             }//enemy is down left
-            for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + radius; fleeY++) {
-                for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + radius; fleeX++) {
+            for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
+                for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
                     if (env.spaceOccupied(fleeX, fleeY) == null) {
-
                         int utility = safetyUtility(fleeX, fleeY, radius);
                         if (utility > maxUtility) {
                             maxUtility = utility;
                             maxX = fleeX;
                             maxY = fleeY;
-                            bestSpaces.clear();
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
-                        } else if (utility == maxUtility) {
-                            bestSpaces.add(new FleeSpace(maxX, maxY));
+                            
                         } else if (utility == 0) {
                             return new FleeSpace(maxX, maxY);
                         }
@@ -760,9 +765,7 @@ public class RabbitAgent extends Agent {
                 }
             }//enemy is up left
         }
-        System.out.println("running to " + maxX + " " + maxY);
-        int randIndex = (int) (Math.random() * bestSpaces.size());
-        //return bestSpaces.get(randIndex);
+        System.out.println(myName + " running to " + maxX + " " + maxY);
         return new FleeSpace(maxX, maxY);
     }
 
@@ -779,8 +782,8 @@ public class RabbitAgent extends Agent {
     public void lookAround(int radius) {
         if (env.getNumberOfRuns() % 10 == 0) {//every 10 runs, flush the memory
             foxesMemory.clear();
-            for(Goal g:postponedGoals){
-                if(!agenda.checkExistists(g)){
+            for (Goal g : postponedGoals) {
+                if (!agenda.checkExistists(g)) {
                     agenda.addTask(g);
                 }
             }
@@ -820,7 +823,7 @@ public class RabbitAgent extends Agent {
         }
 
     }
-
+    
     public ArrayList<FoxAgent> foxesAtArea(int x, int y, int r) {
         ArrayList<FoxAgent> foxes = new ArrayList<>();
         for (EnvironmentObject ag : env.getAgents()) {

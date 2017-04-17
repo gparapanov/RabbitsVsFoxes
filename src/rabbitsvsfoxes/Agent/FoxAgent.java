@@ -165,6 +165,7 @@ public class FoxAgent extends Agent {
 
             } else if (goal instanceof Explore) {
                 lastLogs.add(0, "There is nothing around me, I will explore!");
+                env.getGui().writeLogToGui("Fox: " + getName() + " does not detect anything around..... going to explore!");
                 this.addGoal(goal);
             }
         }

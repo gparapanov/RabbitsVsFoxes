@@ -171,7 +171,7 @@ public class Agent extends EnvironmentObject {
             if (path.size() > 0) {
                 move(((AgentAction) path.get(0).action).movement);
             } else {
-                System.out.println("at x"+getX()+" y"+getY() +"going to x"+goal.getGoalObject().getX()+" y"+goal.getGoalObject().getY()+" no path found");
+                System.out.println("at x" + getX() + " y" + getY() + "going to x" + goal.getGoalObject().getX() + " y" + goal.getGoalObject().getY() + " no path found");
 //                if (differenceX <= 1 && differenceY <= 1 && goal instanceof Flee) {
 //                    this.setX(goal.getGoalObject().getX());
 //                    this.setY(goal.getGoalObject().getY());
@@ -203,11 +203,11 @@ public class Agent extends EnvironmentObject {
                 }
                 env.removeEnvironmentObject(goal.getGoalObject());
             }
-           
+
         }
-        decreaseHealth();
+        //decreaseHealth();
         if (health <= 0) {
-            env.getGui().writeLogToGui(myName +" HAS DIED OUT OF STARVATION!");
+            env.getGui().writeLogToGui(myName + " HAS DIED OUT OF STARVATION!");
             this.setAlive(false);
             env.removeEnvironmentObject(this);
         }
@@ -326,12 +326,12 @@ public class Agent extends EnvironmentObject {
             myGroup.broadcastMessage(new Message(MessageType.DisengageInDistraction, g.getGoalObject(), this));
             lastLogs.add(0, "I have distracted the fox, running away!");
         }
-        decreaseHealth();
+        //decreaseHealth();
         if (health <= 0) {
-            if(this instanceof RabbitAgent){
-                ((RabbitAgent)this).unclaimAllCarrots();
+            if (this instanceof RabbitAgent) {
+                ((RabbitAgent) this).unclaimAllCarrots();
             }
-            env.getGui().writeLogToGui(myName +" has died out of starvation.");
+            env.getGui().writeLogToGui(myName + " has died out of starvation.");
             this.setAlive(false);
             env.removeEnvironmentObject(this);
         }

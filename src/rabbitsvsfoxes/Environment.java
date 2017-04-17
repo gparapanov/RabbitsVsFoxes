@@ -7,7 +7,7 @@ package rabbitsvsfoxes;
 
 import rabbitsvsfoxes.Objects.EnvironmentObject;
 import rabbitsvsfoxes.Objects.Carrot;
-import rabbitsvsfoxes.Objects.Bomb;
+import rabbitsvsfoxes.Objects.Barrier;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,7 +29,7 @@ public class Environment {
     private Set<Agent> agents;
     private Set<EnvironmentObject> envObjects;
     private ArrayList<Carrot> carrots;
-    private ArrayList<Bomb> bombs;
+    private ArrayList<Barrier> barriers;
 
     /*
      This is an array of names and each agent is assigned one.
@@ -87,7 +87,7 @@ public class Environment {
                 newX = randomRange(0, size - 1);
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
-            this.addEnvironmentObject(new Bomb(newX, newY));
+            this.addEnvironmentObject(new Barrier(newX, newY));
             world[newY][newX] = 'B';
         }
         for (int i = 0; i < r; i++) {//create rabbits
@@ -129,7 +129,7 @@ public class Environment {
                 world[eo.getY()][eo.getX()]='F';
             }else if(eo instanceof Carrot){
                 world[eo.getY()][eo.getX()]='C';
-            }else if(eo instanceof Bomb){
+            }else if(eo instanceof Barrier){
                 world[eo.getY()][eo.getX()]='B';
             }
         }
