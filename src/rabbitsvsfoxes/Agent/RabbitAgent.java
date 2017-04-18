@@ -161,7 +161,7 @@ public class RabbitAgent extends Agent {
                     lastLogs.add(0, lastMessageRead.getSender().getName() + " is asking for help, I will go and distract " + ((Agent) lastMessageRead.getTargetObject()).getName() + "!");
                     //env.getGui().writeLogToGui(myName + " is going to help " + lastMessageRead.getSender().getName() + " by distracting " + ((Agent) lastMessageRead.getTargetObject()).getName());
                     goal = postGoal;
-                    env.getGui().writeLogToGui("Rabbit: " + myName + " going to help its teammate " + lastMessageRead.getSender().getName() + " by distracting " + ((Agent) lastMessageRead.getTargetObject()).getName());
+                    env.getGui().writeLogToGui("Rabbit: " + myName + " is going to help its teammate " + lastMessageRead.getSender().getName() + " by distracting " + ((Agent) lastMessageRead.getTargetObject()).getName());
                     myGroup.broadcastMessage(new Message(MessageType.EngageInDistraction, goal.getGoalObject(), this));
                 } else {
                     lastLogs.add(0, lastMessageRead.getSender().getName() + " is asking for help, but I prefer to work on my own!");
@@ -387,60 +387,60 @@ public class RabbitAgent extends Agent {
         return false;
     }
 
-    public FleeSpace determineFleeDirection1(boolean enemyU, boolean enemyD, boolean enemyR, boolean enemyL) {
-        int fleeX = getX(), fleeY = getY(), maxX = getX(), maxY = getY(), maxUtility = 0;
-        for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
-            for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
-                if (env.spaceOccupied(fleeX, fleeY) == null) {
-                    int utility = safetyUtility(fleeX, fleeY, radius);
-                    if (utility > maxUtility) {
-                        maxUtility = utility;
-                        maxX = fleeX;
-                        maxY = fleeY;
-
-                    }
-                }
-            }
-        }//going d l
-        for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
-            for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
-                if (env.spaceOccupied(fleeX, fleeY) == null) {
-                    int utility = safetyUtility(fleeX, fleeY, radius);
-                    if (utility > maxUtility) {
-                        maxUtility = utility;
-                        maxX = fleeX;
-                        maxY = fleeY;
-                    }
-                }
-            }
-        }//going d r
-        for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
-            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
-                if (env.spaceOccupied(fleeX, fleeY) == null) {
-                    int utility = safetyUtility(fleeX, fleeY, radius);
-                    if (utility > maxUtility) {
-                        maxUtility = utility;
-                        maxX = fleeX;
-                        maxY = fleeY;
-
-                    }
-                }
-            }
-        }//going u r
-        for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
-            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
-                if (env.spaceOccupied(fleeX, fleeY) == null) {
-                    int utility = safetyUtility(fleeX, fleeY, radius);
-                    if (utility > maxUtility) {
-                        maxUtility = utility;
-                        maxX = fleeX;
-                        maxY = fleeY;
-                    } 
-                }
-            }
-        }//going u l
-        return new FleeSpace(maxX, maxY);
-    }
+//    public FleeSpace determineFleeDirection1(boolean enemyU, boolean enemyD, boolean enemyR, boolean enemyL) {
+//        int fleeX = getX(), fleeY = getY(), maxX = getX(), maxY = getY(), maxUtility = 0;
+//        for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
+//            for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
+//                if (env.spaceOccupied(fleeX, fleeY) == null) {
+//                    int utility = safetyUtility(fleeX, fleeY, radius);
+//                    if (utility > maxUtility) {
+//                        maxUtility = utility;
+//                        maxX = fleeX;
+//                        maxY = fleeY;
+//
+//                    }
+//                }
+//            }
+//        }//going d l
+//        for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
+//            for (fleeY = getY(); fleeY < env.getSize() && fleeY <= getY() + fleeSafetyDistance; fleeY++) {
+//                if (env.spaceOccupied(fleeX, fleeY) == null) {
+//                    int utility = safetyUtility(fleeX, fleeY, radius);
+//                    if (utility > maxUtility) {
+//                        maxUtility = utility;
+//                        maxX = fleeX;
+//                        maxY = fleeY;
+//                    }
+//                }
+//            }
+//        }//going d r
+//        for (fleeX = getX(); fleeX < env.getSize() && fleeX <= getX() + fleeSafetyDistance; fleeX++) {
+//            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
+//                if (env.spaceOccupied(fleeX, fleeY) == null) {
+//                    int utility = safetyUtility(fleeX, fleeY, radius);
+//                    if (utility > maxUtility) {
+//                        maxUtility = utility;
+//                        maxX = fleeX;
+//                        maxY = fleeY;
+//
+//                    }
+//                }
+//            }
+//        }//going u r
+//        for (fleeX = getX(); fleeX >= 0 && fleeX >= getX() - fleeSafetyDistance; fleeX--) {
+//            for (fleeY = getY(); fleeY >= 0 && fleeY >= getY() - fleeSafetyDistance; fleeY--) {
+//                if (env.spaceOccupied(fleeX, fleeY) == null) {
+//                    int utility = safetyUtility(fleeX, fleeY, radius);
+//                    if (utility > maxUtility) {
+//                        maxUtility = utility;
+//                        maxX = fleeX;
+//                        maxY = fleeY;
+//                    } 
+//                }
+//            }
+//        }//going u l
+//        return new FleeSpace(maxX, maxY);
+//    }
 
     /**
      * This method returns a space to which the agent has to flee. It takes 4

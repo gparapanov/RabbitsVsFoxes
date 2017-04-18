@@ -10,7 +10,7 @@ public class Barrier extends EnvironmentObject{
     
     public Barrier(int x, int y) {
         super(x, y);
-        this.setIcon(new ImageIcon("images/wall2.png","Barrier icon"));
+        this.setIcon(new ImageIcon("images/wall4.png","Barrier icon"));
     }
     
 }

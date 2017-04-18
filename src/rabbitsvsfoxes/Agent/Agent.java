@@ -191,21 +191,21 @@ public class Agent extends EnvironmentObject {
                 agenda.removeTask(goal);
                 if (goal instanceof CatchRabbit) {
                     //System.out.println("fox ate rabbit");
-                    replenishHealth();
+                    replenishHealthFoxes();
                     ((RabbitAgent) goal.getGoalObject()).unclaimAllCarrots();
                     env.getGui().writeLogToGui("Rabbit: " + ((RabbitAgent) goal.getGoalObject()).getName() + " is about to get eaten, unclaiming all of his carrots.");
                     env.getGui().writeLogToGui("Fox: " + myName + " has eaten " + ((RabbitAgent) goal.getGoalObject()).getName());
                 } else if (goal instanceof Explore) {
                     this.toExplore.remove(goal.getGoalObject());
                 } else if (goal instanceof EatCarrot) {
-                    replenishHealth();
+                    replenishHealth(100);
                     env.getGui().writeLogToGui("Rabbit: " + getName() + " has eaten carrot at x:" + goal.getGoalObject().getX() + " y:" + goal.getGoalObject().getY());
                 }
                 env.removeEnvironmentObject(goal.getGoalObject());
             }
 
         }
-        //decreaseHealth();
+        decreaseHealth();
         if (health <= 0) {
             env.getGui().writeLogToGui(myName + " HAS DIED OUT OF STARVATION!");
             this.setAlive(false);
@@ -215,131 +215,131 @@ public class Agent extends EnvironmentObject {
             lastLogs.remove(lastLogs.size() - 1);
         }
     }
-
-    public void moveTowardsGoal(Goal g) {
-        int goalX = g.getGoalObject().getX();
-        int goalY = g.getGoalObject().getY();
-        int differenceX = Math.abs(goalX - getX());
-        int differenceY = Math.abs(goalY - getY());
-        EnvironmentObject desiredObject;
-        if (this instanceof FoxAgent) {
-            desiredObject = new RabbitAgent();
-            //System.out.println("fox roing to:" + goalX + " " + goalY);
-        } else {
-            desiredObject = new Carrot();
-            //System.out.println("rabbit roing to:" + goalX + " " + goalY);
-        }
-        if (differenceX == 1 && differenceY == 1) {
-            if (goalX > getX() && goalY > getY()) {
-                move(Direction.DOWNRIGHT);
-            } else if (goalX > getX() && goalY < getY()) {
-                move(Direction.UPRIGHT);
-            } else if (goalX < getX() && goalY > getY()) {
-                move(Direction.DOWNLEFT);
-            } else {
-                move(Direction.UPLEFT);
-            }
-        } else if (differenceX > differenceY) {//avoids 'dancing'
-            if (goalX > getX()) {//if goal is on the right
-                EnvironmentObject neighbour = env.spaceOccupied(getX() + 1, getY());
-                if (neighbour == null
-                        || neighbour.getClass().equals(desiredObject.getClass())) {
-                    move(Direction.RIGHT);
-                } else if (goalY < getY() && env.spaceOccupied(getX(), getY() - 1) == null
-                        && getY() - 1 >= 0) {
-                    move(Direction.UP);
-                } else {
-                    if (env.spaceOccupied(getX(), getY() + 1) == null
-                            && getY() + 1 < env.getSize()) {
-                        move(Direction.DOWN);
-                    } else if (getX() - 1 >= 0 && env.spaceOccupied(getX() - 1, getY()) == null) {
-                        move(Direction.LEFT);
-                    }
-                }
-            } else if (goalX < getX()) {//if goal is on the left
-                if (env.spaceOccupied(getX() - 1, getY()) == null
-                        || env.spaceOccupied(getX() - 1, getY()).getClass().equals(desiredObject.getClass())) {
-                    move(Direction.LEFT);
-                } else if (goalY < getY() && env.spaceOccupied(getX(), getY() - 1) == null
-                        && getY() - 1 >= 0) {
-                    move(Direction.UP);
-                } else {
-                    if (env.spaceOccupied(getX(), getY() + 1) == null
-                            && getY() + 1 < env.getSize()) {
-                        move(Direction.DOWN);
-                    } else if (getX() + 1 < env.getSize() && env.spaceOccupied(getX() + 1, getY()) == null) {
-                        move(Direction.RIGHT);
-                    }
-                }
-            }
-        } else {
-            if (goalY > getY()) {//if goal is up
-                if (env.spaceOccupied(getX(), getY() + 1) == null
-                        || env.spaceOccupied(getX(), getY() + 1).getClass().equals(desiredObject.getClass())) {
-                    move(Direction.DOWN);
-                } else if (goalX > getX() && env.spaceOccupied(getX() + 1, getY()) == null
-                        && getX() + 1 < env.getSize()) {
-                    move(Direction.RIGHT);
-                } else {
-                    if (env.spaceOccupied(getX() - 1, getY()) == null
-                            && getX() - 1 >= 0) {
-                        move(Direction.LEFT);
-                    } else if (getY() - 1 >= 0 && env.spaceOccupied(getX(), getY() - 1) == null) {
-                        move(Direction.UP);
-                    }
-                }
-            } else if (goalY < getY()) {//if goal is down
-                if (env.spaceOccupied(getX(), getY() - 1) == null
-                        || env.spaceOccupied(getX(), getY() - 1).getClass().equals(desiredObject.getClass())) {
-                    move(Direction.UP);
-                } else if (goalX > getX() && env.spaceOccupied(getX() + 1, getY()) == null
-                        && getX() + 1 < env.getSize()) {
-                    move(Direction.RIGHT);
-                } else {
-                    if (env.spaceOccupied(getX() - 1, getY()) == null
-                            && getX() - 1 >= 0) {
-                        move(Direction.LEFT);
-                    } else if (getY() + 1 < env.getSize() && env.spaceOccupied(getX(), getY() + 1) == null) {
-                        move(Direction.DOWN);
-                    }
-                }
-            }
-        }
-        if (goalX == getX() && goalY == getY()) {//if on goal
-            g.getGoalObject().setAlive(false);
-            g.setCompleted(true);
-            agenda.removeTask(g);
-            if (g instanceof CatchRabbit) {
-                //System.out.println("fox ate rabbit");
-                replenishHealth();
-                ((RabbitAgent) g.getGoalObject()).unclaimAllCarrots();
-            } else if (g instanceof Explore) {
-                this.toExplore.remove(g.getGoalObject());
-            }
-            env.removeEnvironmentObject(g.getGoalObject());
-
-        }
-        if (g instanceof DistractFox && manhattanDistance(this, g.getGoalObject()) <= 4) {
-            g.setCompleted(true);
-            agenda.removeTask(g);
-            System.out.println("i have distracted the fox");
-            myGroup.broadcastMessage(new Message(MessageType.DisengageInDistraction, g.getGoalObject(), this));
-            lastLogs.add(0, "I have distracted the fox, running away!");
-        }
-        //decreaseHealth();
-        if (health <= 0) {
-            if (this instanceof RabbitAgent) {
-                ((RabbitAgent) this).unclaimAllCarrots();
-            }
-            env.getGui().writeLogToGui(myName + " has died out of starvation.");
-            this.setAlive(false);
-            env.removeEnvironmentObject(this);
-        }
-        while (lastLogs.size() > 5) {
-            lastLogs.remove(lastLogs.size() - 1);
-        }
-
-    }
+//
+//    public void moveTowardsGoal(Goal g) {
+//        int goalX = g.getGoalObject().getX();
+//        int goalY = g.getGoalObject().getY();
+//        int differenceX = Math.abs(goalX - getX());
+//        int differenceY = Math.abs(goalY - getY());
+//        EnvironmentObject desiredObject;
+//        if (this instanceof FoxAgent) {
+//            desiredObject = new RabbitAgent();
+//            //System.out.println("fox roing to:" + goalX + " " + goalY);
+//        } else {
+//            desiredObject = new Carrot();
+//            //System.out.println("rabbit roing to:" + goalX + " " + goalY);
+//        }
+//        if (differenceX == 1 && differenceY == 1) {
+//            if (goalX > getX() && goalY > getY()) {
+//                move(Direction.DOWNRIGHT);
+//            } else if (goalX > getX() && goalY < getY()) {
+//                move(Direction.UPRIGHT);
+//            } else if (goalX < getX() && goalY > getY()) {
+//                move(Direction.DOWNLEFT);
+//            } else {
+//                move(Direction.UPLEFT);
+//            }
+//        } else if (differenceX > differenceY) {//avoids 'dancing'
+//            if (goalX > getX()) {//if goal is on the right
+//                EnvironmentObject neighbour = env.spaceOccupied(getX() + 1, getY());
+//                if (neighbour == null
+//                        || neighbour.getClass().equals(desiredObject.getClass())) {
+//                    move(Direction.RIGHT);
+//                } else if (goalY < getY() && env.spaceOccupied(getX(), getY() - 1) == null
+//                        && getY() - 1 >= 0) {
+//                    move(Direction.UP);
+//                } else {
+//                    if (env.spaceOccupied(getX(), getY() + 1) == null
+//                            && getY() + 1 < env.getSize()) {
+//                        move(Direction.DOWN);
+//                    } else if (getX() - 1 >= 0 && env.spaceOccupied(getX() - 1, getY()) == null) {
+//                        move(Direction.LEFT);
+//                    }
+//                }
+//            } else if (goalX < getX()) {//if goal is on the left
+//                if (env.spaceOccupied(getX() - 1, getY()) == null
+//                        || env.spaceOccupied(getX() - 1, getY()).getClass().equals(desiredObject.getClass())) {
+//                    move(Direction.LEFT);
+//                } else if (goalY < getY() && env.spaceOccupied(getX(), getY() - 1) == null
+//                        && getY() - 1 >= 0) {
+//                    move(Direction.UP);
+//                } else {
+//                    if (env.spaceOccupied(getX(), getY() + 1) == null
+//                            && getY() + 1 < env.getSize()) {
+//                        move(Direction.DOWN);
+//                    } else if (getX() + 1 < env.getSize() && env.spaceOccupied(getX() + 1, getY()) == null) {
+//                        move(Direction.RIGHT);
+//                    }
+//                }
+//            }
+//        } else {
+//            if (goalY > getY()) {//if goal is up
+//                if (env.spaceOccupied(getX(), getY() + 1) == null
+//                        || env.spaceOccupied(getX(), getY() + 1).getClass().equals(desiredObject.getClass())) {
+//                    move(Direction.DOWN);
+//                } else if (goalX > getX() && env.spaceOccupied(getX() + 1, getY()) == null
+//                        && getX() + 1 < env.getSize()) {
+//                    move(Direction.RIGHT);
+//                } else {
+//                    if (env.spaceOccupied(getX() - 1, getY()) == null
+//                            && getX() - 1 >= 0) {
+//                        move(Direction.LEFT);
+//                    } else if (getY() - 1 >= 0 && env.spaceOccupied(getX(), getY() - 1) == null) {
+//                        move(Direction.UP);
+//                    }
+//                }
+//            } else if (goalY < getY()) {//if goal is down
+//                if (env.spaceOccupied(getX(), getY() - 1) == null
+//                        || env.spaceOccupied(getX(), getY() - 1).getClass().equals(desiredObject.getClass())) {
+//                    move(Direction.UP);
+//                } else if (goalX > getX() && env.spaceOccupied(getX() + 1, getY()) == null
+//                        && getX() + 1 < env.getSize()) {
+//                    move(Direction.RIGHT);
+//                } else {
+//                    if (env.spaceOccupied(getX() - 1, getY()) == null
+//                            && getX() - 1 >= 0) {
+//                        move(Direction.LEFT);
+//                    } else if (getY() + 1 < env.getSize() && env.spaceOccupied(getX(), getY() + 1) == null) {
+//                        move(Direction.DOWN);
+//                    }
+//                }
+//            }
+//        }
+//        if (goalX == getX() && goalY == getY()) {//if on goal
+//            g.getGoalObject().setAlive(false);
+//            g.setCompleted(true);
+//            agenda.removeTask(g);
+//            if (g instanceof CatchRabbit) {
+//                //System.out.println("fox ate rabbit");
+//                replenishHealthFoxes();
+//                ((RabbitAgent) g.getGoalObject()).unclaimAllCarrots();
+//            } else if (g instanceof Explore) {
+//                this.toExplore.remove(g.getGoalObject());
+//            }
+//            env.removeEnvironmentObject(g.getGoalObject());
+//
+//        }
+//        if (g instanceof DistractFox && manhattanDistance(this, g.getGoalObject()) <= 4) {
+//            g.setCompleted(true);
+//            agenda.removeTask(g);
+//            System.out.println("i have distracted the fox");
+//            myGroup.broadcastMessage(new Message(MessageType.DisengageInDistraction, g.getGoalObject(), this));
+//            lastLogs.add(0, "I have distracted the fox, running away!");
+//        }
+//        //decreaseHealth();
+//        if (health <= 0) {
+//            if (this instanceof RabbitAgent) {
+//                ((RabbitAgent) this).unclaimAllCarrots();
+//            }
+//            env.getGui().writeLogToGui(myName + " has died out of starvation.");
+//            this.setAlive(false);
+//            env.removeEnvironmentObject(this);
+//        }
+//        while (lastLogs.size() > 5) {
+//            lastLogs.remove(lastLogs.size() - 1);
+//        }
+//
+//    }
 
     public boolean compareObjects(EnvironmentObject eo1, EnvironmentObject eo2) {
         if (eo1.getX() == eo2.getX() && eo1.getY() == eo2.getY()) {
@@ -362,11 +362,35 @@ public class Agent extends EnvironmentObject {
     }
 
     public void decreaseHealth() {
-        this.health -= 0.7;
+        this.health -= 0.4;
     }
-
-    public void replenishHealth() {
-        this.health = 100;
+    
+    public void replenishHealth(double amount){
+        if(health+amount>100){
+            health=100;
+        }else{
+            health+=amount;
+        }
+    }
+    
+    public void replenishHealthFoxes() {
+        double portion=100;
+        int benefitsRadius=3;
+        ArrayList<FoxAgent>foxesCloseBy=new ArrayList<>();
+        //if there are other foxes chasing the rabbit replenish their health as well
+        for(Agent foxAgent:env.getAgents()){
+            if(foxAgent instanceof FoxAgent 
+                    && foxAgent.getX()>=getX()-benefitsRadius
+                    && foxAgent.getX()<=getX()+benefitsRadius
+                    && foxAgent.getY()>=getY()-benefitsRadius
+                    && foxAgent.getY()<=getY()+benefitsRadius){
+                foxesCloseBy.add((FoxAgent)foxAgent);
+            }
+        }
+        portion/=foxesCloseBy.size();
+        for(FoxAgent fox:foxesCloseBy){
+            fox.replenishHealth(portion);
+        }
     }
 
     public boolean checkMove(Direction d) {

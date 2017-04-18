@@ -22,6 +22,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
@@ -419,7 +420,13 @@ public class RVFGui extends javax.swing.JFrame {
         foxesNumber.setText("" + foxes);
         carrotsNumber.setText("" + carrotsF);
         runsNumber.setText("" + numberOfRuns);
-        //if(rabbits==0)displayTimer.stop();
+        if(rabbits==0){
+            displayTimer.stop();
+            JOptionPane.showMessageDialog(this, "Foxes Win!","Game Over",JOptionPane.INFORMATION_MESSAGE);
+        }else if(foxes==0){
+            displayTimer.stop();
+            JOptionPane.showMessageDialog(this, "Rabbits Win!","Game Over",JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     public void writeLogToGui(String st) {
