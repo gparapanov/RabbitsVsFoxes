@@ -156,7 +156,7 @@ public class FoxAgent extends Agent {
                         messageToSend.setTeamColor(goal.getTeamColor());
                         myGroup.broadcastMessage(messageToSend);
                         //System.out.println("asking for help");
-                        env.getGui().writeLogToGui("Fox: " + myName + " is asking for help from all foxes to catch " + ((RabbitAgent) goal.getGoalObject()).getName() + "at x:" + goal.getGoalObject().getX() + " y:" + goal.getGoalObject().getY());
+                        env.getGui().writeLogToGui("Fox: " + myName + " is asking for help from all foxes to catch " + ((RabbitAgent) goal.getGoalObject()).getName() + " at x:" + goal.getGoalObject().getX() + " y:" + goal.getGoalObject().getY());
                         lastLogs.add(0, "Asking for help from all my friends!");
                     }
                 } else if (env.getGui().getFoxesTeamwork2()) {

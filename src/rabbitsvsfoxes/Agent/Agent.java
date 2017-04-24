@@ -64,6 +64,7 @@ public class Agent extends EnvironmentObject {
         this.myGroup = mg;
         this.lastLogs = new ArrayList<>();
         this.myName = env.getName(this);
+        this.myColor=env.getColor(this);
         this.messagesReadIndex = 0;
         radius = (this instanceof RabbitAgent) ? rabbitRadius : foxRadius;
         discoverExplorationSpaces();
@@ -362,7 +363,7 @@ public class Agent extends EnvironmentObject {
     }
 
     public void decreaseHealth() {
-        this.health -= 0.4;
+        this.health -= 0.5;
     }
     
     public void replenishHealth(double amount){

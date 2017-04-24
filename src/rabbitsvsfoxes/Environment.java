@@ -40,6 +40,11 @@ public class Environment {
         "Jeff", "Rick", "Bernie", "Jimmy", "Jesus", "Bruce", "Bill", "Ian", "Pip", "Ron"};
     private int rabbitNameIndex = 0;
     private int foxNameIndex = names.length - 1;
+    
+    private Color[] colours={Color.BLUE,Color.CYAN,Color.DARK_GRAY,Color.YELLOW,
+        Color.MAGENTA,Color.ORANGE,Color.PINK,Color.RED,Color.WHITE,Color.BLACK};//colors for each agent
+    private int rabbitsColorIndex=0;
+    private int foxesColorIndex=colours.length-1;
 
     private int size;
     private RVFGui gui;
@@ -47,6 +52,7 @@ public class Environment {
     private MessageGroup foxesGroup;
     private MessageGroup rabbitsGroup;
     public char[][] world;
+    
 
     public Environment(int size, int r, int f, int c, int b, RVFGui gui) {
         this.size = size;
@@ -70,9 +76,6 @@ public class Environment {
         }
         
         int newX, newY;
-        Random random = new Random();
-        final float saturation = 0.9f;//1.0 for brilliant, 0.0 for dull
-        final float luminance = 1.0f; //1.0 for brighter, 0.0 for black
         
         for (int i = 0; i < c; i++) {//create carrots
             do {
@@ -97,9 +100,6 @@ public class Environment {
             } while (spaceOccupied(newX, newY) != null);
             RabbitAgent rabbit = new RabbitAgent(newX, newY, this, rabbitsGroup);
 
-            final float hue = random.nextFloat();
-            rabbit.setMyColor(Color.getHSBColor(hue, saturation, luminance));
-
             this.addEnvironmentObject(rabbit);
             world[newY][newX] = 'R';
         }
@@ -109,13 +109,16 @@ public class Environment {
                 newY = randomRange(0, size - 1);
             } while (spaceOccupied(newX, newY) != null);
             FoxAgent fox = new FoxAgent(newX, newY, this, foxesGroup);
-            final float hue = random.nextFloat();
-            fox.setMyColor(Color.getHSBColor(hue, saturation, luminance));
+            
             this.addEnvironmentObject(fox);
             world[newY][newX] = 'F';
         }
         //System.out.println(envObjects.toString());
     }
+    /**
+     * A function that refreshes the array representation of the world.#
+     * This is used for the pathfinding algorithm.
+     */
     public void refreshArrayMap(){
         for (int y = 0; y < world.length; y++) {
             for (int x = 0; x < world[0].length; x++) {
@@ -162,6 +165,20 @@ public class Environment {
                 rabbitNameIndex = 0;
             }
             return names[rabbitNameIndex++];
+        }
+    }
+    
+    public Color getColor(Agent ag){
+        if (ag instanceof FoxAgent) {
+            if (foxesColorIndex< 0) {
+                foxNameIndex = colours.length - 1;
+            }
+            return colours[foxesColorIndex--];
+        } else {
+            if (rabbitsColorIndex >= colours.length) {
+                rabbitsColorIndex = 0;
+            }
+            return colours[rabbitsColorIndex++];
         }
     }
 
